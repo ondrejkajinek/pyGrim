@@ -44,10 +44,7 @@ class Server(object):
         response = self._handle_request(Request(environment))
         response.finalize()
         start_response(response.status_code(), response.headers)
-        """
-        yield response.body
-        return
-        """
+        # TODO: yielding
         return tuple(response.body)
 
     # napojit na postfork
@@ -57,7 +54,7 @@ class Server(object):
             self._route_register_func(self._dic.router)
             self._finalize_routes()
         else:
-            log.warning("No function for registering routes found!")
+            log.warning("There is no function to register routes!")
 
         if hasattr(self, "postfork"):
             self.postfork()
@@ -91,7 +88,7 @@ class Server(object):
                 method = self._methods[route.get_handle_name()]
             except KeyError:
                 raise RuntimeError(
-                    u"Server nemá metodu %s pro obsluhu routy %s" % (
+                    u"Server has no method %r to handle route %r" % (
                         route._handle_name,
                         route.get_name() or str(route.get_pattern())
                     )
