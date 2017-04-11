@@ -13,7 +13,7 @@ class RouteAlreadyExists(BaseRouterException):
         )
 
 
-class RouteDispatched(BaseRouterException):
+class RouteSuccessfullyDispatched(BaseRouterException):
     pass
 
 

@@ -5,10 +5,12 @@ import sys
 
 from .components import DependencyContainer, Router, View
 from .configuration import config
-from logging import getLogger
 from .http import Request, Response
+from .router_exceptions import (
+    RouteSuccessfullyDispatched, RouteNotFound, RoutePassed
+)
+from logging import getLogger
 from os import path
-from .router_exceptions import RouteDispatched, RouteNotFound, RoutePassed
 
 
 log = getLogger("pygrim.server")
@@ -103,7 +105,7 @@ class Server(object):
             for route in self._dic.router.matching_routes(request):
                 try:
                     route.dispatch(request, response)
-                    raise RouteDispatched()
+                    raise RouteSuccessfullyDispatched()
                 except RoutePassed:
                     pass
             else:
@@ -111,7 +113,7 @@ class Server(object):
                     self._not_found_method(request, response)
                 else:
                     raise RouteNotFound()
-        except RouteDispatched:
+        except RouteSuccessfullyDispatched:
             # everything was ok
             pass
         except RouteNotFound:
