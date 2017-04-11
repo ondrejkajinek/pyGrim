@@ -138,8 +138,6 @@ class Server(object):
         self._dic.config = config
         self._dic.mode = config.get("grim.mode")
         self._dic.router = Router()
-        # TODO: config
-        # if config.getboolean("view.enabled", True):
         if config.get("view.enabled", True):
             self._register_view()
 

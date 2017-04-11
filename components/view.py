@@ -8,8 +8,6 @@ from os import path
 class View(object):
 
     def __init__(self, config, flash):
-        # TODO: when config is ready
-        # self._debug = config.getboolean("jinja.debug", False)
         self._debug = config.get("jinja.debug", False)
         self._dump_switch = config.get("jinja.dump_switch", "jkxd")
         self._env = Environment(
@@ -21,12 +19,10 @@ class View(object):
                 )
             ),
             autoescape=select_autoescape(
-                # TODO: when config is ready
-                # enabled_extensions=config.getlist(
-                #     "jinja.environment.autoescape",
-                #     ("jinja", "xml")
-                # )
-                ("jinja", "xml")
+                enabled_extensions=config.get(
+                    "jinja.environment.autoescape",
+                    ("jinja",)
+                )
             )
         )
         self._flash = flash
@@ -77,8 +73,6 @@ class View(object):
         return {}
 
     def _has_i18n(self, config):
-        # TODO: when config is ready
-        # return config.getboolean("jinja.i18n.enabled", False)
         return config.get("jinja.i18n.enabled", False)
 
     def _initialize_extensions(self, config):
