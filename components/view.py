@@ -2,7 +2,7 @@
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from json import dumps as json_dumps
-from os import path
+from os import getcwd, path
 
 
 class View(object):
@@ -14,7 +14,7 @@ class View(object):
             extensions=self._get_extensions(config),
             loader=FileSystemLoader(
                 searchpath=path.join(
-                    config.get("uwsgi.cwd"),
+                    getcwd(),
                     config.get("jinja.template_path")
                 )
             ),
