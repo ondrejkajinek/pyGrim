@@ -4,6 +4,7 @@ import inspect
 import sys
 
 from .components import DependencyContainer, Router, View
+from .components import initializeLoggers
 from .configuration import config
 from .http import Request, Response
 from .router_exceptions import (
@@ -133,10 +134,14 @@ class Server(object):
         self._dic = DependencyContainer()
 
         self._dic.config = config
+        self._register_logger(self._dic.config)
         self._dic.mode = config.get("grim.mode")
         self._dic.router = Router()
         if config.get("view.enabled", True):
             self._register_view()
+
+    def _register_logger(self, config):
+        initializeLoggers(config)
 
     def _register_view(self):
         extra_functions = {
