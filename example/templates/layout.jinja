@@ -5,13 +5,14 @@
 
 <head>
 	<meta charset="utf-8">
-	<title>Test pyGrimu</title>
+	<title>pyGrim test</title>
 </head>
 
 <body>
 	<p>{{ text }}</p>
-	<a href="{{ base_url(request) }}">Domů</a>
-	<a href="{{ url_for(request, "domu", {"jkxd": 10}) }}">Domů 2</a>
+	<a href="{{ base_url(request) }}">Home</a>
+	<a href="{{ url_for(request, "home") }}">Home 2</a>
+	<a href="{{ url_for(request, "home", {"jkxd": ""}) }}">Home dump</a>
 </body>
 
 </html>
