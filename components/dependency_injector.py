@@ -32,12 +32,14 @@ class DependencyContainer(object):
     def __setattr__(self, key, value):
         self.register(key, value)
 
-    def get(self, key):
-        """
-        TODO: if it is singleton factory, instantiate it,
-                then replace the value by instance
-        """
-        return self._components[key]
+    def get(self, key, *args, **kwargs):
+        try:
+            return self.resolve(key)
+        except UnknownComponent:
+            if len(args):
+                return args[0]
+            else:
+                return kwargs.get("default")
 
     def register(self, key, value):
         self._components[key] = value
