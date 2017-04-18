@@ -31,7 +31,7 @@ class ConfigObject(object):
         self.config = DEFAULT_CONFIG
         self.config.update(config)
 
-    def get(self, key, default=None):
+    def get(self, key, **kwargs):
         try:
             target = self.config
             for part in key.split("."):
@@ -39,10 +39,10 @@ class ConfigObject(object):
 
             return target
         except KeyError:
-            if default is None:
+            if "default" not in kwargs:
                 raise
 
-            return default
+            return kwargs["default"]
 
 
 def load_config(path):
