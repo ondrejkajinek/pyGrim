@@ -3,15 +3,14 @@
 import inspect
 import sys
 
-from .components import DependencyContainer, Router, View
+from .components import ConfigObject, DependencyContainer, Router, View
 from .components import initialize_loggers
-from .configuration import config
 from .http import Request, Response
 from .router_exceptions import (
     RouteSuccessfullyDispatched, RouteNotFound, RoutePassed
 )
 from logging import getLogger
-from os import path
+from os import environ, path
 
 
 log = getLogger("pygrim.server")
@@ -133,17 +132,17 @@ class Server(object):
     def _initialize_basic_components(self):
         self._dic = DependencyContainer()
 
-        self._dic.config = config
+        self._dic.config = ConfigObject(environ["CONF"])
         self._register_logger(self._dic.config)
-        self._dic.mode = config.get("grim.mode")
+        self._dic.mode = self._dic.config.get("grim.mode")
         self._dic.router = Router()
-        if config.get("view.enabled", True):
-            self._register_view()
+        if self._dic.config.get("view.enabled", True):
+            self._register_view(self._dic.config)
 
     def _register_logger(self, config):
         initialize_loggers(config)
 
-    def _register_view(self):
+    def _register_view(self, config):
         extra_functions = {
             "base_url": self._jinja_base_url,
             "site_url": self._jinja_site_url,
