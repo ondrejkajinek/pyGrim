@@ -70,10 +70,10 @@ class Request(object):
         self.cookies = {}
 
     def get(self, key=None, fallback=None):
-        if key is not None:
-            return self._get_params.get(key, fallback)
-        else:
-            return self._get_params
+        return self._safe_param(self._get_params, key, fallback)
+
+    def get_host(self):
+        return self.environment["host"]
 
     def get_ip(self):
         return self.environment["ip"]
@@ -82,7 +82,7 @@ class Request(object):
         return self.environment["request_method"]
 
     def get_port(self):
-        return self.environment["port"]
+        return self.environment["server_port"]
 
     def get_request_uri(self):
         return self.environment["path_info"]
@@ -105,8 +105,11 @@ class Request(object):
 
     def pop_route_params(self):
         params = self.route_params.copy()
-        self.route_params = {}
+        self.set_route_params()
         return params
+
+    def post(self, key=None, fallback=None):
+        return self._safe_param(self._post_params, key, fallback)
 
     def set_route_params(self, params=None):
         self.route_params = ImmutableDict(params or {})
@@ -135,6 +138,10 @@ class Request(object):
             ip = env["REMOTE_ADDR"]
 
         return ip
+
+    def _get_port(self, env):
+        # TODO: is this field always filled? and is it always integer?
+        return int(env["SERVER_PORT"])
 
     def _parse_headers(self, env):
         self.headers = NormalizedDict()
@@ -169,8 +176,16 @@ class Request(object):
 
         self._post_params = parse(post)
 
+    def _safe_param(self, source, key=None, fallback=None):
+        if key is not None:
+            return source.get(key, fallback)
+        else:
+            return source
+
     def _save_environment(self, env):
-        env["request_method"] = env.pop("REQUEST_METHOD").upper()
         env["host"] = self._get_host(env)
         env["ip"] = self._get_ip(env)
+        env["path_info"] = env.pop("PATH_INFO").rstrip("/")
+        env["request_method"] = env.pop("REQUEST_METHOD").upper()
+        env["server_port"] = self._get_port(env)
         self.environment = NormalizedDict(env)
