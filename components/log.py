@@ -61,12 +61,12 @@ def initialize_loggers(config):
     logger.propagate = False
 
     try:
-        for logger in config.get("logging-levels").iterkeys():
+        for logger in (config.get("logging.loggers") or {}).iterkeys():
             l = logging.getLogger(logger)
-            l.setLevel(config.get("logging-levels.%s" % logger))
+            l.setLevel(config.get("logging.loggers.%s" % logger))
     except KeyError:
         logging.error(
-            "Chybí sekce na detailní nastavení loggerů ([logging-levels])")
+            "Chybí sekce na detailní nastavení loggerů ([logging.loggers])")
     except:
         logging.exception("Chyba načítání detailních loglevelů")
 
@@ -80,7 +80,7 @@ def _default_log_format(logger_type):
         )
     else:
         log_format = (
-            "$(asctime)s [pid:$(process)d] $(levelname)s $(name)s "
+            "$(asctime)s [pid: $(process)d] $(levelname)s $(name)s "
             "$(filename)s $(funcName)s: $(message)s"
         )
 

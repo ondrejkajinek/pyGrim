@@ -19,6 +19,10 @@ DEFAULT_CONFIG = {
         },
         "template_path": "templates"
     },
+    "logging": {
+        "file": "/home/ondrak/public_html/pygrim_test/pygrim.log",
+        "level": "DEBUG"
+    },
     "view": {
         "enabled": True
     }
