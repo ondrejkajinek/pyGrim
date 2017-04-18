@@ -1,11 +1,15 @@
 # coding: utf8
 
+from urllib import quote_plus
 import re
 
 
 class Route(object):
 
     REGEXP_TYPE = type(re.compile(r""))
+
+    TRAILING_SLASH_REGEXP = re.compile("/\??$")
+    URL_PARAM_REGEXP = re.compile("\(\?P<([^>]+)>[^)]+\)")
 
     def __init__(self, methods, pattern, handle_name, name=None):
         # temporary
@@ -22,7 +26,7 @@ class Route(object):
             )
         ))
         self._name = name
-        self._pattern = pattern
+        self._pattern = self._strip_trailing_slash(pattern)
 
     def assign_method(self, method):
         self._handle = method
@@ -51,6 +55,42 @@ class Route(object):
 
     def set_pattern(self, pattern):
         self._pattern = pattern
+
+    def url_for(self, params):
+        if self._is_regex:
+            readable, param_names = self._pattern_to_readable()
+            query_params = {
+                key: params[key]
+                for key
+                in params.iterkeys()
+                if key not in param_names
+            }
+            url = readable % params
+        else:
+            url = self._pattern
+            query_params = params
+
+        if query_params:
+            url += "?%s" % "&".join(
+                "%s=%s" % tuple(map(quote_plus, map(str, (key, value))))
+                for key, value
+                in query_params.iteritems()
+            )
+
+        return url
+
+    def _pattern_to_readable(self):
+        param_names = self.URL_PARAM_REGEXP.findall(self._pattern)
+        readable = self.URL_PARAM_REGEXP.sub(r"%(\1)s", self._pattern)
+        return readable, param_names
+
+    def _strip_trailing_slash(self, pattern):
+        if self._is_regex:
+            return re.compile(
+                self.TRAILING_SLASH_REGEXP.sub("", pattern.pattern)
+            )
+        else:
+            return pattern.rstrip("/")
 
     def _supports_http_method(self, method):
         return method in self._methods

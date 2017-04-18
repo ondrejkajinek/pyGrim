@@ -139,18 +139,23 @@ class Server(object):
             self._register_view()
 
     def _register_view(self):
-        self._dic.view = View(config, None)
+        extra_functions = {
+            "base_url": self._jinja_base_url,
+            "site_url": self._jinja_site_url,
+            "url_for": self._jinja_url_for
+        }
+        self._dic.view = View(config, extra_functions)
 
     # jinja extra methods
-    def _jinja_base_url(self):
-        return "%s%s" % ("request.get_url()", "request.get_root_uri()")
+    def _jinja_base_url(self, request):
+        return "%s%s" % (request.get_url(), request.get_root_uri())
 
-    def _jinja_site_url(self, site):
-        return path.join(self._jinja_base_url(), site)
+    def _jinja_site_url(self, request, site):
+        return path.join(self._jinja_base_url(request), site)
 
-    def _jinja_url_for(self, route, params=None):
+    def _jinja_url_for(self, request, route, params=None):
         params = params or {}
         return "%s%s" % (
-            "NEED request._request_uri",
+            request.get_request_uri(),
             self._dic.router.url_for(route, params)
         )

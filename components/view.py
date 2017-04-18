@@ -7,7 +7,8 @@ from os import getcwd, path
 
 class View(object):
 
-    def __init__(self, config, flash):
+    # TODO: add filters
+    def __init__(self, config, extra_functions):
         self._debug = config.get("jinja.debug", False)
         self._dump_switch = config.get("jinja.dump_switch", "jkxd")
         self._env = Environment(
@@ -25,7 +26,8 @@ class View(object):
                 )
             )
         )
-        self._flash = flash
+        # TODO: can extra functions be registered via Environment?
+        self._extra_functions = extra_functions
         self._initialize_extensions(config)
 
     def display(self, template, data, request, response):
@@ -70,7 +72,7 @@ class View(object):
         return extensions
 
     def _get_extension_methods(self):
-        return {}
+        return self._extra_functions
 
     def _has_i18n(self, config):
         return config.get("jinja.i18n.enabled", False)

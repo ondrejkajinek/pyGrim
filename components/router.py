@@ -7,7 +7,7 @@ from ..router_exceptions import RouteAlreadyExists
 class Router(object):
 
     def __init__(self):
-        self._named_routes = {}
+        self._named_routes = None
         self._routes = []
         self._route_groups = []
 
@@ -34,27 +34,22 @@ class Router(object):
         self._route_groups.append(group)
 
     def url_for(self, route_name, params):
-        if not self._has_named_route(route_name):
-            raise RuntimeError(u"Nebyla nalezena routa %r" % route_name)
-        # TODO: sotva, když route.pattern je výsledek re.compile
-
-    def _add_named_route(self, name, route):
-        if self._has_named_route(name):
-            raise RouteAlreadyExists(name)
-        self._named_routes[name] = route
+        route = self._get_named_route(route_name)
+        return route.url_for(params)
 
     def _get_named_route(self, name):
-        try:
-            return self._named_routes[name]
-        except KeyError:
-            return None
+        if not self._has_named_route(name):
+            raise RuntimeError(u"Route %r was not found" % name)
+        return self._named_routes[name]
 
     def _get_named_routes(self):
-        self._named_routes = tuple(
-            route for route in self._routes if route.get_name()
-        )
-        for route in self._named_routes:
-            self._add_named_route(route.get_name(), route)
+        self._named_routes = {}
+        for route in self._routes:
+            name = route.get_name()
+            if name:
+                if name in self._named_routes:
+                    raise RouteAlreadyExists
+                self._named_routes[name] = route
 
     def group_pattern(self):
         return (
@@ -68,6 +63,6 @@ class Router(object):
         )
 
     def _has_named_route(self, route_name):
-        if not self._named_routes:
+        if self._named_routes is None:
             self._get_named_routes()
         return route_name in self._named_routes
