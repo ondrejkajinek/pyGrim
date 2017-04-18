@@ -72,8 +72,12 @@ class Server(object):
                     self._methods[member._dispatch_name] = member
                 except AttributeError:
                     self._methods[member_name] = member
+
                 if getattr(member, "_not_found", False) is True:
                     self._not_found_method = member
+
+                if getattr(member, "_error", False) is True:
+                    self._error_method = member
 
     def _default_error_method(self, request, response, exc):
         from traceback import print_exc
