@@ -66,9 +66,10 @@ def initialize_loggers(config):
             l.setLevel(config.get("logging.loggers.%s" % logger))
     except KeyError:
         logging.error(
-            "Chybí sekce na detailní nastavení loggerů ([logging.loggers])")
+            "Missing section for detailed logger settings ([logging.loggers])"
+        )
     except:
-        logging.exception("Chyba načítání detailních loglevelů")
+        logging.exception("Error loading logging levels")
 
 
 def _default_log_format(logger_type):
