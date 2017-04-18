@@ -1,7 +1,7 @@
 # coding: utf8
 
-from normalized_dicts import NormalizedDict
-from urlparse import parse_qsl
+from grim_dicts import ImmutableDict, NormalizedDict
+from urllib import unquote_plus
 
 import re
 
@@ -13,10 +13,7 @@ class Request(object):
         "https": 443
     }
 
-    HOST_REGEXP = re.compile(
-        r"^(\[[a-f0-9:.]+\])(:\d+)?\Z",
-        re.IGNORECASE
-    )
+    HOST_REGEXP = re.compile(r"^(\[[a-f0-9:.]+\])(:\d+)?\Z", re.IGNORECASE)
 
     IP_KEYS = (
         "X_FORWARDED_FOR", "HTTP_X_FORWARDED_FOR", "CLIENT_IP"
@@ -112,7 +109,7 @@ class Request(object):
         return params
 
     def set_route_params(self, params=None):
-        self.route_params = params or {}
+        self.route_params = ImmutableDict(params or {})
 
     def _get_host(self, env):
         try:
@@ -150,8 +147,20 @@ class Request(object):
                 self.headers[upper_key] = env[key]
 
     def _parse_query_params(self, env):
+
         def parse(source):
-            return dict(parse_qsl(source))
+            # TODO: when multiple values for single key appear,
+            #       put them to list / tuple
+            return ImmutableDict(
+                (
+                    map(unquote_plus, item.split("=", 1))
+                    if "=" in item
+                    else (item, None)
+                )
+                for item
+                in env["QUERY_STRING"].split("&")
+                if item
+            )
 
         self._get_params = parse(env["QUERY_STRING"])
         post = ""
