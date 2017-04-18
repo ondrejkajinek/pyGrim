@@ -7,7 +7,7 @@ import logging
 import sys
 
 
-def initializeLoggers(config):
+def initialize_loggers(config):
     level = config.get("logging.level", "NOTSET")
     try:
         level = getattr(logging, level)

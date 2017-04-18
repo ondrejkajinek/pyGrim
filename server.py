@@ -4,7 +4,7 @@ import inspect
 import sys
 
 from .components import DependencyContainer, Router, View
-from .components import initializeLoggers
+from .components import initialize_loggers
 from .configuration import config
 from .http import Request, Response
 from .router_exceptions import (
@@ -141,7 +141,7 @@ class Server(object):
             self._register_view()
 
     def _register_logger(self, config):
-        initializeLoggers(config)
+        initialize_loggers(config)
 
     def _register_view(self):
         extra_functions = {
