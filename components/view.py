@@ -39,11 +39,10 @@ class View(object):
         return self._env.loader.searchpath
 
     def render(self, template, data, request):
-        # TODO: enable when flash is ready
-        # self._load_flash_data()
-        if self._debug and self._dump_switch in request.GET:
+        # TODO: load flash data from session
+        if self._debug and self._dump_switch in request.get():
             data["template_path"] = path.join(
-                self.get_template_directory(),
+                self.get_template_directory()[0],
                 template
             )
             template = self._dump_switch
