@@ -55,7 +55,7 @@ class DependencyContainer(object):
     def singleton(self, key, value):
         def singleton_closure(dic):
             singleton = value(self) if hasattr(value, "__call__") else value
-            self.register(key, value)
+            self.register(key, singleton)
             return singleton
 
         self.register(key, singleton_closure)
