@@ -26,7 +26,7 @@ class Response(object):
 
     COOKIE_PARTS = (
         lambda c: (
-            "domain=%s" % c["domain"]
+            "Domain=%s" % c["domain"]
             if c.get("domain")
             else None
         ),
@@ -39,8 +39,8 @@ class Response(object):
             else None
         ),
         lambda c: "HttpOnly" if c.get("http_only") else None,
-        lambda c: "path=%s" % c["path"] if c.get("path") else None,
-        lambda c: "secure" if c.get("secure") else None
+        lambda c: "Path=%s" % c["path"] if c.get("path") else None,
+        lambda c: "Secure" if c.get("secure") else None
     )
 
     NO_CONTENT_STATUSES = (204, 304)
