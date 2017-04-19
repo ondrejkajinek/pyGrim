@@ -2,7 +2,7 @@
 
 # from compatibility import http_responses
 from datetime import datetime, timedelta
-from urllib import quote_plus as url_quote
+from urllib import quote_plus as url_quoteplus
 
 import sys
 if sys.version_info.major == 3:
@@ -86,7 +86,13 @@ class Response(object):
         )
         cookie_params = "; ".join(filter(None, params))
         return "%s=%s%s" % (
-            url_quote(name), url_quote(str(cookie["value"])), cookie_params
+            url_quoteplus(name),
+            url_quoteplus(str(cookie["value"])),
+            (
+                "; %s" % cookie_params
+                if cookie_params
+                else ""
+            )
         )
 
     def _serialize_cookies(self):
