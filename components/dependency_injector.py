@@ -2,7 +2,7 @@
 
 from logging import getLogger
 
-log = getLogger("dependency_injector")
+log = getLogger("pygrim.dependency_injector")
 
 
 class BaseDependencyException(Exception):
@@ -26,7 +26,6 @@ class DependencyContainer(object):
         self.unregister(key)
 
     def __getattr__(self, key):
-        log.debug("Looking for %s", key)
         return self.resolve(key)
 
     def __setattr__(self, key, value):
@@ -42,12 +41,14 @@ class DependencyContainer(object):
                 return kwargs.get("default")
 
     def register(self, key, value):
+        log.debug("Registering component %r", key)
         self._components[key] = value
 
     def registered(self, key):
         return key in self
 
     def resolve(self, key):
+        log.debug("Looking for component %r", key)
         try:
             data = self._components[key]
             return data(self) if hasattr(data, "__call__") else data
@@ -60,7 +61,9 @@ class DependencyContainer(object):
             self.register(key, singleton)
             return singleton
 
+        log.debug("Registering singleton %r", key)
         self.register(key, singleton_closure)
 
     def unregister(self, key):
+        log.debug("Deleting component %r", key)
         del self._components[key]
