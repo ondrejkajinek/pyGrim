@@ -57,6 +57,9 @@ class View(object):
             template = self._env.get_template(template)
             headers = {}
             data.update(self._get_extension_methods())
+            data.update({
+                "request": request
+            })
             result = template.render(**data)
 
         return result, headers
