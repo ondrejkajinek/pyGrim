@@ -80,14 +80,16 @@ class Response(object):
         else:
             self.headers["Content-Length"] = str(len(self.body))
 
-        if self.cookies:
-            self.headers["Set-Cookie"] = "\n".join(self._serialize_cookies())
-
         self.headers = [
             (key, value)
             for key, value
             in self.headers.iteritems()
         ]
+
+        if self.cookies:
+            for cookie in self._serialized_cookies():
+                self.headers.append(("Set-Cookie", cookie))
+
         if isinstance(self.body, unicode):
             self.body = self.body.encode("utf-8")
 
@@ -115,6 +117,6 @@ class Response(object):
             )
         )
 
-    def _serialize_cookies(self):
+    def _serialized_cookies(self):
         for name, cookie in self.cookies.iteritems():
             yield self._serialize_cookie(name, cookie)
