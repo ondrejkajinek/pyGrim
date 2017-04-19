@@ -25,33 +25,54 @@ http_responses.setdefault(428, "Precondition Required")
 class Response(object):
 
     COOKIE_PARTS = (
-        ("domain", lambda c: (
+        lambda c: (
             "domain=%s" % c["domain"]
             if c.get("domain")
             else None
-        )),
-        ("expires", lambda c: (
+        ),
+        lambda c: (
             "expires=%s" % (
-                (datetime.utcnow() + timedelta(seconds=c["lifetime"]))
+                # (datetime.utcnow() + timedelta(seconds=c["lifetime"]))
+                (datetime.now() + timedelta(seconds=c["lifetime"]))
                 .strftime("%a, %d-%m-%Y %H:%M:%S UTC")
             )
             if c.get("lifetime")
             else None
-        )),
-        ("http_only", lambda c: "HttpOnly" if c.get("http_only") else None),
-        ("path", lambda c: "path=%s" % c["path"] if c.get("path") else None),
-        ("secure", lambda c: "secure" if c.get("secure") else None)
+        ),
+        lambda c: "HttpOnly" if c.get("http_only") else None,
+        lambda c: "path=%s" % c["path"] if c.get("path") else None,
+        lambda c: "secure" if c.get("secure") else None
     )
 
     NO_CONTENT_STATUSES = (204, 304)
 
-    def __init__(self, cookies=None):
+    def __init__(self):
         self.body = ""
-        self.cookies = cookies or {}
+        self.cookies = {}
         self.headers = {
             "Content-Type": "text/html"
         }
         self.status = 200
+
+    def add_cookie(
+        self, name, value, lifetime=None, domain=None, path=None,
+        http_only=None, secure=None
+    ):
+        self.cookies[name] = {
+            "domain": domain,
+            "http_only": http_only,
+            "lifetime": lifetime,
+            "path": path,
+            "secure": secure,
+            "value": value
+        }
+
+    def delete_cookie(self, name):
+        if name in self.cookies:
+            self.cookies[name].update({
+                "lifetime": -1,
+                "value": None
+            })
 
     def finalize(self):
         if self.status in self.NO_CONTENT_STATUSES:
