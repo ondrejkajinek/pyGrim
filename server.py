@@ -80,10 +80,8 @@ class Server(object):
                     self._error_method = member
 
     def _default_error_method(self, request, response, exc):
-        from traceback import print_exc
-        print_exc()
         log.exception(exc.message)
-        response.body = "TODO: Internal Server Error"
+        response.body = "Internal Server Error"
         response.status = 500
 
     def _finalize_routes(self):
