@@ -26,9 +26,6 @@ class DependencyContainer(object):
         log.debug("Deleting component %r", key)
         del self._components[key]
 
-    def __hasattr__(self, key):
-        return key in self
-
     def __getattr__(self, key):
         log.debug("Looking for component %r", key)
         try:
@@ -36,6 +33,9 @@ class DependencyContainer(object):
             return data(self) if hasattr(data, "__call__") else data
         except KeyError:
             raise UnknownComponent(key)
+
+    def __hasattr__(self, key):
+        return key in self
 
     def __setattr__(self, key, value):
         log.debug("Registering component %r", key)
