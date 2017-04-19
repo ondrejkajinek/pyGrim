@@ -31,10 +31,9 @@ class Response(object):
             else None
         ),
         lambda c: (
-            "expires=%s" % (
-                # (datetime.utcnow() + timedelta(seconds=c["lifetime"]))
-                (datetime.now() + timedelta(seconds=c["lifetime"]))
-                .strftime("%a, %d-%m-%Y %H:%M:%S UTC")
+            "Expires=%s" % (
+                (datetime.utcnow() + timedelta(seconds=c["lifetime"]))
+                .strftime("%a, %d-%b-%Y %H:%M:%S GMT")
             )
             if c.get("lifetime")
             else None
