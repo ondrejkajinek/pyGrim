@@ -47,7 +47,7 @@ class Response(object):
 
     def __init__(self):
         self.body = ""
-        self.cookies = {}
+        self._cookies = {}
         self.headers = {
             "Content-Type": "text/html"
         }
@@ -57,7 +57,7 @@ class Response(object):
         self, name, value, lifetime=None, domain=None, path=None,
         http_only=None, secure=None
     ):
-        self.cookies[name] = {
+        self._cookies[name] = {
             "domain": domain,
             "http_only": http_only,
             "lifetime": lifetime,
@@ -67,8 +67,8 @@ class Response(object):
         }
 
     def delete_cookie(self, name):
-        if name in self.cookies:
-            self.cookies[name].update({
+        if name in self._cookies:
+            self._cookies[name].update({
                 "lifetime": -1,
                 "value": None
             })
@@ -86,7 +86,7 @@ class Response(object):
             in self.headers.iteritems()
         ]
 
-        if self.cookies:
+        if self._cookies:
             for cookie in self._serialized_cookies():
                 self.headers.append(("Set-Cookie", cookie))
 
@@ -118,5 +118,5 @@ class Response(object):
         )
 
     def _serialized_cookies(self):
-        for name, cookie in self.cookies.iteritems():
+        for name, cookie in self._cookies.iteritems():
             yield self._serialize_cookie(name, cookie)
