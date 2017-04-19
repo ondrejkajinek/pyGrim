@@ -28,16 +28,16 @@ class NormalizedDict(object):
         }
 
     def __delitem__(self, key):
-        try:
-            del self._container[self._normalize_key(key)]
-        except KeyError:
-            raise
+        """
+        raises KeyError when normalized key is not found
+        """
+        del self._container[self._normalize_key(key)]
 
     def __getitem__(self, key):
-        try:
-            return self._container[self._normalize_key(key)]
-        except KeyError:
-            raise
+        """
+        raises KeyError when normalized key is not found
+        """
+        return self._container[self._normalize_key(key)]
 
     def __iter__(self, key):
         return self._container.iterkeys()
@@ -47,6 +47,12 @@ class NormalizedDict(object):
 
     def __setitem__(self, key, value):
         self._container[self._normalize_key(key)] = value
+
+    def get(self, key, default=None):
+        try:
+            return self._container[key]
+        except KeyError:
+            return default
 
     def _normalize_key(self, key):
         normalized = key.lower().replace("-", "_")
