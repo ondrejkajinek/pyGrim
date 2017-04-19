@@ -46,9 +46,11 @@ class DependencyContainer(object):
             return self.__getattr__(key)
         except UnknownComponent:
             if len(args):
-                return args[0]
+                data = args[0]
             else:
-                return kwargs.get("default")
+                data = kwargs.get("default")
+
+            return data(self) if hasattr(data, "__call__") else data
 
     def singleton(self, key, value):
         def singleton_closure(dic):
