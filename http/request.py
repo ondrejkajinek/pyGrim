@@ -1,6 +1,6 @@
 # coding: utf8
 
-from grim_dicts import ImmutableDict, NormalizedDict
+from .grim_dicts import ImmutableDict, NormalizedImmutableDict
 from urllib import unquote_plus
 
 import re
@@ -102,14 +102,16 @@ class Request(object):
             return self.DEFAULT_SCHEME_PORTS[env["wsgi.url_scheme"]]
 
     def _parse_headers(self, environment):
-        self._headers = NormalizedDict()
+        headers = {}
         for key in environment.keys():
             upper_key = key.upper()
             if (
                 upper_key.startswith("X_") or
                 upper_key.startswith("HTTP_")
             ):
-                self._headers[key] = environment.pop(key)
+                headers[key] = environment.pop(key)
+
+        self._headers = NormalizedImmutableDict(headers)
 
     def _parse_query_params(self):
         self._get_params = self._parse_string(
@@ -155,4 +157,4 @@ class Request(object):
         env["path_info"] = env.pop("PATH_INFO").rstrip("/")
         env["request_method"] = env.pop("REQUEST_METHOD").upper()
         env["server_port"] = self._get_port(env)
-        self._environment = NormalizedDict(env)
+        self._environment = NormalizedImmutableDict(env)
