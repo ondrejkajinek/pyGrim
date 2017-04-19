@@ -10,7 +10,8 @@ from .router_exceptions import (
     RouteSuccessfullyDispatched, RouteNotFound, RoutePassed
 )
 from logging import getLogger
-from os import environ, path
+from os import path
+from uwsgi import opt as uwsgi_opt
 
 
 log = getLogger("pygrim.server")
@@ -29,6 +30,10 @@ class ResponseWrap(object):
 
 
 class Server(object):
+
+    KNOWN_CONFIG_FORMATS = (
+        "yaml", "ini"
+    )
 
     def __init__(self):
         self._initialize_basic_components()
@@ -98,6 +103,13 @@ class Server(object):
             else:
                 route.assign_method(method)
 
+    def _get_config_path(self):
+        for key in self.KNOWN_CONFIG_FORMATS:
+            if key in uwsgi_opt:
+                return uwsgi_opt[key]
+        else:
+            raise RuntimeError("No known config format used to start uwsgi!")
+
     def _handle_request(self, request):
         response = Response()
         try:
@@ -134,7 +146,7 @@ class Server(object):
     def _initialize_basic_components(self):
         self._dic = DependencyContainer()
 
-        self._dic.config = ConfigObject(environ["CONF"])
+        self._dic.config = ConfigObject(self._get_config_path())
         self._register_logger(self._dic.config)
         self._dic.mode = self._dic.config.get("grim.mode")
         self._dic.router = Router()
