@@ -62,36 +62,33 @@ class Request(object):
         }
 
         self.set_route_params()
-        self._save_environment(environment)
         self._parse_headers(environment)
-        self._parse_query_params(environment)
-
-        # TODO: get cookies
-        self.cookies = {}
+        self._save_environment(environment)
+        self._parse_query_params()
 
     def get(self, key=None, fallback=None):
         return self._safe_param(self._get_params, key, fallback)
 
     def get_host(self):
-        return self.environment["host"]
+        return self._environment["host"]
 
     def get_ip(self):
-        return self.environment["ip"]
+        return self._environment["ip"]
 
     def get_method(self):
-        return self.environment["request_method"]
+        return self._environment["request_method"]
 
     def get_port(self):
-        return self.environment["server_port"]
+        return self._environment["server_port"]
 
     def get_request_uri(self):
-        return self.environment["path_info"]
+        return self._environment["path_info"]
 
     def get_root_uri(self):
-        return self.environment["script_name"]
+        return self._environment["script_name"]
 
     def get_scheme(self):
-        return self.environment["wsgi.url_scheme"]
+        return self._environment["wsgi.url_scheme"]
 
     def get_url(self):
         return "%s://%s%s" % (
@@ -118,7 +115,7 @@ class Request(object):
         try:
             matches = self.HOST_REGEXP.match(env["HTTP_HOST"])
         except KeyError:
-            host = env("SERVER_NAME")
+            host = env["SERVER_NAME"]
         else:
             if matches:
                 host = matches.groups()[1]
@@ -140,41 +137,52 @@ class Request(object):
         return ip
 
     def _get_port(self, env):
-        # TODO: is this field always filled? and is it always integer?
-        return int(env["SERVER_PORT"])
+        try:
+            return int(env["SERVER_PORT"])
+        except:
+            return self.DEFAULT_SCHEME_PORTS[env["wsgi.url_scheme"]]
 
-    def _parse_headers(self, env):
-        self.headers = NormalizedDict()
-        for key in env:
+    def _parse_headers(self, environment):
+        self._headers = NormalizedDict()
+        for key in environment.keys():
             upper_key = key.upper()
             if (
                 upper_key.startswith("X_") or
                 upper_key.startswith("HTTP_")
             ):
-                self.headers[upper_key] = env[key]
+                self._headers[key] = environment.pop(key)
 
-    def _parse_query_params(self, env):
+    def _parse_query_params(self):
+        self._get_params = self._parse_string(
+            self._environment["query_string"]
+        )
+        self._post_params = self._parse_string(
+            "".join(part for part in self._environment["wsgi.input"])
+        )
+        self.cookies = self._parse_string(self._headers.get("cookie", ""))
 
-        def parse(source):
-            # TODO: when multiple values for single key appear,
-            #       put them to list / tuple
-            return ImmutableDict(
-                (
-                    map(unquote_plus, item.split("=", 1))
-                    if "=" in item
-                    else (item, None)
-                )
-                for item
-                in env["QUERY_STRING"].split("&")
-                if item
+    def _parse_string(self, source):
+        parts = (
+            item
+            for item
+            in source.split("&")
+            if item
+        )
+
+        parsed = {}
+        for part in parts:
+            key, value = (
+                map(unquote_plus, part.split("=", 1))
+                if "=" in part
+                else (unquote_plus(part), None)
             )
+            parsed.setdefault(key, []).append(value)
 
-        self._get_params = parse(env["QUERY_STRING"])
-        post = ""
-        for part in env["wsgi.input"]:
-            post += part
+        for key in parsed.iterkeys():
+            if len(parsed[key]) == 1:
+                parsed[key] = parsed[key][0]
 
-        self._post_params = parse(post)
+        return ImmutableDict(parsed)
 
     def _safe_param(self, source, key=None, fallback=None):
         if key is not None:
@@ -188,4 +196,4 @@ class Request(object):
         env["path_info"] = env.pop("PATH_INFO").rstrip("/")
         env["request_method"] = env.pop("REQUEST_METHOD").upper()
         env["server_port"] = self._get_port(env)
-        self.environment = NormalizedDict(env)
+        self._environment = NormalizedDict(env)
