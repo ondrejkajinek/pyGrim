@@ -1,6 +1,9 @@
 # coding: utf8
 
-from pyGrim import method
+from logging import getLogger
+from pyGrim import method, not_found_method
+
+log = getLogger(__file__)
 
 
 class Test(object):
@@ -10,6 +13,19 @@ class Test(object):
         data = {
             "text": u"Hello, index here! :)"
         }
+        response.add_cookie(name="test", value="test", lifetime=3600)
+        response.add_cookie(name="test2", value="test2", lifetime=7200)
+        log.debug("Hello, index is logging :)")
+        self._dic.view.display(
+            "layout.jinja", data, request, response
+        )
+
+    @not_found_method
+    def not_found(self, request, response):
+        data = {
+            "text": u"404: Try something else ;)"
+        }
+        log.debug("Not found...")
         self._dic.view.display(
             "layout.jinja", data, request, response
         )

@@ -17,4 +17,15 @@ uwsgi:
 logging:
    file: /home/ondrak/public_html/pygrim_test/pygrim.log
    level: DEBUG
+   loggers:
+
+jinja:
+   debug: true,
+   dump_switch: jkxd
+   environment:
+      autoescape:
+         - jinja
+   i18n:
+      enabled: false
+   template_path: templates
 
