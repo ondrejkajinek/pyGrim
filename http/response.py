@@ -101,8 +101,8 @@ class Response(object):
 
     def _serialize_cookie(self, name, cookie):
         params = (
-            part_formatter(part)
-            for part, part_formatter
+            part_formatter(cookie)
+            for part_formatter
             in self.COOKIE_PARTS
         )
         cookie_params = "; ".join(filter(None, params))
