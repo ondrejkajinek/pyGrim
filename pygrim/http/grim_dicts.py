@@ -1,5 +1,9 @@
 # coding: utf8
 
+from logging import getLogger
+
+log = getLogger("pygrim.http.grim_dicts")
+
 
 class ImmutableDict(dict):
 

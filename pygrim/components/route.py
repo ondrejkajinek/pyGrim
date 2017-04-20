@@ -1,7 +1,11 @@
 # coding: utf8
 
-from urllib import quote_plus
 import re
+
+from logging import getLogger
+from urllib import quote_plus
+
+log = getLogger("pygrim.components.route")
 
 
 class Route(object):

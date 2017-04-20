@@ -1,9 +1,12 @@
 # coding: utf8
 
 from .grim_dicts import ImmutableDict, NormalizedImmutableDict
+from logging import getLogger
 from urllib import unquote_plus
 
 import re
+
+log = getLogger("pygrim.http.request")
 
 
 class Request(object):

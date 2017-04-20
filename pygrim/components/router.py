@@ -1,8 +1,11 @@
 # coding: utf8
 
+from logging import getLogger
 from os.path import join as path_join
 from re import compile as re_compile
 from ..router_exceptions import RouteAlreadyExists
+
+log = getLogger("pygrim.components.router")
 
 
 class Router(object):
