@@ -78,6 +78,9 @@ class Response(object):
             del self.headers["Content-Type"]
             self.body = ""
         else:
+            if isinstance(self.body, unicode):
+                self.body = self.body.encode("utf-8")
+
             self.headers["Content-Length"] = str(len(self.body))
 
         self.headers = [
@@ -89,9 +92,6 @@ class Response(object):
         if self._cookies:
             for cookie in self._serialized_cookies():
                 self.headers.append(("Set-Cookie", cookie))
-
-        if isinstance(self.body, unicode):
-            self.body = self.body.encode("utf-8")
 
     def redirect(self, url, status=302):
         self.status = status
