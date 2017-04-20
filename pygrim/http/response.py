@@ -2,9 +2,10 @@
 
 # from compatibility import http_responses
 from datetime import datetime, timedelta
-from urllib import quote_plus as url_quoteplus
 from logging import getLogger
-log = getLogger(__name__)
+from urllib import quote_plus as url_quoteplus
+
+log = getLogger("pygrim.http.response")
 
 import sys
 import os
