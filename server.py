@@ -97,7 +97,7 @@ class Server(object):
                 raise RuntimeError(
                     u"Server has no method %r to handle route %r" % (
                         route._handle_name,
-                        route.get_name() or str(route.get_pattern())
+                        route.get_name() or route.get_pattern()
                     )
                 )
             else:

@@ -1,6 +1,7 @@
 # coding: utf8
 
 from os.path import join as path_join
+from re import compile as re_compile
 from ..router_exceptions import RouteAlreadyExists
 
 
@@ -15,7 +16,11 @@ class Router(object):
         return self._routes
 
     def map(self, route):
-        route.set_pattern(self.group_pattern() + route.get_pattern())
+        full_pattern = self.group_pattern() + route.get_pattern()
+        if route._is_regex:
+            route.set_pattern(re_compile(full_pattern))
+        else:
+            route.set_pattern(full_pattern)
         self._routes.append(route)
 
     def matching_routes(self, request):

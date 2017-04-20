@@ -45,7 +45,11 @@ class Route(object):
         return self._name
 
     def get_pattern(self):
-        return self._pattern
+        return (
+            self._pattern.pattern
+            if self._is_regex
+            else self._pattern
+        )
 
     def matches(self, request):
         return (
@@ -80,8 +84,8 @@ class Route(object):
         return url
 
     def _pattern_to_readable(self):
-        param_names = self.URL_PARAM_REGEXP.findall(self._pattern)
-        readable = self.URL_PARAM_REGEXP.sub(r"%(\1)s", self._pattern)
+        param_names = self.URL_PARAM_REGEXP.findall(self._pattern.pattern)
+        readable = self.URL_PARAM_REGEXP.sub(r"%(\1)s", self._pattern.pattern)
         return readable, param_names
 
     def _strip_trailing_slash(self, pattern):
