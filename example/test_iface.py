@@ -20,6 +20,15 @@ class Test(object):
             "layout.jinja", data, request, response
         )
 
+    @method
+    def template_test(self, request, response, template):
+        data = {
+            "text": u"Selected template: %r" % template
+        }
+        self._dic.view.display(
+            "layout.jinja", data, request, response
+        )
+
     @not_found_method
     def not_found(self, request, response):
         data = {
