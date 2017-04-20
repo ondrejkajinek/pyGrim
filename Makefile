@@ -61,7 +61,6 @@ install:
 
 linkItems:
 	( \
-		echo 'linking' \
 		ln -sf `pwd`/pygrim /usr/local/lib/python${PY_VERSION}/dist-packages/pygrim  \
     )
 
