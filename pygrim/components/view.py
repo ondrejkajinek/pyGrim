@@ -41,10 +41,7 @@ class View(object):
     def render(self, template, data, request):
         # TODO: load flash data from session
         if self._debug and self._dump_switch in request.get():
-            data["template_path"] = path.join(
-                self.get_template_directory()[0],
-                template
-            )
+            data["template_path"] = template
             template = self._dump_switch
 
         data["debug"] = self._debug
