@@ -14,3 +14,10 @@ class Routes(object):
             re_compile(r"/tpl_test/(?P<template>[^/]*)/"),
             "template_test"
         ))
+        router.push_group("/konfigurator")
+        router.map(Route(
+            ("GET",),
+            re_compile("/(?P<world>[a-z-_]+)"),
+            "time_listing")
+        )
+        router.pop_group()

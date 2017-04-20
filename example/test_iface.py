@@ -29,6 +29,15 @@ class Test(object):
             "layout.jinja", data, request, response
         )
 
+    @method
+    def time_listing(self, request, response, world):
+        data = {
+            "text": u"Time listing: %r" % world
+        }
+        self._dic.view.display(
+            "layout.jinja", data, request, response
+        )
+
     @not_found_method
     def not_found(self, request, response):
         data = {
