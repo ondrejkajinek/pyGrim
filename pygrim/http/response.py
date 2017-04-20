@@ -88,18 +88,22 @@ class Response(object):
 
             if isinstance(self.body, (basestring,)):
                 self.headers["Content-Length"] = str(len(self.body))
-            else:
+            elif hasattr(self.body, "seek") and hasattr(self.body, "tell"):
                 self.body.seek(0, os.SEEK_END)
-                content_length = self.body.tell()
+                self.headers["Content-Length"] = self.body.tell()
                 self.body.seek(0)
-                self.headers["Content-Length"] = content_length
+            else:
+                log.warning(
+                    "Unable to get Content-Length for content %r", self.body
+                )
+                self.headers["Content-Length"] = 0
 
         self.headers = [
             (key, value)
             for key, value
             in self.headers.iteritems()
         ]
-        log.debug(self.headers)
+        log.debug("RESPONSE HEADERS: %r", self.headers)
 
         if self._cookies:
             for cookie in self._serialized_cookies():
