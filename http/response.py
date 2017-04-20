@@ -3,8 +3,11 @@
 # from compatibility import http_responses
 from datetime import datetime, timedelta
 from urllib import quote_plus as url_quoteplus
+from logging import getLogger
+log = getLogger(__name__)
 
 import sys
+import os
 if sys.version_info.major == 3:
     import http.server
     http_responses = {
@@ -74,6 +77,7 @@ class Response(object):
             })
 
     def finalize(self):
+        log.debug(self.headers)
         if self.status in self.NO_CONTENT_STATUSES:
             del self.headers["Content-Type"]
             self.body = ""
@@ -81,13 +85,20 @@ class Response(object):
             if isinstance(self.body, unicode):
                 self.body = self.body.encode("utf-8")
 
-            self.headers["Content-Length"] = str(len(self.body))
+            if isinstance(self.body, (basestring,)):
+                self.headers["Content-Length"] = str(len(self.body))
+            else:
+                self.body.seek(0, os.SEEK_END)
+                content_length = self.body.tell()
+                self.body.seek(0)
+                self.headers["Content-Length"] = content_length
 
         self.headers = [
             (key, value)
             for key, value
             in self.headers.iteritems()
         ]
+        log.debug(self.headers)
 
         if self._cookies:
             for cookie in self._serialized_cookies():
