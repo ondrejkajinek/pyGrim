@@ -1,0 +1,15 @@
+Source: pygrim
+Maintainer: Lukoko <lukoko@lukoko.name>
+Section: python
+Priority: optional
+Build-Depends: python-setuptools (>= 0.6b3), python-all (>= 2.6.6-3), debhelper (>= 7)
+Standards-Version: 3.9.4
+X-Python-Version: >= 2.7
+
+Package: pygrim
+Architecture: all
+Depends: ${misc:Depends}, ${python:Depends}, python-dev, python-compatibility, python-pip
+X-Python-Version: >= 2.7
+Description: frontend framework
+ written in python, inspired by php slim
+
