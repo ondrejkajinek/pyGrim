@@ -84,14 +84,16 @@ class Route(object):
         else:
             url = self._pattern
             query_params = params
+
         if query_params:
             url += "?%s" % "&".join(
                 "%s=%s" % tuple(map(quote_plus, map(str, (key, value))))
                 for key, value
                 in query_params.iteritems()
             )
-        log.debug("Route constructed url:%r for params: %r" % (url, params))
-        return url
+
+        log.debug("Route constructed url: %r for params: %r" % (url, params))
+        return "/%s" % url.lstrip("/")
 
     def _pattern_to_readable(self):
         param_names = self.URL_PARAM_REGEXP.findall(self._pattern.pattern)
