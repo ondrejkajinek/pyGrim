@@ -18,7 +18,7 @@ upgrade_pip_package ()
 {
     package=$1
     minversion=$2
-    installed_version=`pip freeze|grep -i "${package}=="|cut -d "=" -f3`
+    installed_version=`pip freeze|grep -i "^${package}=="|cut -d "=" -f3`
     if [ "x" == "x${installed_version}" ]
     then
         # no version installed
