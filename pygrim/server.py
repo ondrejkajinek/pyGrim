@@ -177,3 +177,6 @@ class Server(object):
             request.get_request_uri(),
             self._dic.router.url_for(route, params)
         )
+
+    def render(self, *args, **kwargs):
+        return self._dic.view.display(*args, **kwargs)
