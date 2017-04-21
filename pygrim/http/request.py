@@ -75,14 +75,14 @@ class Request(object):
 
     def _get_host(self, env):
         try:
-            matches = self.HOST_REGEXP.match(env["HTTP_HOST"])
+            matches = self.HOST_REGEXP.match(self._headers["host"])
         except KeyError:
             host = env["SERVER_NAME"]
         else:
             if matches:
                 host = matches.groups()[1]
             else:
-                host = env["HTTP_HOST"].split(":")[0]
+                host = self._headers["host"].split(":")[0]
 
         return host
 
