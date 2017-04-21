@@ -8,6 +8,13 @@ from urllib import quote_plus
 log = getLogger("pygrim.components.route")
 
 
+class RouteGroup(list):
+    def __init__(self, pattern, *args, **kwargs):
+        self.pattern = pattern
+        super(RouteGroup, self).__init__(*args, **kwargs)
+    # enddef
+
+
 class Route(object):
 
     REGEXP_TYPE = type(re.compile(r""))

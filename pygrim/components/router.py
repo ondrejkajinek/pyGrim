@@ -4,6 +4,7 @@ from logging import getLogger
 from os.path import join as path_join
 from re import compile as re_compile
 from ..router_exceptions import RouteAlreadyExists
+from .route import Route, RouteGroup
 
 log = getLogger("pygrim.components.router")
 
@@ -19,12 +20,21 @@ class Router(object):
         return self._routes
 
     def map(self, route):
-        full_pattern = self.group_pattern() + route.get_pattern()
-        if route._is_regex:
-            route.set_pattern(re_compile(full_pattern))
+        if isinstance(route, Route):
+            full_pattern = self.group_pattern() + route.get_pattern()
+            if route._is_regex:
+                route.set_pattern(re_compile(full_pattern))
+            else:
+                route.set_pattern(full_pattern)
+            self._routes.append(route)
+        elif isinstance(route, RouteGroup):
+            self.push_group(route.pattern)
+            for one in route:
+                self.map(one)
+            # endfor
+            self.pop_group()
         else:
-            route.set_pattern(full_pattern)
-        self._routes.append(route)
+            raise ValueError("Unknown type:%s to map" % (type(route),))
 
     def matching_routes(self, request):
         for route in self._routes:
