@@ -63,3 +63,17 @@ class ConfigObject(object):
             config = {}
 
         return config
+
+    def getint(self, key, *args, **kwargs):
+        v = self.get(key, *args, **kwargs)
+        if not isinstance(v, (int, long)):
+            if len(args):
+                return args[0]
+            elif "default" in kwargs:
+                return kwargs["default"]
+            else:
+                raise TypeError("Wrong value for key:%r" % (key,))
+            # endif
+        # endif
+        return v
+    # enddef

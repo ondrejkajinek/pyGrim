@@ -171,9 +171,12 @@ class Server(object):
     def _jinja_site_url(self, request, site):
         return path.join(self._jinja_base_url(request), site)
 
-    def _jinja_url_for(self, request, route, params=None):
+    def _jinja_url_for(self, request, route, params=None, add_domain=False):
         params = params or {}
-        return "%s%s" % (
-            request.get_request_uri(),
-            self._dic.router.url_for(route, params)
-        )
+        url = self._dic.router.url_for(route, params)
+        if add_domain:
+            url = request.get_url() + url
+        return url
+
+    def render(self, *args, **kwargs):
+        return self._dic.view.display(*args, **kwargs)
