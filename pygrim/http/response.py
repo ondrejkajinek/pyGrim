@@ -70,12 +70,23 @@ class Response(object):
             "value": value
         }
 
-    def delete_cookie(self, name):
+    def delete_cookie(
+        self, name, domain=None, path=None, http_only=None, secure=None
+    ):
         if name in self._cookies:
             self._cookies[name].update({
                 "lifetime": -1,
                 "value": None
             })
+        else:
+            self._cookies[name] = {
+                "domain": domain,
+                "http_only": http_only,
+                "lifetime": -1,
+                "path": path,
+                "secure": secure,
+                "value": None
+            }
 
     def finalize(self):
         log.debug(self.headers)
