@@ -9,7 +9,6 @@ uwsgi:
    processes: 2
    procname: pygrim_test
    procname-master: pygrim_test_m
-   pythonpath: /home/ondrak/programming/python/
    pythonpath: /home/ondrak/public_html/pygrim_test/
    python-autoreload: 1
    touch-reload: /home/ondrak/public_html/pygrim_test/pygrim.yaml
