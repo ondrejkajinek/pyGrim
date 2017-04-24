@@ -52,6 +52,9 @@ class Server(object):
         # TODO: yielding
         return tuple(response.body)
 
+    def display(self, *args, **kwargs):
+        return self._dic.view.display(*args, **kwargs)
+
     # napojit na postfork
     def do_postfork(self):
         self._collect_exposed_methods()
@@ -63,6 +66,13 @@ class Server(object):
 
         if hasattr(self, "postfork"):
             self.postfork()
+
+    def render(self, *args, **kwargs):
+        log.warning(
+            "STOP CALLING AWFUL %r, CALL %r INSTEAD!",
+            "server.render", "server.display"
+        )
+        return self.display(*args, **kwargs)
 
     def _collect_exposed_methods(self):
         def is_exposed(member, member_name):
@@ -177,6 +187,3 @@ class Server(object):
         if add_domain:
             url = request.get_url() + url
         return url
-
-    def render(self, *args, **kwargs):
-        return self._dic.view.display(*args, **kwargs)
