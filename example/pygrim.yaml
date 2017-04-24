@@ -12,7 +12,7 @@ uwsgi:
    pythonpath: /home/ondrak/programming/python/
    pythonpath: /home/ondrak/public_html/pygrim_test/
    python-autoreload: 1
-   touch-reload: /home/ondrak/public_html/pygrim_test/pygrim.conf
+   touch-reload: /home/ondrak/public_html/pygrim_test/pygrim.yaml
 
 logging:
    file: /home/ondrak/public_html/pygrim_test/pygrim.log
