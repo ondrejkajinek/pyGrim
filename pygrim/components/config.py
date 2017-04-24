@@ -30,6 +30,8 @@ DEFAULT_CONFIG = {
 
 class ConfigObject(object):
 
+    SEPARATOR = ":"
+
     def __init__(self, path):
         config = DEFAULT_CONFIG
         config.update(self._load_config(path))
@@ -38,7 +40,7 @@ class ConfigObject(object):
     def get(self, key, *args, **kwargs):
         try:
             target = self.config
-            for part in key.split("."):
+            for part in key.split(self.SEPARATOR):
                 target = target[part]
 
             return target

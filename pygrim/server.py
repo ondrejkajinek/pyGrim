@@ -148,9 +148,9 @@ class Server(object):
 
         self._dic.config = ConfigObject(self._get_config_path())
         self._register_logger(self._dic.config)
-        self._dic.mode = self._dic.config.get("grim.mode")
+        self._dic.mode = self._dic.config.get("grim:mode")
         self._dic.router = Router()
-        if self._dic.config.get("view.enabled", True):
+        if self._dic.config.get("view:enabled", True):
             self._register_view(self._dic.config)
 
     def _register_logger(self, config):

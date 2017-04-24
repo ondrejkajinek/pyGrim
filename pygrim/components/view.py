@@ -9,19 +9,19 @@ class View(object):
 
     # TODO: add filters
     def __init__(self, config, extra_functions):
-        self._debug = config.get("jinja.debug", False)
-        self._dump_switch = config.get("jinja.dump_switch", "jkxd")
+        self._debug = config.get("jinja:debug", False)
+        self._dump_switch = config.get("jinja:dump_switch", "jkxd")
         self._env = Environment(
             extensions=self._get_extensions(config),
             loader=FileSystemLoader(
                 searchpath=path.join(
                     getcwd(),
-                    config.get("jinja.template_path")
+                    config.get("jinja:template_path")
                 )
             ),
             autoescape=select_autoescape(
                 enabled_extensions=config.get(
-                    "jinja.environment.autoescape",
+                    "jinja:environment:autoescape",
                     ("jinja",)
                 )
             )
@@ -74,7 +74,7 @@ class View(object):
         return self._extra_functions
 
     def _has_i18n(self, config):
-        return config.get("jinja.i18n.enabled", False)
+        return config.get("jinja:i18n:enabled", False)
 
     def _initialize_extensions(self, config):
         if self._has_i18n(config):
@@ -83,9 +83,9 @@ class View(object):
     def _initialize_i18n(self, config):
         import gettext
         translations = gettext.translation(
-            domain=config.get("jinja.i18n.lang_domain"),
-            localedir=config.get("jinja.i18n.locale_path"),
-            languages=config.get("jinja.i18n.locales")
+            domain=config.get("jinja:i18n:lang_domain"),
+            localedir=config.get("jinja:i18n:locale_path"),
+            languages=config.get("jinja:i18n:locales")
         )
         self._env.install_gettext_translations(translations)
 

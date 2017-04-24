@@ -8,7 +8,7 @@ import sys
 
 
 def initialize_loggers(config):
-    level = config.get("logging.level", "NOTSET")
+    level = config.get("logging:level", "NOTSET")
     try:
         level = getattr(logging, level)
     except AttributeError:
@@ -19,10 +19,10 @@ def initialize_loggers(config):
     while logger.handlers:
         logger.removeHandler(logger.handlers[0])
 
-    logger_type = config.get("logging.type", "file").lower()
+    logger_type = config.get("logging:type", "file").lower()
     log_format = (
         config.get(
-            "logging.format", _default_log_format(logger_type)
+            "logging:format", _default_log_format(logger_type)
         )
     )
 
@@ -38,13 +38,13 @@ def initialize_loggers(config):
     handler = None
 
     if logger_type == "file":
-        log_file = config.get("logging.file", "/dev/null")
+        log_file = config.get("logging:file", "/dev/null")
         if log_file and log_file != "/dev/null":
             handler = LockingFileHandler(log_file)
     elif logger_type == "syslog":
-        host = config.get("logging.host", "localhost")
-        port = config.get("logging.port", 514)
-        socket = config.get("logging.socket", "")
+        host = config.get("logging:host", "localhost")
+        port = config.get("logging:port", 514)
+        socket = config.get("logging:socket", "")
         if socket:
             handler = logging.handlers.SysLogHandler(address=socket)
         else:
@@ -61,9 +61,9 @@ def initialize_loggers(config):
     logger.propagate = False
 
     try:
-        for logger in (config.get("logging.loggers") or {}).iterkeys():
+        for logger in (config.get("logging:loggers") or {}).iterkeys():
             l = logging.getLogger(logger)
-            l.setLevel(config.get("logging.loggers.%s" % logger))
+            l.setLevel(config.get("logging:loggers:%s" % logger))
     except KeyError:
         logging.error(
             "Missing section for detailed logger settings ([logging.loggers])"
