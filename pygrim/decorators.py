@@ -1,6 +1,7 @@
 # coding: utf8
 
 from functools import wraps
+from uwsgi import log as uwsgi_log
 
 
 def error_method(func):
@@ -30,5 +31,10 @@ def not_found_method(func):
 
 
 def _expose(func):
+    if func.__name__.startswith("_"):
+        uwsgi_log(
+            "pygrim.decorators: Exposing internal method %s" % func.__name__
+        )
+
     func._exposed = True
     return func
