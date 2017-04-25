@@ -30,8 +30,10 @@ class View(object):
         self._extra_functions = extra_functions
         self._initialize_extensions(config)
 
-    def display(self, template, data, request, response):
-        body, headers = self.render(template, data, request)
+    def display(self, request, response):
+        body, headers = self.render(
+            response.get_template(), response.get_view_data(), request
+        )
         response.body = body
         response.headers.update(headers)
 
@@ -39,6 +41,11 @@ class View(object):
         return self._env.loader.searchpath
 
     def render(self, template, data, request):
+        if not template:
+            raise RuntimeError(
+                "Trying to render response but no template has been set."
+            )
+
         # TODO: load flash data from session
         if self._debug and self._dump_switch in request.get():
             data["template_path"] = template

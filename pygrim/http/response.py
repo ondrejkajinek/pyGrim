@@ -51,11 +51,14 @@ class Response(object):
 
     def __init__(self):
         self.body = ""
-        self._cookies = {}
         self.headers = {
             "Content-Type": "text/html"
         }
         self.status = 200
+
+        self._cookies = {}
+        self._template = None
+        self._view_data = {}
 
     def add_cookie(
         self, name, value, lifetime=None, domain=None, path=None,
@@ -69,6 +72,12 @@ class Response(object):
             "secure": secure,
             "value": value
         }
+
+    def add_view_data(self, data):
+        self._view_data.update(data)
+
+    def clear_view_data(self):
+        self._view_data = {}
 
     def delete_cookie(
         self, name, domain=None, path=None, http_only=None, secure=None
@@ -87,6 +96,12 @@ class Response(object):
                 "secure": secure,
                 "value": None
             }
+
+    def delete_view_data(self, key):
+        try:
+            del self._view_data[key]
+        except KeyError:
+            pass
 
     def finalize(self):
         log.debug(self.headers)
@@ -120,9 +135,18 @@ class Response(object):
             for cookie in self._serialized_cookies():
                 self.headers.append(("Set-Cookie", cookie))
 
+    def get_template(self):
+        return self._template
+
+    def get_view_data(self):
+        return self._view_data
+
     def redirect(self, url, status=302):
         self.status = status
         self.headers["Location"] = url
+
+    def set_template(self, template):
+        self._template = template
 
     def status_code(self):
         return "%d %s" % (self.status, http_responses[self.status])
