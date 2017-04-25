@@ -35,7 +35,10 @@ class DependencyContainer(object):
             raise UnknownComponent(key)
 
     def __hasattr__(self, key):
-        return key in self
+        return key in self._components
+
+    def __iter__(self):
+        return self._components.__iter__()
 
     def __setattr__(self, key, value):
         log.debug("Registering component %r", key)
