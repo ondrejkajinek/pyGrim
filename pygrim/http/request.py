@@ -123,13 +123,13 @@ class Request(object):
         self._post_params = self._parse_string(
             "".join(part for part in self._environment["wsgi.input"])
         )
-        self.cookies = self._parse_string(self._headers.get("cookie", ""))
+        self.cookies = self._parse_string(self._headers.get("cookie", ""), ";")
 
-    def _parse_string(self, source):
+    def _parse_string(self, source, pairs_separator="&"):
         parts = (
             item
             for item
-            in source.split("&")
+            in source.split(pairs_separator)
             if item
         )
 
