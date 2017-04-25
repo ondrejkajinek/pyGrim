@@ -104,7 +104,6 @@ class Response(object):
             pass
 
     def finalize(self):
-        log.debug(self.headers)
         if self.status in self.NO_CONTENT_STATUSES:
             del self.headers["Content-Type"]
             self.body = ""

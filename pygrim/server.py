@@ -61,6 +61,7 @@ class Server(object):
         if hasattr(self, "_route_register_func"):
             self._route_register_func(self._dic.router)
             self._finalize_routes()
+            log.debug("Routes loaded")
         else:
             log.warning("There is no function to register routes!")
 
@@ -162,6 +163,8 @@ class Server(object):
         self._dic.router = Router()
         if self._dic.config.get("view:enabled", True):
             self._register_view(self._dic.config)
+
+        log.debug("Basic components initialized")
 
     def _register_logger(self, config):
         initialize_loggers(config)
