@@ -96,12 +96,14 @@ class Server(object):
                 if getattr(member, "_error", False) is True:
                     self._error_method = member
 
-    def _default_error_method(self, session, request, response, exc):
+    def _default_error_method(self, exc, **kwargs):
         log.exception(exc.message)
+        response = kwargs.pop("response")
         response.body = "Internal Server Error"
         response.status = 500
 
-    def _default_not_found_method(self, session, request, response):
+    def _default_not_found_method(self, **kwargs):
+        response = kwargs.pop("response")
         response.body = "Not found"
         response.status = 404
 
@@ -126,6 +128,12 @@ class Server(object):
         else:
             raise RuntimeError("No known config format used to start uwsgi!")
 
+    def _handle_params(self, **kwargs):
+        session, request, response = map(
+            kwargs.pop, ("session", "request", "response")
+        )
+        return session, request, response
+
     def _handle_request(self, request):
         response = Response()
         session = self._dic.session_handler.load(request)
@@ -133,7 +141,11 @@ class Server(object):
         try:
             for route in self._dic.router.matching_routes(request):
                 try:
-                    route.dispatch(session, request, response)
+                    route.dispatch(
+                        session=session,
+                        request=request,
+                        response=response
+                    )
                     self._dic.session_handler.save(session)
                     if session.need_cookie():
                         response.add_cookie(
@@ -145,24 +157,42 @@ class Server(object):
                     pass
             else:
                 if self._not_found_method:
-                    self._not_found_method(session, request, response)
+                    self._not_found_method(
+                        session=session,
+                        request=request,
+                        response=response
+                    )
                 else:
                     raise RouteNotFound()
         except RouteSuccessfullyDispatched:
             # everything was ok
             pass
         except RouteNotFound:
-            self._default_not_found_method(session, request, response)
+            self._default_not_found_method(
+                session=session,
+                request=request,
+                response=response
+            )
         except:
             exc = sys.exc_info()[1]
             if hasattr(self, "_error_method"):
                 try:
-                    self._error_method(session, request, response, exc)
+                    self._error_method(
+                        session=session,
+                        request=request,
+                        response=response,
+                        exc=exc
+                    )
                     return response
                 except:
                     exc = sys.exc_info()[1]
 
-            self._default_error_method(session, request, response, exc)
+            self._default_error_method(
+                session=session,
+                request=request,
+                response=response,
+                exc=exc
+            )
 
         return response
 
