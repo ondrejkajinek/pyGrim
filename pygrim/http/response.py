@@ -122,10 +122,10 @@ class Response(object):
                 log.warning(
                     "Unable to get Content-Length for content %r", self.body
                 )
-                self.headers["Content-Length"] = "0"
+                self.headers["Content-Length"] = 0
 
         self.headers = [
-            (key, value)
+            (key, str(value))
             for key, value
             in self.headers.iteritems()
         ]
