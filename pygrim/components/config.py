@@ -22,6 +22,13 @@ DEFAULT_CONFIG = {
         "file": "/tmp/pygrim.log",
         "level": "DEBUG"
     },
+    "session": {
+        "enabled": True,
+        "type": "file",
+        "args": {
+            "session_dir": "/tmp/pygrim_session/"
+        }
+    },
     "view": {
         "enabled": True
     }

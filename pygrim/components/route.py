@@ -42,8 +42,9 @@ class Route(object):
     def assign_method(self, method):
         self._handle = method
 
-    def dispatch(self, request, response):
+    def dispatch(self, session, request, response):
         self._handle(
+            session=session,
             request=request,
             response=response,
             **request.pop_route_params()

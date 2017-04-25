@@ -9,6 +9,7 @@ from .http import Request, Response
 from .router_exceptions import (
     RouteSuccessfullyDispatched, RouteNotFound, RoutePassed
 )
+from .session import FileSessionStorage, MockSession
 from logging import getLogger
 from os import path
 from uwsgi import opt as uwsgi_opt
@@ -95,10 +96,14 @@ class Server(object):
                 if getattr(member, "_error", False) is True:
                     self._error_method = member
 
-    def _default_error_method(self, request, response, exc):
+    def _default_error_method(self, session, request, response, exc):
         log.exception(exc.message)
         response.body = "Internal Server Error"
         response.status = 500
+
+    def _default_not_found_method(self, session, request, response):
+        response.body = "Not found"
+        response.status = 404
 
     def _finalize_routes(self):
         for route in self._dic.router.get_routes():
@@ -123,34 +128,41 @@ class Server(object):
 
     def _handle_request(self, request):
         response = Response()
+        session = self._dic.session_handler.load(request)
+
         try:
             for route in self._dic.router.matching_routes(request):
                 try:
-                    route.dispatch(request, response)
+                    route.dispatch(session, request, response)
+                    self._dic.session_handler.save(session)
+                    if session.need_cookie():
+                        response.add_cookie(
+                            **self._dic.session_handler.cookie_for(session)
+                        )
+
                     raise RouteSuccessfullyDispatched()
                 except RoutePassed:
                     pass
             else:
                 if self._not_found_method:
-                    self._not_found_method(request, response)
+                    self._not_found_method(session, request, response)
                 else:
                     raise RouteNotFound()
         except RouteSuccessfullyDispatched:
             # everything was ok
             pass
         except RouteNotFound:
-            response.body = "Not found"
-            response.status = 404
+            self._default_not_found_method(session, request, response)
         except:
             exc = sys.exc_info()[1]
             if hasattr(self, "_error_method"):
                 try:
-                    self._error_method(request, response, exc)
+                    self._error_method(session, request, response, exc)
                     return response
                 except:
                     exc = sys.exc_info()[1]
 
-            self._default_error_method(request, response, exc)
+            self._default_error_method(session, request, response, exc)
 
         return response
 
@@ -161,6 +173,8 @@ class Server(object):
         self._register_logger(self._dic.config)
         self._dic.mode = self._dic.config.get("grim:mode")
         self._dic.router = Router()
+        self._register_session_handler(self._dic.config)
+
         if self._dic.config.get("view:enabled", True):
             self._register_view(self._dic.config)
 
@@ -168,6 +182,18 @@ class Server(object):
 
     def _register_logger(self, config):
         initialize_loggers(config)
+
+    def _register_session_handler(self, config):
+        session_enabled = config.get("session:enabled", True)
+        storage_type = config.get("session:type")
+        if not session_enabled:
+            storage_class = MockSession
+        elif storage_type == "file":
+            storage_class = FileSessionStorage
+        else:
+            raise RuntimeError("Unknown session handler: %r", storage_type)
+
+        self._dic.session_handler = storage_class(config)
 
     def _register_view(self, config):
         extra_functions = {
