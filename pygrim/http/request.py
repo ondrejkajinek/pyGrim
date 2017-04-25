@@ -136,9 +136,9 @@ class Request(object):
         parsed = {}
         for part in parts:
             key, value = (
-                map(unquote_plus, part.split("=", 1))
+                map(lambda x: x.strip(), map(unquote_plus, part.split("=", 1)))
                 if "=" in part
-                else (unquote_plus(part), None)
+                else (unquote_plus(part.strip()), None)
             )
             parsed.setdefault(key, []).append(value)
 
