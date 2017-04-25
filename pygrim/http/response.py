@@ -116,13 +116,13 @@ class Response(object):
                 self.headers["Content-Length"] = str(len(self.body))
             elif hasattr(self.body, "seek") and hasattr(self.body, "tell"):
                 self.body.seek(0, os.SEEK_END)
-                self.headers["Content-Length"] = self.body.tell()
+                self.headers["Content-Length"] = str(self.body.tell())
                 self.body.seek(0)
             else:
                 log.warning(
                     "Unable to get Content-Length for content %r", self.body
                 )
-                self.headers["Content-Length"] = 0
+                self.headers["Content-Length"] = "0"
 
         self.headers = [
             (key, value)
