@@ -16,7 +16,7 @@ class Test(object):
         response.add_cookie(name="test", value="test", lifetime=3600)
         response.add_cookie(name="test2", value="test2", lifetime=7200)
         log.debug("Hello, index is logging :)")
-        self._dic.view.display(
+        self.render(
             "layout.jinja", data, request, response
         )
 
@@ -25,7 +25,7 @@ class Test(object):
         data = {
             "text": u"Selected template: %r" % template
         }
-        self._dic.view.display(
+        self.render(
             "layout.jinja", data, request, response
         )
 
@@ -34,7 +34,7 @@ class Test(object):
         data = {
             "text": u"Time listing: %r" % world
         }
-        self._dic.view.display(
+        self.render(
             "layout.jinja", data, request, response
         )
 
@@ -44,6 +44,6 @@ class Test(object):
             "text": u"404: Try something else ;)"
         }
         log.debug("Not found...")
-        self._dic.view.display(
+        self.render(
             "layout.jinja", data, request, response
         )
