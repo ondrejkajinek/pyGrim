@@ -140,6 +140,10 @@ class Context(object):
         self.set_route_params()
         return params
 
+    def redirect(self, url, status=302):
+        self._request.status = status
+        self._request.headers["Location"] = url
+
     def save_session(self, session_handler):
         session_handler.save(self.session)
         if self.session.need_cookie():

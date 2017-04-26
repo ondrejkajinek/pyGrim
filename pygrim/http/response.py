@@ -71,10 +71,6 @@ class Response(object):
             for cookie in self._serialized_cookies():
                 self.headers.append(("Set-Cookie", cookie))
 
-    def redirect(self, url, status=302):
-        self.status = status
-        self.headers["Location"] = url
-
     def _serialize_cookie(self, name, cookie):
         params = (
             part_formatter(cookie)
