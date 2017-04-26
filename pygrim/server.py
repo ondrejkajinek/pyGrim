@@ -197,21 +197,21 @@ class Server(object):
     def _initialize_basic_components(self):
         self._dic = DependencyContainer()
 
-        self._dic.config = ConfigObject(self._get_config_path())
-        self._register_logger(self._dic.config)
-        self._dic.mode = self._dic.config.get("grim:mode")
+        self.config = ConfigObject(self._get_config_path())
+        self._register_logger(self.config)
+        self._dic.mode = self.config.get("grim:mode")
         self._dic.router = Router()
 
-        if self._dic.config.get("view:enabled", True):
-            self._register_view(self._dic.config)
+        if self.config.get("view:enabled", True):
+            self._register_view(self.config)
 
         self._register_session_handler()
 
         log.debug("Basic components initialized")
 
     def _register_session_handler(self):
-        session_enabled = self._dic.config.get("session:preload", False)
-        storage_type = self._dic.config.get("session:type")
+        session_enabled = self.config.get("session:preload", False)
+        storage_type = self.config.get("session:type")
         if not session_enabled:
             storage_class = MockSession
         elif storage_type == "file":
@@ -219,7 +219,7 @@ class Server(object):
         else:
             raise RuntimeError("Unknown session handler: %r", storage_type)
         # endiif
-        self.register_session_handler(storage_class(self._dic.config))
+        self.register_session_handler(storage_class(self.config))
 
     def _register_logger(self, config):
         initialize_loggers(config)
