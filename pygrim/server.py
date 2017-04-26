@@ -156,7 +156,6 @@ class Server(object):
             else:
                 if self._not_found_method:
                     self._not_found_method(
-                        session=request.session,
                         request=request,
                         response=response
                     )
