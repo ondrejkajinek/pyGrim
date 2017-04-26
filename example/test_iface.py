@@ -8,68 +8,70 @@ log = getLogger(__file__)
 
 class Test(object):
 
-    @method()
-    def index(self, request, response):
-        response.add_cookie(name="test", value="test", lifetime=3600)
-        response.add_cookie(
+    @method(
+        session=True
+    )
+    def index(self, context):
+        context.add_cookie(name="test", value="test", lifetime=3600)
+        context.add_cookie(
             name="test2", value="test2", path="/test", lifetime=7200
         )
-        response.add_view_data({
+        context.view_data.update({
             "text": u"Hello, index here! :) Now we check unicode works fine.",
-            "session_text": request.session.get("text")
+            "session_text": context.session.get("text")
         })
-        request.session.setdefault("text", "")
-        request.session["text"] += "a"
-        if len(request.session["text"]) > 6:
-            request.session["text"] = ""
+        context.session.setdefault("text", "")
+        context.session["text"] += "a"
+        if len(context.session["text"]) > 6:
+            context.session["text"] = ""
 
-        response.set_template("layout.jinja")
+        context.template = "layout.jinja"
         log.debug("Hello, index is logging :)")
-        self.display(request, response)
+        self.display(context)
 
     @method()
-    def test_cookie(self, request, response):
-        response.add_view_data({
-            "text": "COOKIES = %r" % request.cookies
+    def test_cookie(self, context):
+        context.view_data.update({
+            "text": "COOKIES = %r" % context.get_cookies()
         })
-        response.set_template("layout.jinja")
-        self.display(request, response)
+        context.template = "layout.jinja"
+        self.display(context)
 
     @method()
-    def template_test(self, request, response, template):
-        response.add_view_data({
+    def template_test(self, context, template):
+        context.view_data.update({
             "text": u"Selected template: %r" % template
         })
-        response.set_template("layout.jinja")
-        self.render(request, response)
+        context.template = "layout.jinja"
+        self.render(context)
 
     @method()
-    def time_listing(self, request, response, world):
-        response.add_view_data({
+    def time_listing(self, context, world):
+        context.view_data.update({
             "text": u"Time listing: %r" % world
         })
-        response.set_template("layout.jinja")
-        self.render(request, response)
+        context.template = "layout.jinja"
+        self.render(context)
 
     @method()
-    def ise(self, **kwargs):
+    def ise(self, context):
         # this will cause ValueError ;)
         int(10, 20)
 
     @not_found_method
-    def not_found(self, request, response):
+    def not_found(self, context):
         log.debug("Not found...")
-        response.add_view_data({
+        context.view_data.update({
             "text": u"404: Try something else ;)"
         })
-        response.set_template("layout.jinja")
-        self.display(request, response)
+        context.template = "layout.jinja"
+        self.display(context)
 
     @error_method()
-    def ise_handle(self, request, response, exc):
+    def ise_handle(self, context, exc):
         log.exception("500: AARRGGHH")
-        response.add_view_data({
+        context.view_data.update({
             "text": u"500: Something terrible happened, but we know it :)"
         })
-        response.set_template("layout.jinja")
-        self.display(request, response)
+        context.template = "layout.jinja"
+        self.display(context)
