@@ -13,6 +13,7 @@ from .session import MockSession, SessionStorage, FileSessionStorage
 from logging import getLogger
 from os import path
 from uwsgi import opt as uwsgi_opt
+import json
 
 
 log = getLogger("pygrim.server")
@@ -167,6 +168,11 @@ class Server(object):
                     raise RouteSuccessfullyDispatched()
                 except RoutePassed:
                     pass
+                except:
+                    log.error(
+                        "Error while disptching to:%r", route._handle_name
+                    )
+                    raise
             else:
                 if self._not_found_method:
                     self._not_found_method(
@@ -239,11 +245,15 @@ class Server(object):
         extra_functions = {
             "base_url": self._jinja_base_url,
             "site_url": self._jinja_site_url,
-            "url_for": self._jinja_url_for
+            "url_for": self._jinja_url_for,
+            "as_json": self._jinja_as_json,
         }
         self._dic.view = View(config, extra_functions)
 
     # jinja extra methods
+    def _jinja_as_json(self, data):
+        return json.dumps(data)
+
     def _jinja_base_url(self, request):
         return "%s%s" % (request.get_url(), request.get_root_uri())
 
@@ -256,3 +266,5 @@ class Server(object):
         if add_domain:
             url = request.get_url() + url
         return url
+
+# eof
