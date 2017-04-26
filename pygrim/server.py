@@ -156,7 +156,6 @@ class Server(object):
             else:
                 if self._not_found_method:
                     self._not_found_method(
-                        session=request.session,
                         request=request,
                         response=response
                     )
@@ -167,7 +166,6 @@ class Server(object):
             pass
         except RouteNotFound:
             self._default_not_found_method(
-                session=request.session,
                 request=request,
                 response=response
             )
@@ -176,7 +174,6 @@ class Server(object):
             if hasattr(self, "_error_method"):
                 try:
                     self._error_method(
-                        session=request.session,
                         request=request,
                         response=response,
                         exc=exc
@@ -186,7 +183,6 @@ class Server(object):
                     exc = sys.exc_info()[1]
 
             self._default_error_method(
-                session=request.session,
                 request=request,
                 response=response,
                 exc=exc
@@ -218,7 +214,7 @@ class Server(object):
             storage_class = FileSessionStorage
         else:
             raise RuntimeError("Unknown session handler: %r", storage_type)
-        # endiif
+
         self.register_session_handler(storage_class(self.config))
 
     def _register_logger(self, config):
