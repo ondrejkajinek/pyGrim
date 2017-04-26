@@ -211,7 +211,7 @@ class Server(object):
         log.debug("Basic components initialized")
 
     def _register_session_handler(self):
-        session_enabled = self.config.get("session:preload", False)
+        session_enabled = self.config.get("session:enabled", False)
         storage_type = self.config.get("session:type")
         if not session_enabled:
             storage_class = MockSession
