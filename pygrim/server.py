@@ -153,6 +153,11 @@ class Server(object):
                     raise RouteSuccessfullyDispatched()
                 except RoutePassed:
                     pass
+                except:
+                    log.error(
+                        "Error while disptching to:%r", route._handle_name
+                    )
+                    raise
             else:
                 if self._not_found_method:
                     self._not_found_method(
