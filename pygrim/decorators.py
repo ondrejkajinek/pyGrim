@@ -13,12 +13,12 @@ class BaseDecorator(object):
     def _expose(self, func):
         if func.__name__.startswith("_"):
             uwsgi_log(
-                "pygrim.decorators: Exposing internal method %s" % (
+                "pygrim WARNING: Internal method %r will not be exposed!" % (
                     func.__name__
                 )
             )
-
-        func._exposed = True
+        else:
+            func._exposed = True
 
 
 class method(BaseDecorator):

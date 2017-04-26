@@ -1,6 +1,5 @@
 # coding: utf8
 
-import inspect
 import sys
 
 from .components import ConfigObject, DependencyContainer, Router, View
@@ -10,6 +9,8 @@ from .router_exceptions import (
     RouteSuccessfullyDispatched, RouteNotFound, RoutePassed
 )
 from .session import MockSession, SessionStorage, FileSessionStorage
+
+from inspect import getmembers, ismethod
 from logging import getLogger
 from os import path
 from uwsgi import opt as uwsgi_opt
@@ -79,11 +80,10 @@ class Server(object):
     def _collect_exposed_methods(self):
         def is_exposed(member, member_name):
             return (
-                member_name[0] != "_" and
                 getattr(member, "_exposed", False) is True
             )
 
-        for member_name, member in inspect.getmembers(self):
+        for member_name, member in getmembers(self, predicate=ismethod):
             if is_exposed(member, member_name):
                 try:
                     self._methods[member._dispatch_name] = member
