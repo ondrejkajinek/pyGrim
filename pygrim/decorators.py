@@ -25,8 +25,7 @@ class method(BaseDecorator):
 
     def __call__(self, func):
         self._expose(func)
-        if self._kwargs.get("session"):
-            func._session = True
+        func._session = bool(self._kwargs.get("session"))
 
         @wraps(func)
         def wrapper(*args, **kwargs):

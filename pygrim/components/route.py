@@ -67,6 +67,9 @@ class Route(object):
             self._uri_matches(request)
         )
 
+    def requires_session(self):
+        return self._handle._session
+
     def set_pattern(self, pattern):
         self._pattern = pattern
 

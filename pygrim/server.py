@@ -121,6 +121,15 @@ class Server(object):
             else:
                 route.assign_method(method)
 
+    def _find_session_handler(self):
+        storage_type = self.config.get("session:type")
+        if storage_type == "file":
+            storage_class = FileSessionStorage
+        else:
+            raise RuntimeError("Unknown session handler: %r", storage_type)
+
+        return storage_class
+
     def _get_config_path(self):
         for key in self.KNOWN_CONFIG_FORMATS:
             if key in uwsgi_opt:
@@ -136,19 +145,24 @@ class Server(object):
 
     def _handle_request(self, request):
         response = Response()
-        request.session = self.session_handler.load(request)
         try:
             for route in self._dic.router.matching_routes(request):
+                if route.requires_session() and request.session is None:
+                    request.session = self.session_handler.load(request)
+
                 try:
                     route.dispatch(
                         request=request,
                         response=response
                     )
-                    self.session_handler.save(request.session)
-                    if request.session.need_cookie():
-                        response.add_cookie(
-                            **self.session_handler.cookie_for(request.session)
-                        )
+                    if route.requires_session():
+                        self.session_handler.save(request.session)
+                        if request.session.need_cookie():
+                            response.add_cookie(
+                                **self.session_handler.cookie_for(
+                                    request.session
+                                )
+                            )
 
                     raise RouteSuccessfullyDispatched()
                 except RoutePassed:
@@ -202,30 +216,24 @@ class Server(object):
             self._register_view(self.config)
 
         self._register_session_handler()
-
         log.debug("Basic components initialized")
 
     def _register_session_handler(self):
-        session_enabled = self.config.get("session:preload", False)
-        storage_type = self.config.get("session:type")
-        if not session_enabled:
-            storage_class = MockSession
-        elif storage_type == "file":
-            storage_class = FileSessionStorage
+        if self.config.get("session:enabled", False):
+            storage_class = self._find_session_handler()
         else:
-            raise RuntimeError("Unknown session handler: %r", storage_type)
+            storage_class = MockSession
 
-        self.register_session_handler(storage_class(self.config))
-
-    def _register_logger(self, config):
-        initialize_loggers(config)
-
-    def register_session_handler(self, handler):
+        handler = storage_class(self.config)
         if not isinstance(handler, SessionStorage):
             raise ValueError(
                 "SessionHandler should be derived from SessionStorage"
             )
+
         self.session_handler = handler
+
+    def _register_logger(self, config):
+        initialize_loggers(config)
 
     def _register_view(self, config):
         extra_functions = {
