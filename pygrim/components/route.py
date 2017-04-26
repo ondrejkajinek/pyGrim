@@ -41,11 +41,10 @@ class Route(object):
     def assign_method(self, method):
         self._handle = method
 
-    def dispatch(self, request, response):
+    def dispatch(self, context):
         self._handle(
-            request=request,
-            response=response,
-            **request.pop_route_params()
+            context=context,
+            **context.pop_route_params()
         )
 
     def get_handle_name(self):
@@ -63,10 +62,10 @@ class Route(object):
         patt = patt.strip("/")
         return patt
 
-    def matches(self, request):
+    def matches(self, context):
         return (
-            self._supports_http_method(request.get_method()) and
-            self._uri_matches(request)
+            self._supports_http_method(context.get_request_method()) and
+            self._uri_matches(context)
         )
 
     def requires_session(self):
@@ -116,8 +115,8 @@ class Route(object):
     def _supports_http_method(self, method):
         return method in self._methods
 
-    def _uri_matches(self, request):
-        uri = request.get_request_uri() or "/"
+    def _uri_matches(self, context):
+        uri = context.get_request_uri() or "/"
         log.debug(
             "matching %r with  %r",
             self._pattern.pattern if self._is_regex else self._pattern, uri
@@ -126,10 +125,10 @@ class Route(object):
             matches = self._pattern.match(uri)
             match = matches is not None
             if match:
-                request.set_route_params(matches.groupdict())
+                context.set_route_params(matches.groupdict())
         else:
             match = self._pattern == uri
             if match:
-                request.set_route_params({})
+                context.set_route_params({})
 
         return match

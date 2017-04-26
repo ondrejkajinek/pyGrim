@@ -7,23 +7,7 @@ from urllib import quote_plus as url_quoteplus
 
 log = getLogger("pygrim.http.response")
 
-import sys
 import os
-if sys.version_info.major == 3:
-    import http.server
-    http_responses = {
-        code: code_desc[0]
-        for code, code_desc
-        in http.server.BaseHTTPRequestHandler.responses.items()
-    }
-else:
-    from httplib import responses as http_responses
-# endif
-# in order of http://en.wikipedia.org/wiki/List_of_HTTP_status_codes
-http_responses.setdefault(418, "I'm a teapot")  # LOL
-http_responses.setdefault(423, "Locked")
-http_responses.setdefault(426, "Updgrade Required")
-http_responses.setdefault(428, "Precondition Required")
 
 
 class Response(object):
@@ -51,57 +35,11 @@ class Response(object):
 
     def __init__(self):
         self.body = ""
+        self.cookies = {}
         self.headers = {
             "Content-Type": "text/html"
         }
         self.status = 200
-
-        self._cookies = {}
-        self._template = None
-        self._view_data = {}
-
-    def add_cookie(
-        self, name, value, lifetime=None, domain=None, path=None,
-        http_only=None, secure=None
-    ):
-        self._cookies[name] = {
-            "domain": domain,
-            "http_only": http_only,
-            "lifetime": lifetime,
-            "path": path,
-            "secure": secure,
-            "value": value
-        }
-
-    def add_view_data(self, data):
-        self._view_data.update(data)
-
-    def clear_view_data(self):
-        self._view_data = {}
-
-    def delete_cookie(
-        self, name, domain=None, path=None, http_only=None, secure=None
-    ):
-        if name in self._cookies:
-            self._cookies[name].update({
-                "lifetime": -1,
-                "value": None
-            })
-        else:
-            self._cookies[name] = {
-                "domain": domain,
-                "http_only": http_only,
-                "lifetime": -1,
-                "path": path,
-                "secure": secure,
-                "value": None
-            }
-
-    def delete_view_data(self, key):
-        try:
-            del self._view_data[key]
-        except KeyError:
-            pass
 
     def finalize(self):
         if self.status in self.NO_CONTENT_STATUSES:
@@ -128,27 +66,14 @@ class Response(object):
             for key, value
             in self.headers.iteritems()
         ]
-        log.debug("RESPONSE HEADERS: %r", self.headers)
 
-        if self._cookies:
+        if self.cookies:
             for cookie in self._serialized_cookies():
                 self.headers.append(("Set-Cookie", cookie))
-
-    def get_template(self):
-        return self._template
-
-    def get_view_data(self):
-        return self._view_data
 
     def redirect(self, url, status=302):
         self.status = status
         self.headers["Location"] = url
-
-    def set_template(self, template):
-        self._template = template
-
-    def status_code(self):
-        return "%d %s" % (self.status, http_responses[self.status])
 
     def _serialize_cookie(self, name, cookie):
         params = (
@@ -168,5 +93,5 @@ class Response(object):
         )
 
     def _serialized_cookies(self):
-        for name, cookie in self._cookies.iteritems():
+        for name, cookie in self.cookies.iteritems():
             yield self._serialize_cookie(name, cookie)

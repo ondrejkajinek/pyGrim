@@ -30,41 +30,41 @@ class View(object):
         self._extra_functions = extra_functions
         self._initialize_extensions(config)
 
-    def display(self, request, response):
-        body, headers = self.render(
-            response.get_template(), response.get_view_data(), request
-        )
-        response.body = body
-        response.headers.update(headers)
+    def display(self, context):
+        body, headers = self.render(context)
+        context.set_response_body(body)
+        context.add_response_headers(headers)
 
     def get_template_directory(self):
         return self._env.loader.searchpath
 
-    def render(self, template, data, request):
-        if not template:
+    def render(self, context):
+        if not context.template:
             raise RuntimeError(
                 "Trying to render response but no template has been set."
             )
 
         # TODO: load flash data from session
-        if self._debug and self._dump_switch in request.get():
-            data["template_path"] = template
-            template = self._dump_switch
+        if self._debug and self._dump_switch in context.GET():
+            context.view_data["template_path"] = context.template
+            context.template = self._dump_switch
 
-        data["debug"] = self._debug
-        if template == self._dump_switch:
+        context.view_data.update({
+            "debug": self._debug,
+        })
+        if context.template == self._dump_switch:
             headers = {
                 "Content-Type": "application/json"
             }
-            result = json_dumps(data)
+            result = json_dumps(context.view_data)
         else:
-            template = self._env.get_template(template)
+            template = self._env.get_template(context.template)
             headers = {}
-            data.update(self._get_extension_methods())
-            data.update({
-                "request": request
+            context.view_data.update(self._get_extension_methods())
+            context.view_data.update({
+                "context": context
             })
-            result = template.render(**data)
+            result = template.render(**context.view_data)
 
         return result, headers
 
@@ -95,8 +95,3 @@ class View(object):
             languages=config.get("jinja:i18n:locales")
         )
         self._env.install_gettext_translations(translations)
-
-    def _load_flash_data(self):
-        self._data.update({
-            self._flash.get_key(): self._flash.get_messages()
-        })

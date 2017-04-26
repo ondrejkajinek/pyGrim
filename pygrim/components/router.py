@@ -33,15 +33,15 @@ class Router(object):
             self.push_group(route.pattern.strip("/"))
             for one in route:
                 self.map(one)
-            # endfor
+
             self.pop_group()
         else:
             raise ValueError("Unknown type:%s to map" % (type(route),))
 
-    def matching_routes(self, request):
+    def matching_routes(self, context):
         for route in self._routes:
-            if route.matches(request):
-                request.current_route = route
+            if route.matches(context):
+                context.current_route = route
                 yield route
 
     def pop_group(self):
