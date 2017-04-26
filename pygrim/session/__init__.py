@@ -6,3 +6,4 @@ from .session_exceptions import (
     SessionBaseException, SessionInitializeError, SessionLoadError,
     SessionSaveError
 )
+from .session_storage import SessionStorage
