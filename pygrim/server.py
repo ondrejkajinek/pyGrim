@@ -11,10 +11,10 @@ from .router_exceptions import (
 from .session import MockSession, SessionStorage, FileSessionStorage
 
 from inspect import getmembers, ismethod
+from json import dumps as json_dumps
 from logging import getLogger
 from os import path
 from uwsgi import opt as uwsgi_opt
-import json
 
 
 log = getLogger("pygrim.server")
@@ -220,7 +220,7 @@ class Server(object):
 
     # jinja extra methods
     def _jinja_as_json(self, data):
-        return json.dumps(data)
+        return json_dumps(data)
 
     def _jinja_base_url(self, context):
         return "%s%s" % (
