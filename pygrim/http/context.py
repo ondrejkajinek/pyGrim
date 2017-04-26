@@ -84,6 +84,9 @@ class Context(object):
     def finalize_response(self):
         self._response.finalize()
 
+    def get_cookies(self):
+        return self._request.cookies.copy()
+
     def get_request_host(self):
         return self._request.environment["host"]
 
