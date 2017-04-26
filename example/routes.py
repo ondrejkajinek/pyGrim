@@ -8,7 +8,9 @@ class Routes(object):
 
     def _route_register_func(self, router):
         router.map(Route(("GET",), "/", "index", "home"))
-        router.map(Route(("GET",), "/index", "index"))
+        router.map(Route(("GET",), "/test", "test_cookie"))
+        router.map(Route(("GET",), "/test2", "test_cookie"))
+        router.map(Route(("GET",), "/internal_server_error", "ise"))
         router.map(Route(
             ("GET",),
             re_compile(r"/tpl_test/(?P<template>[^/]*)/"),
