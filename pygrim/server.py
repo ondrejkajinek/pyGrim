@@ -9,7 +9,7 @@ from .http import Request, Response
 from .router_exceptions import (
     RouteSuccessfullyDispatched, RouteNotFound, RoutePassed
 )
-from .session import MockSession, SessionStorage
+from .session import MockSession, SessionStorage, FileSessionStorage
 from logging import getLogger
 from os import path
 from uwsgi import opt as uwsgi_opt
@@ -205,9 +205,21 @@ class Server(object):
         if self._dic.config.get("view:enabled", True):
             self._register_view(self._dic.config)
 
-        self.session_handler = MockSession(self._dic.config)
+        self._register_session_handler()
 
         log.debug("Basic components initialized")
+
+    def _register_session_handler(self):
+        session_enabled = self._dic.config.get("session:preload", False)
+        storage_type = self._dic.config.get("session:type")
+        if not session_enabled:
+            storage_class = MockSession
+        elif storage_type == "file":
+            storage_class = FileSessionStorage
+        else:
+            raise RuntimeError("Unknown session handler: %r", storage_type)
+        # endiif
+        self.register_session_handler(storage_class(self._dic.config))
 
     def _register_logger(self, config):
         initialize_loggers(config)
