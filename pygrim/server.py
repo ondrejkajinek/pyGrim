@@ -150,6 +150,10 @@ class Server(object):
             for route in self._dic.router.matching_routes(request):
                 if route.requires_session() and request.session is None:
                     request.session = self.session_handler.load(request)
+                    log.debug(
+                        "Session handler:%r loaded session:%r",
+                        type(self.session_handler), request.session
+                    )
 
                 try:
                     route.dispatch(
@@ -168,9 +172,17 @@ class Server(object):
                     raise RouteSuccessfullyDispatched()
                 except RoutePassed:
                     pass
+                except RouteSuccessfullyDispatched:
+                    log.debug(
+                        "Dispatch succeded on:%r", route._handle_name
+                    )
+                    raise
                 except:
+                    e_info = sys.exc_info()
                     log.error(
-                        "Error while disptching to:%r", route._handle_name
+                        "Error %r while disptching to:%r",
+                        e_info and e_info[1],
+                        route._handle_name
                     )
                     raise
             else:
