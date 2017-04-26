@@ -12,7 +12,6 @@ class RouteGroup(list):
     def __init__(self, pattern, *args, **kwargs):
         self.pattern = pattern
         super(RouteGroup, self).__init__(*args, **kwargs)
-    # enddef
 
 
 class Route(object):

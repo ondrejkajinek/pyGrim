@@ -8,7 +8,7 @@ log = getLogger(__file__)
 
 class Test(object):
 
-    @method
+    @method()
     def index(self, request, response):
         data = {
             "text": u"Hello, index here! :)"
@@ -20,7 +20,7 @@ class Test(object):
             "layout.jinja", data, request, response
         )
 
-    @method
+    @method()
     def template_test(self, request, response, template):
         data = {
             "text": u"Selected template: %r" % template
@@ -29,7 +29,7 @@ class Test(object):
             "layout.jinja", data, request, response
         )
 
-    @method
+    @method()
     def time_listing(self, request, response, world):
         data = {
             "text": u"Time listing: %r" % world
