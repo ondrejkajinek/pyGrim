@@ -58,7 +58,7 @@ class Test(object):
         # this will cause ValueError ;)
         int(10, 20)
 
-    @not_found_method
+    @not_found_method()
     def not_found(self, context):
         log.debug("Not found...")
         context.view_data.update({
