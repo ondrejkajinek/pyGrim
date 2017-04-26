@@ -55,11 +55,13 @@ class Route(object):
         return self._name
 
     def get_pattern(self):
-        return (
+        patt = (
             self._pattern.pattern
             if self._is_regex
             else self._pattern
         )
+        patt = patt.strip("/")
+        return patt
 
     def matches(self, request):
         return (
@@ -115,13 +117,18 @@ class Route(object):
         return method in self._methods
 
     def _uri_matches(self, request):
+        uri = request.get_request_uri() or "/"
+        log.debug(
+            "matching %r with  %r",
+            self._pattern.pattern if self._is_regex else self._pattern, uri
+        )
         if self._is_regex:
-            matches = self._pattern.match(request.get_request_uri())
+            matches = self._pattern.match(uri)
             match = matches is not None
             if match:
                 request.set_route_params(matches.groupdict())
         else:
-            match = self._pattern == request.get_request_uri()
+            match = self._pattern == uri
             if match:
                 request.set_route_params({})
 

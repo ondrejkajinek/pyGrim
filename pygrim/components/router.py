@@ -21,14 +21,16 @@ class Router(object):
 
     def map(self, route):
         if isinstance(route, Route):
-            full_pattern = self.group_pattern() + route.get_pattern()
+            full_pattern = path_join(
+                "/" + self.group_pattern(), route.get_pattern()
+            )
             if route._is_regex:
                 route.set_pattern(re_compile(full_pattern))
             else:
                 route.set_pattern(full_pattern)
             self._routes.append(route)
         elif isinstance(route, RouteGroup):
-            self.push_group(route.pattern)
+            self.push_group(route.pattern.strip("/"))
             for one in route:
                 self.map(one)
             # endfor
@@ -70,7 +72,7 @@ class Router(object):
                 self._named_routes[name] = route
 
     def group_pattern(self):
-        return (
+        pattern = (
             path_join(*tuple(
                 group_pattern
                 for group_pattern
@@ -79,6 +81,7 @@ class Router(object):
             if self._route_groups
             else ""
         )
+        return pattern
 
     def _has_named_route(self, route_name):
         if self._named_routes is None:
