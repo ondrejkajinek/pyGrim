@@ -162,12 +162,11 @@ class Server(object):
                     )
                     if route.requires_session():
                         self.session_handler.save(request.session)
-                        if request.session.need_cookie():
-                            response.add_cookie(
-                                **self.session_handler.cookie_for(
-                                    request.session
-                                )
+                        response.add_cookie(
+                            **self.session_handler.cookie_for(
+                                request
                             )
+                        )
 
                     raise RouteSuccessfullyDispatched()
                 except RoutePassed:

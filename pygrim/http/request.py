@@ -53,14 +53,16 @@ class Request(object):
     def get_scheme(self):
         return self._environment["wsgi.url_scheme"]
 
+    def get_host_with_port(self):
+        return self.get_host() + (
+            ""
+            if self.DEFAULT_SCHEME_PORTS.get(self.get_port())
+            else ":%d" % self.get_port()
+        )
+
     def get_url(self):
-        return "%s://%s%s" % (
-            self.get_scheme(), self.get_host(),
-            (
-                ""
-                if self.DEFAULT_SCHEME_PORTS.get(self.get_port())
-                else ":%d" % self.get_port()
-            )
+        return "%s://%s" % (
+            self.get_scheme(), self.get_host_with_port()
         )
 
     def pop_route_params(self):
