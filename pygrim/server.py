@@ -140,6 +140,10 @@ class Server(object):
             for route in self._dic.router.matching_routes(context):
                 if route.requires_session() and context.session is None:
                     context.load_session(self.session_handler)
+                    log.debug(
+                        "Session handler:%r loaded session:%r",
+                        type(self.session_handler), context.session
+                    )
 
                 try:
                     route.dispatch(context=context)
@@ -155,8 +159,7 @@ class Server(object):
                 else:
                     raise RouteNotFound()
         except RouteSuccessfullyDispatched:
-            # everything was ok
-            pass
+            log.debug("Dispatch succeded on: %r", context.current_route)
         except RouteNotFound:
             self._default_not_found_method(context=context)
         except:

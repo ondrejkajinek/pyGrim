@@ -24,6 +24,9 @@ class Router(object):
             full_pattern = path_join(
                 "/" + self.group_pattern(), route.get_pattern()
             )
+            if full_pattern != "/":
+                full_pattern = full_pattern.rstrip("/")
+
             if route._is_regex:
                 route.set_pattern(re_compile(full_pattern))
             else:

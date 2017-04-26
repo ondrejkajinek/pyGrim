@@ -87,6 +87,15 @@ class Context(object):
     def get_request_host(self):
         return self._request.environment["host"]
 
+    def get_request_host_with_port(self, scheme=None):
+        scheme = scheme or self.get_request_scheme()
+        port = self.get_request_port()
+        return self.get_request_host() + (
+            ""
+            if self._request.special_port(scheme, port)
+            else ":%d" % port
+        )
+
     def get_request_ip(self):
         return self._request.environment["ip"]
 
@@ -104,15 +113,7 @@ class Context(object):
 
     def get_request_url(self):
         scheme = self.get_request_scheme()
-        port = self.get_request_port()
-        return "%s://%s%s" % (
-            scheme, self.get_request_host(),
-            (
-                ""
-                if self._request.special_port(scheme, port)
-                else ":%d" % port
-            )
-        )
+        return "%s://%s" % (scheme, self.get_request_host_with_port(scheme))
 
     def get_request_scheme(self):
         return self._request.environment["wsgi.url_scheme"]
