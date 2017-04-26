@@ -23,6 +23,7 @@ class Request(object):
     )
 
     def __init__(self, environment):
+        self.session = None
         self.set_route_params()
         self._parse_headers(environment)
         self._save_environment(environment)

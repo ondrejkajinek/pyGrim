@@ -9,7 +9,7 @@ from .http import Request, Response
 from .router_exceptions import (
     RouteSuccessfullyDispatched, RouteNotFound, RoutePassed
 )
-from .session import FileSessionStorage, MockSession
+from .session import MockSession, SessionStorage
 from logging import getLogger
 from os import path
 from uwsgi import opt as uwsgi_opt
@@ -129,27 +129,25 @@ class Server(object):
             raise RuntimeError("No known config format used to start uwsgi!")
 
     def _handle_params(self, **kwargs):
-        session, request, response = map(
-            kwargs.pop, ("session", "request", "response")
+        request, response = map(
+            kwargs.pop, ("request", "response")
         )
-        return session, request, response
+        return request, response
 
     def _handle_request(self, request):
         response = Response()
-        session = self._dic.session_handler.load(request)
-
+        request.session = self.session_handler.load(request)
         try:
             for route in self._dic.router.matching_routes(request):
                 try:
                     route.dispatch(
-                        session=session,
                         request=request,
                         response=response
                     )
-                    self._dic.session_handler.save(session)
-                    if session.need_cookie():
+                    self.session_handler.save(request.session)
+                    if request.session.need_cookie():
                         response.add_cookie(
-                            **self._dic.session_handler.cookie_for(session)
+                            **self.session_handler.cookie_for(request.session)
                         )
 
                     raise RouteSuccessfullyDispatched()
@@ -158,7 +156,7 @@ class Server(object):
             else:
                 if self._not_found_method:
                     self._not_found_method(
-                        session=session,
+                        session=request.session,
                         request=request,
                         response=response
                     )
@@ -169,7 +167,7 @@ class Server(object):
             pass
         except RouteNotFound:
             self._default_not_found_method(
-                session=session,
+                session=request.session,
                 request=request,
                 response=response
             )
@@ -178,7 +176,7 @@ class Server(object):
             if hasattr(self, "_error_method"):
                 try:
                     self._error_method(
-                        session=session,
+                        session=request.session,
                         request=request,
                         response=response,
                         exc=exc
@@ -188,7 +186,7 @@ class Server(object):
                     exc = sys.exc_info()[1]
 
             self._default_error_method(
-                session=session,
+                session=request.session,
                 request=request,
                 response=response,
                 exc=exc
@@ -203,27 +201,23 @@ class Server(object):
         self._register_logger(self._dic.config)
         self._dic.mode = self._dic.config.get("grim:mode")
         self._dic.router = Router()
-        self._register_session_handler(self._dic.config)
 
         if self._dic.config.get("view:enabled", True):
             self._register_view(self._dic.config)
+
+        self.session_handler = MockSession(self._dic.config)
 
         log.debug("Basic components initialized")
 
     def _register_logger(self, config):
         initialize_loggers(config)
 
-    def _register_session_handler(self, config):
-        session_enabled = config.get("session:enabled", True)
-        storage_type = config.get("session:type")
-        if not session_enabled:
-            storage_class = MockSession
-        elif storage_type == "file":
-            storage_class = FileSessionStorage
-        else:
-            raise RuntimeError("Unknown session handler: %r", storage_type)
-
-        self._dic.session_handler = storage_class(config)
+    def register_session_handler(self, handler):
+        if not isinstance(handler, SessionStorage):
+            raise ValueError(
+                "SessionHandler should be derived from SessionStorage"
+            )
+        self.session_handler = handler
 
     def _register_view(self, config):
         extra_functions = {
