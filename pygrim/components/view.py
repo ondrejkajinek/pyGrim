@@ -27,7 +27,8 @@ class View(object):
             )
         )
         # TODO: can extra functions be registered via Environment?
-        self._extra_functions = extra_functions
+        self._extra_functions = {}
+        self._env.filters.update(extra_functions)
         self._initialize_extensions(config)
 
     def display(self, context):
@@ -76,7 +77,7 @@ class View(object):
 
     def _get_extensions(self, config):
         extensions = [
-            # "jinja2_git.GitExtension"
+            # "pygrim.components.jinja2_git.GitExtension"
         ]
         if self._has_i18n(config):
             extensions.append("jinja2.ext.i18n")
