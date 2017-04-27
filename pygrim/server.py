@@ -9,6 +9,7 @@ from .router_exceptions import (
     RouteSuccessfullyDispatched, RouteNotFound, RoutePassed, DispatchFinished
 )
 from .session import MockSession, SessionStorage, FileSessionStorage
+from .session import RedisSessionStorage, RedisSentinelSessionStorage
 
 from inspect import getmembers, ismethod
 from json import dumps as json_dumps
@@ -149,6 +150,10 @@ class Server(object):
         storage_type = self.config.get("session:type")
         if storage_type == "file":
             storage_class = FileSessionStorage
+        elif storage_type == "redis":
+            storage_class = RedisSessionStorage
+        elif storage_type == "redis-sentinel":
+            storage_class = RedisSentinelSessionStorage
         else:
             raise RuntimeError("Unknown session handler: %r", storage_type)
 
