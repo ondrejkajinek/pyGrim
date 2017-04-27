@@ -55,7 +55,12 @@ class Server(object):
         return
 
     def display(self, *args, **kwargs):
-        return self._dic.view.display(*args, **kwargs)
+        self._dic.view.display(*args, **kwargs)
+        raise RouteSuccessfullyDispatched()
+
+    def redirect(context, url, **kwargs):
+        context.redirect(url, **kwargs)
+        raise RouteSuccessfullyDispatched()
 
     # napojit na postfork
     def do_postfork(self):
@@ -147,12 +152,14 @@ class Server(object):
 
                 try:
                     route.dispatch(context=context)
-                    if route.requires_session():
-                        context.save_session(self.session_handler)
-
-                    raise RouteSuccessfullyDispatched()
+                except RouteSuccessfullyDispatched:
+                    pass
                 except RoutePassed:
                     pass
+                if route.requires_session():
+                    context.save_session(self.session_handler)
+
+                raise RouteSuccessfullyDispatched()
             else:
                 if self._not_found_method:
                     self._not_found_method(context=context)
@@ -161,7 +168,10 @@ class Server(object):
         except RouteSuccessfullyDispatched:
             log.debug("Dispatch succeded on: %r", context.current_route)
         except RouteNotFound:
-            self._default_not_found_method(context=context)
+            try:
+                self._default_not_found_method(context=context)
+            except RouteSuccessfullyDispatched:
+                pass
         except:
             log.error(
                 "Error while dispatching to: %r",
@@ -175,6 +185,8 @@ class Server(object):
             if hasattr(self, "_error_method"):
                 try:
                     self._error_method(context=context, exc=exc)
+                    return
+                except RouteSuccessfullyDispatched:
                     return
                 except:
                     exc = sys.exc_info()[1]
