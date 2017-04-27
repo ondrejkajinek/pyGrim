@@ -44,7 +44,10 @@ class View(object):
                 "Trying to render response but no template has been set."
             )
 
-        # TODO: load flash data from session
+        # load flash data from session
+        if context.session is not None:
+            context.view_data["flashes"] = context.session.get_flashes()
+
         if self._debug and self._dump_switch in context.GET():
             context.view_data["template_path"] = context.template
             context.template = self._dump_switch
@@ -65,6 +68,9 @@ class View(object):
                 "context": context
             })
             result = template.render(**context.view_data)
+
+        if context.session is not None:
+            context.session.del_flashes()  # smazem flashes
 
         return result, headers
 
