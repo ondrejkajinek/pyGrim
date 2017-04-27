@@ -26,8 +26,7 @@ class View(object):
                 )
             )
         )
-        # TODO: can extra functions be registered via Environment?
-        self._extra_functions = {}
+        self._env.globals.update(extra_functions)
         self._env.filters.update(extra_functions)
         self._initialize_extensions(config)
 
@@ -64,7 +63,6 @@ class View(object):
         else:
             template = self._env.get_template(context.template)
             headers = {}
-            context.view_data.update(self._get_extension_methods())
             context.view_data.update({
                 "context": context
             })
@@ -83,9 +81,6 @@ class View(object):
             extensions.append("jinja2.ext.i18n")
 
         return extensions
-
-    def _get_extension_methods(self):
-        return self._extra_functions
 
     def _has_i18n(self, config):
         return config.get("jinja:i18n:enabled", False)
