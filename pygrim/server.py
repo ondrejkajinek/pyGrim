@@ -58,8 +58,20 @@ class Server(object):
         self._dic.view.display(*args, **kwargs)
         raise RouteSuccessfullyDispatched()
 
-    def redirect(context, url, **kwargs):
-        context.redirect(url, **kwargs)
+    def redirect(self, context, **kwargs):
+        if "url" in kwargs:
+            context.redirect(kwargs.pop("url"), **kwargs)
+        elif "route_name" in kwargs:
+            url = "".join((
+                context.get_request_url(),
+                self._dic.router.url_for(
+                    kwargs.pop("route_name"),
+                    kwargs.pop("params", None) or {}
+                )
+            ))
+            context.redirect(url, **kwargs)
+        else:
+            raise RuntimeError("redirect needs url or route_name params")
         raise RouteSuccessfullyDispatched()
 
     # napojit na postfork
