@@ -95,7 +95,7 @@ class Context(object):
         port = self.get_request_port()
         return self.get_request_host() + (
             ""
-            if self._request.special_port(scheme, port)
+            if not self._request.special_port(scheme, port)
             else ":%d" % port
         )
 
