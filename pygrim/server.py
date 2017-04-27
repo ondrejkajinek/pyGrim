@@ -167,9 +167,11 @@ class Server(object):
 
     def _handle_request(self, context):
         try:
+            session_loaded = False
             for route in self._dic.router.matching_routes(context):
                 if route.requires_session() and context.session is None:
                     context.load_session(self.session_handler)
+                    session_loaded = True
                     log.debug(
                         "Session handler:%r loaded session:%r",
                         type(self.session_handler), context.session
@@ -181,30 +183,24 @@ class Server(object):
                     pass
                 except RoutePassed:
                     continue
-                if route.requires_session():
-                    context.save_session(self.session_handler)
 
                 raise RouteSuccessfullyDispatched()
             else:
-                if self._not_found_method:
-                    try:
-                        self._not_found_method(context=context)
-                        return
-                    except DispatchFinished:
-                        return
-                else:
-                    raise RouteNotFound()
+                not_found_method = (
+                    self._not_found_method or self._default_not_found_method
+                )
+                try:
+                    not_found_method(context=context)
+                except DispatchFinished:
+                    raise RouteNotFound
         except RouteSuccessfullyDispatched:
             log.debug("Dispatch succeded on: %r", context.current_route)
+            if session_loaded:
+                context.save_session(self.session_handler)
+
             return
         except RouteNotFound:
-            try:
-                self._default_not_found_method(context=context)
-                return
-            except DispatchFinished:
-                return
-            except:
-                exc = sys.exc_info()
+            return
         except:
             exc = sys.exc_info()
         log.error(
