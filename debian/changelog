@@ -1,3 +1,9 @@
+pygrim (0.1.1) testing; urgency=medium
+
+  * functions and filters to template context 
+
+ -- Václav Pokluda <vaclav.pokluda@grandit.cz>  Thu, 27 Apr 2017 18:27:04 +0200
+
 pygrim (0.1.0) testing; urgency=low
 
   * request + response -> context 
