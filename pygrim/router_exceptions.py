@@ -23,3 +23,13 @@ class RouteNotFound(BaseRouterException):
 
 class RoutePassed(BaseRouterException):
     pass
+
+
+class DispatchFinished(BaseRouterException):
+    """Raised by:
+    - server.display
+    - server.redirect
+Can be used by user to stop anything after. It means:
+    - finish request (session, etc.)
+    - return data to browser
+"""

@@ -6,7 +6,7 @@ from .components import ConfigObject, DependencyContainer, Router, View
 from .components import initialize_loggers
 from .http import Context
 from .router_exceptions import (
-    RouteSuccessfullyDispatched, RouteNotFound, RoutePassed
+    RouteSuccessfullyDispatched, RouteNotFound, RoutePassed, DispatchFinished
 )
 from .session import MockSession, SessionStorage, FileSessionStorage
 
@@ -46,7 +46,16 @@ class Server(object):
     def __call__(self, environment, start_response):
         start_response = ResponseWrap(start_response)
         context = Context(environment)
-        self._handle_request(context)
+        try:
+            self._handle_request(context)
+        except:
+            start_response(500, ())
+            yield "Fatal Server Error"
+            return
+        # endtry
+
+        yield context.get_response_body()
+
         context.finalize_response()
         start_response(
             context.get_response_status_code(), context.get_response_headers()
@@ -56,7 +65,7 @@ class Server(object):
 
     def display(self, *args, **kwargs):
         self._dic.view.display(*args, **kwargs)
-        raise RouteSuccessfullyDispatched()
+        raise DispatchFinished()
 
     def redirect(self, context, **kwargs):
         if "url" in kwargs:
@@ -72,7 +81,7 @@ class Server(object):
             context.redirect(url, **kwargs)
         else:
             raise RuntimeError("redirect needs url or route_name params")
-        raise RouteSuccessfullyDispatched()
+        raise DispatchFinished()
 
     # napojit na postfork
     def do_postfork(self):
@@ -164,10 +173,10 @@ class Server(object):
 
                 try:
                     route.dispatch(context=context)
-                except RouteSuccessfullyDispatched:
+                except DispatchFinished:
                     pass
                 except RoutePassed:
-                    pass
+                    continue
                 if route.requires_session():
                     context.save_session(self.session_handler)
 
@@ -179,31 +188,40 @@ class Server(object):
                     raise RouteNotFound()
         except RouteSuccessfullyDispatched:
             log.debug("Dispatch succeded on: %r", context.current_route)
+            return
         except RouteNotFound:
             try:
                 self._default_not_found_method(context=context)
-            except RouteSuccessfullyDispatched:
-                pass
+                return
+            except DispatchFinished:
+                return
+            except:
+                exc = sys.exc_info()
         except:
-            log.error(
-                "Error while dispatching to: %r",
-                (
-                    context.current_route._handle_name
-                    if context.current_route
-                    else "<no route>"
-                )
+            exc = sys.exc_info()
+        log.error(
+            "Error while dispatching to: %r",
+            (
+                context.current_route._handle_name
+                if context.current_route
+                else "<no route>"
             )
-            exc = sys.exc_info()[1]
-            if hasattr(self, "_error_method"):
-                try:
-                    self._error_method(context=context, exc=exc)
-                    return
-                except RouteSuccessfullyDispatched:
-                    return
-                except:
-                    exc = sys.exc_info()[1]
-
-            self._default_error_method(context=context, exc=exc)
+        )
+        if hasattr(self, "_error_method"):
+            try:
+                self._error_method(context=context, exc=exc[1])
+                return
+            except DispatchFinished:
+                return
+            except:
+                exc = sys.exc_info()[1]
+        try:
+            self._default_error_method(context=context, exc=exc[1])
+        except:
+            log.exception("Error in default_error_method")
+            log.critical("Error in default_error_method")
+            raise
+        # endtry
 
     def _initialize_basic_components(self):
         self._dic = DependencyContainer()
