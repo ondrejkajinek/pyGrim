@@ -187,7 +187,11 @@ class Server(object):
                 raise RouteSuccessfullyDispatched()
             else:
                 if self._not_found_method:
-                    self._not_found_method(context=context)
+                    try:
+                        self._not_found_method(context=context)
+                        return
+                    except DispatchFinished:
+                        return
                 else:
                     raise RouteNotFound()
         except RouteSuccessfullyDispatched:
