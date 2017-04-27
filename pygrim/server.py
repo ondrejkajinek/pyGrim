@@ -245,11 +245,9 @@ class Server(object):
     def _jinja_site_url(self, context, site):
         return path.join(self._jinja_base_url(context), site)
 
-    def _jinja_url_for(self, context, route, params=None, add_domain=False):
+    def _jinja_url_for(self, route, params=None):
         params = params or {}
         url = self._dic.router.url_for(route, params)
-        if add_domain:
-            url = context.get_request_url() + url
         return url
 
 # eof
