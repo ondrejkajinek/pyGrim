@@ -51,16 +51,16 @@ class Server(object):
             self._handle_request(context)
         except:
             log.exception("Fatal Error")
-            start_response(500, ())
+            start_response("500: Fatal Server Error", ())
             yield "Fatal Server Error"
-            return
-        # endtry
+        else:
+            context.finalize_response()
+            start_response(
+                context.get_response_status_code(),
+                context.get_response_headers()
+            )
+            yield context.get_response_body()
 
-        context.finalize_response()
-        start_response(
-            context.get_response_status_code(), context.get_response_headers()
-        )
-        yield context.get_response_body()
         return
 
     def display(self, *args, **kwargs):
