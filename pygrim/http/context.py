@@ -141,8 +141,8 @@ class Context(object):
         return params
 
     def redirect(self, url, status=302):
-        self._request.status = status
-        self._request.headers["Location"] = url
+        self._response.status = status
+        self._response.headers["Location"] = url
 
     def save_session(self, session_handler):
         session_handler.save(self.session)
