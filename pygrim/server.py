@@ -51,7 +51,7 @@ class Server(object):
             self._handle_request(context)
         except:
             log.exception("Fatal Error")
-            start_response("500: Fatal Server Error", ())
+            start_response("500: Fatal Server Error", [])
             yield "Fatal Server Error"
         else:
             context.finalize_response()
