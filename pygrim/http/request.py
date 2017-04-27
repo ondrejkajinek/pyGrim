@@ -23,58 +23,36 @@ class Request(object):
     )
 
     def __init__(self, environment):
-        self.session = None
-        self.set_route_params()
+        self._params = {
+            "GET": None,
+            "POST": None
+        }
         self._parse_headers(environment)
         self._save_environment(environment)
-        self._parse_query_params()
+        self.cookies = self._parse_string(self._headers.get("cookie", ""), ";")
 
-    def get(self, key=None, fallback=None):
-        return self._safe_param(self._get_params, key, fallback)
+    def special_port(self, scheme, port):
+        try:
+            return self.DEFAULT_SCHEME_PORTS[scheme] != port
+        except KeyError:
+            return True
 
-    def get_host(self):
-        return self._environment["host"]
+    def request_param(self, method, key=None, fallback=None):
+        try:
+            if self._params[method] is None:
+                self._parse_query_params(method)
 
-    def get_ip(self):
-        return self._environment["ip"]
+            source = self._params[method]
+        except KeyError:
+            log.warning(
+                "Trying to get param sent by unknown method %r", method
+            )
+            return None
 
-    def get_method(self):
-        return self._environment["request_method"]
-
-    def get_port(self):
-        return self._environment["server_port"]
-
-    def get_request_uri(self):
-        return self._environment["path_info"]
-
-    def get_root_uri(self):
-        return self._environment["script_name"]
-
-    def get_scheme(self):
-        return self._environment["wsgi.url_scheme"]
-
-    def get_host_with_port(self):
-        return self.get_host() + (
-            ""
-            if self.DEFAULT_SCHEME_PORTS.get(self.get_port())
-            else ":%d" % self.get_port()
-        )
-
-    def get_url(self):
-        return "%s://%s" % (
-            self.get_scheme(), self.get_host_with_port()
-        )
-
-    def pop_route_params(self):
-        params = self.route_params.copy()
-        self.set_route_params()
-        return params
-
-    def post(self, key=None, fallback=None):
-        return self._safe_param(self._post_params, key, fallback)
-
-    def set_route_params(self, params=None):
-        self.route_params = ImmutableDict(params or {})
+        if key is not None:
+            return source.get(key, fallback)
+        else:
+            return source
 
     def _get_host(self, env):
         try:
@@ -101,6 +79,16 @@ class Request(object):
 
         return ip
 
+    def _get_method_param_string(self, method):
+        """
+        no extra check is done since the method is called
+        after it is checked that `method` is ok
+        """
+        if method == "GET":
+            return self.environment["query_string"]
+        elif method == "POST":
+            return "".join(part for part in self.environment["wsgi.input"])
+
     def _get_port(self, env):
         try:
             return int(env["SERVER_PORT"])
@@ -119,14 +107,10 @@ class Request(object):
 
         self._headers = NormalizedImmutableDict(headers)
 
-    def _parse_query_params(self):
-        self._get_params = self._parse_string(
-            self._environment["query_string"]
+    def _parse_query_params(self, method):
+        self._params[method] = self._parse_string(
+            self._get_method_param_string(method)
         )
-        self._post_params = self._parse_string(
-            "".join(part for part in self._environment["wsgi.input"])
-        )
-        self.cookies = self._parse_string(self._headers.get("cookie", ""), ";")
 
     def _parse_string(self, source, pairs_separator="&"):
         parts = (
@@ -139,7 +123,10 @@ class Request(object):
         parsed = {}
         for part in parts:
             key, value = (
-                map(lambda x: x.strip(), map(unquote_plus, part.split("=", 1)))
+                map(
+                    lambda x: x.strip(),
+                    map(unquote_plus, part.split("=", 1))
+                )
                 if "=" in part
                 else (unquote_plus(part.strip()), None)
             )
@@ -151,16 +138,10 @@ class Request(object):
 
         return ImmutableDict(parsed)
 
-    def _safe_param(self, source, key=None, fallback=None):
-        if key is not None:
-            return source.get(key, fallback)
-        else:
-            return source
-
     def _save_environment(self, env):
         env["host"] = self._get_host(env)
         env["ip"] = self._get_ip(env)
         env["path_info"] = env.pop("PATH_INFO").rstrip("/")
         env["request_method"] = env.pop("REQUEST_METHOD").upper()
         env["server_port"] = self._get_port(env)
-        self._environment = NormalizedImmutableDict(env)
+        self.environment = NormalizedImmutableDict(env)

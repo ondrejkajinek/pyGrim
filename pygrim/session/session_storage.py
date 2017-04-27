@@ -32,9 +32,9 @@ class SessionStorage(object):
     def save(self, session):
         raise NotImplementedError()
 
-    def cookie_for(self, request):
+    def cookie_for(self, session):
         cookie = self._cookie.copy()
-        cookie["value"] = request.session.get_id()
+        cookie["value"] = session.get_id()
         return cookie
 
     def _get_id(self, request):

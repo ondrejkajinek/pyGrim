@@ -28,3 +28,6 @@ class Session(dict):
 
     def del_flashes(self):
         self['_flashes'] = []
+
+    def need_cookie(self):
+        return self._new

@@ -1,19 +1,20 @@
 # coding: utf8
 
-import inspect
 import sys
 
 from .components import ConfigObject, DependencyContainer, Router, View
 from .components import initialize_loggers
-from .http import Request, Response
+from .http import Context
 from .router_exceptions import (
     RouteSuccessfullyDispatched, RouteNotFound, RoutePassed
 )
 from .session import MockSession, SessionStorage, FileSessionStorage
+
+from inspect import getmembers, ismethod
+from json import dumps as json_dumps
 from logging import getLogger
 from os import path
 from uwsgi import opt as uwsgi_opt
-import json
 
 
 log = getLogger("pygrim.server")
@@ -42,17 +43,16 @@ class Server(object):
         self._methods = {}
         self._not_found_method = None
 
-    # TODO: put decorators
     def __call__(self, environment, start_response):
-        """
-        called when request comes
-        """
         start_response = ResponseWrap(start_response)
-        response = self._handle_request(Request(environment))
-        response.finalize()
-        start_response(response.status_code(), response.headers)
-        # TODO: yielding
-        return tuple(response.body)
+        context = Context(environment)
+        self._handle_request(context)
+        context.finalize_response()
+        start_response(
+            context.get_response_status_code(), context.get_response_headers()
+        )
+        yield context.get_response_body()
+        return
 
     def display(self, *args, **kwargs):
         return self._dic.view.display(*args, **kwargs)
@@ -80,11 +80,10 @@ class Server(object):
     def _collect_exposed_methods(self):
         def is_exposed(member, member_name):
             return (
-                member_name[0] != "_" and
                 getattr(member, "_exposed", False) is True
             )
 
-        for member_name, member in inspect.getmembers(self):
+        for member_name, member in getmembers(self, predicate=ismethod):
             if is_exposed(member, member_name):
                 try:
                     self._methods[member._dispatch_name] = member
@@ -97,16 +96,14 @@ class Server(object):
                 if getattr(member, "_error", False) is True:
                     self._error_method = member
 
-    def _default_error_method(self, exc, **kwargs):
+    def _default_error_method(self, context, exc):
         log.exception(exc.message)
-        response = kwargs.pop("response")
-        response.body = "Internal Server Error"
-        response.status = 500
+        context.set_response_body("Internal Server Error")
+        context.set_response_status(500)
 
-    def _default_not_found_method(self, **kwargs):
-        response = kwargs.pop("response")
-        response.body = "Not found"
-        response.status = 404
+    def _default_not_found_method(self, context):
+        context.set_response_body("Not found")
+        context.set_response_status(404)
 
     def _finalize_routes(self):
         for route in self._dic.router.get_routes():
@@ -138,88 +135,51 @@ class Server(object):
         else:
             raise RuntimeError("No known config format used to start uwsgi!")
 
-    def _handle_params(self, **kwargs):
-        request, response = map(
-            kwargs.pop, ("request", "response")
-        )
-        return request, response
-
-    def _handle_request(self, request):
-        response = Response()
+    def _handle_request(self, context):
         try:
-            for route in self._dic.router.matching_routes(request):
-                if route.requires_session() and request.session is None:
-                    request.session = self.session_handler.load(request)
+            for route in self._dic.router.matching_routes(context):
+                if route.requires_session() and context.session is None:
+                    context.load_session(self.session_handler)
                     log.debug(
                         "Session handler:%r loaded session:%r",
-                        type(self.session_handler), request.session
+                        type(self.session_handler), context.session
                     )
 
                 try:
-                    route.dispatch(
-                        request=request,
-                        response=response
-                    )
+                    route.dispatch(context=context)
                     if route.requires_session():
-                        self.session_handler.save(request.session)
-                        response.add_cookie(
-                            **self.session_handler.cookie_for(
-                                request
-                            )
-                        )
+                        context.save_session(self.session_handler)
 
                     raise RouteSuccessfullyDispatched()
                 except RoutePassed:
                     pass
-                except RouteSuccessfullyDispatched:
-                    log.debug(
-                        "Dispatch succeded on:%r", route._handle_name
-                    )
-                    raise
-                except:
-                    e_info = sys.exc_info()
-                    log.error(
-                        "Error %r while disptching to:%r",
-                        e_info and e_info[1],
-                        route._handle_name
-                    )
-                    raise
             else:
                 if self._not_found_method:
-                    self._not_found_method(
-                        request=request,
-                        response=response
-                    )
+                    self._not_found_method(context=context)
                 else:
                     raise RouteNotFound()
         except RouteSuccessfullyDispatched:
-            # everything was ok
-            pass
+            log.debug("Dispatch succeded on: %r", context.current_route)
         except RouteNotFound:
-            self._default_not_found_method(
-                request=request,
-                response=response
-            )
+            self._default_not_found_method(context=context)
         except:
+            log.error(
+                "Error while dispatching to: %r",
+                (
+                    context.current_route._handle_name
+                    if context.current_route
+                    else "<no route>"
+                )
+            )
             exc = sys.exc_info()[1]
             if hasattr(self, "_error_method"):
                 try:
-                    self._error_method(
-                        request=request,
-                        response=response,
-                        exc=exc
-                    )
-                    return response
+                    self._error_method(context=context, exc=exc)
+                    return
                 except:
                     exc = sys.exc_info()[1]
 
-            self._default_error_method(
-                request=request,
-                response=response,
-                exc=exc
-            )
-
-        return response
+            self._default_error_method(context=context, exc=exc)
 
     def _initialize_basic_components(self):
         self._dic = DependencyContainer()
@@ -263,19 +223,21 @@ class Server(object):
 
     # jinja extra methods
     def _jinja_as_json(self, data):
-        return json.dumps(data)
+        return json_dumps(data)
 
-    def _jinja_base_url(self, request):
-        return "%s%s" % (request.get_url(), request.get_root_uri())
+    def _jinja_base_url(self, context):
+        return "%s%s" % (
+            context.get_request_url(), context.get_request_root_uri()
+        )
 
-    def _jinja_site_url(self, request, site):
-        return path.join(self._jinja_base_url(request), site)
+    def _jinja_site_url(self, context, site):
+        return path.join(self._jinja_base_url(context), site)
 
-    def _jinja_url_for(self, request, route, params=None, add_domain=False):
+    def _jinja_url_for(self, context, route, params=None, add_domain=False):
         params = params or {}
         url = self._dic.router.url_for(route, params)
         if add_domain:
-            url = request.get_url() + url
+            url = context.get_request_url() + url
         return url
 
 # eof
