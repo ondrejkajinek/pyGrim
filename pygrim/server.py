@@ -58,8 +58,20 @@ class Server(object):
         self._dic.view.display(*args, **kwargs)
         raise RouteSuccessfullyDispatched()
 
-    def redirect(context, url, **kwargs):
-        context.redirect(url, **kwargs)
+    def redirect(self, context, **kwargs):
+        if "url" in kwargs:
+            context.redirect(kwargs.pop("url"), **kwargs)
+        elif "route_name" in kwargs:
+            url = "".join((
+                context.get_request_url(),
+                self._dic.router.url_for(
+                    kwargs.pop("route_name"),
+                    kwargs.pop("params", None) or {}
+                )
+            ))
+            context.redirect(url, **kwargs)
+        else:
+            raise RuntimeError("redirect needs url or route_name params")
         raise RouteSuccessfullyDispatched()
 
     # napojit na postfork
@@ -245,11 +257,9 @@ class Server(object):
     def _jinja_site_url(self, context, site):
         return path.join(self._jinja_base_url(context), site)
 
-    def _jinja_url_for(self, context, route, params=None, add_domain=False):
+    def _jinja_url_for(self, route, params=None):
         params = params or {}
         url = self._dic.router.url_for(route, params)
-        if add_domain:
-            url = context.get_request_url() + url
         return url
 
 # eof
