@@ -49,12 +49,11 @@ class Server(object):
         try:
             self._handle_request(context)
         except:
+            log.exception("Fatal Error")
             start_response(500, ())
             yield "Fatal Server Error"
             return
         # endtry
-
-        yield context.get_response_body()
 
         context.finalize_response()
         start_response(
