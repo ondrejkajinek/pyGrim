@@ -24,7 +24,9 @@ http_responses.setdefault(428, "Precondition Required")
 
 class Context(object):
 
-    def __init__(self, environment):
+    def __init__(self, environment, config):
+        self.config = config
+        self._suppress_port = config.get("context:suppress_port", False)
 
         self.current_route = None
         self.session = None
@@ -91,7 +93,8 @@ class Context(object):
         return self._request.environment["host"]
 
     def get_request_host_with_port(self, scheme=None):
-        scheme = scheme or self.get_request_scheme()
+        if self._suppress_port:
+            return self.get_request_host()
         port = self.get_request_port()
         return self.get_request_host() + (
             ""
