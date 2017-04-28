@@ -94,8 +94,7 @@ class Context(object):
 
     def get_request_host_with_port(self, scheme=None):
         if self._suppress_port:
-            return ""
-        scheme = scheme or self.get_request_scheme()
+            return self.get_request_host()
         port = self.get_request_port()
         return self.get_request_host() + (
             ""
