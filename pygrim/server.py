@@ -166,6 +166,7 @@ class Server(object):
             raise RuntimeError("No known config format used to start uwsgi!")
 
     def _handle_request(self, context):
+        exc = None
         try:
             session_loaded = False
             for route in self._dic.router.matching_routes(context):
@@ -202,7 +203,7 @@ class Server(object):
         except RouteNotFound:
             return
         except:
-            exc = sys.exc_info()
+            exc = sys.exc_info()[1]
         log.error(
             "Error while dispatching to: %r",
             (
@@ -213,14 +214,14 @@ class Server(object):
         )
         if hasattr(self, "_error_method"):
             try:
-                self._error_method(context=context, exc=exc[1])
+                self._error_method(context=context, exc=exc)
                 return
             except DispatchFinished:
                 return
             except:
                 exc = sys.exc_info()[1]
         try:
-            self._default_error_method(context=context, exc=exc[1])
+            self._default_error_method(context=context, exc=exc)
         except:
             log.exception("Error in default_error_method")
             log.critical("Error in default_error_method")
