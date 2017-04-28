@@ -26,7 +26,7 @@ class Context(object):
 
     def __init__(self, environment, config):
         self.config = config
-        self._suppress_port = config.get("context:supress_port", False)
+        self._suppress_port = config.get("context:suppress_port", False)
 
         self.current_route = None
         self.session = None
