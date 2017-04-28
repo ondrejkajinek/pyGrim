@@ -46,7 +46,7 @@ class Server(object):
 
     def __call__(self, environment, start_response):
         start_response = ResponseWrap(start_response)
-        context = Context(environment)
+        context = Context(environment, self.config)
         try:
             self._handle_request(context)
         except:
