@@ -166,6 +166,7 @@ class Server(object):
             raise RuntimeError("No known config format used to start uwsgi!")
 
     def _handle_request(self, context):
+        exc = None
         try:
             session_loaded = False
             for route in self._dic.router.matching_routes(context):
