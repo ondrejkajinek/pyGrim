@@ -4,6 +4,7 @@ import sys
 
 from .components import ConfigObject, DependencyContainer, Router, View
 from .components import initialize_loggers
+from .components.functions import date_format
 from .http import Context
 from .router_exceptions import (
     RouteSuccessfullyDispatched, RouteNotFound, RoutePassed, DispatchFinished
@@ -265,6 +266,7 @@ class Server(object):
             "site_url": self._jinja_site_url,
             "url_for": self._jinja_url_for,
             "as_json": self._jinja_as_json,
+            "date_format": date_format,
         }
         self._dic.view = View(config, extra_functions)
 

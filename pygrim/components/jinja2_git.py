@@ -18,7 +18,13 @@ class GitExtension(Extension):
         """
         return email[-1::-1]
 
+    def as_date(self, datum, strf=None):
+        if isinstance(datum, basestring):
+            datum = dt_parser(datum)
+        return datum.strftime(strf)
+
     def _get_filters(self):
         return {
-            "protectEmail": self.protectEmail
+            "protectEmail": self.protectEmail,
+            "as_date": self.as_date,
         }
