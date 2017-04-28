@@ -46,8 +46,9 @@ class RedisSessionStorageBase(SessionStorage):
 
     def save(self, session):
         try:
-            ret = self.redis.set(
+            ret = self.redis.setex(
                 session.get_id(),
+                self._cookie["lifetime"],
                 pickle.dumps(session.get_content(), self.PROTOCOL)
             )
             if ret is not True:
