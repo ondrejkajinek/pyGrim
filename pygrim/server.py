@@ -4,6 +4,7 @@ import sys
 
 from .components import ConfigObject, DependencyContainer, Router, View
 from .components import initialize_loggers
+from .components.functions import date_format
 from .http import Context
 from .router_exceptions import (
     RouteSuccessfullyDispatched, RouteNotFound, RoutePassed, DispatchFinished
@@ -47,7 +48,7 @@ class Server(object):
 
     def __call__(self, environment, start_response):
         start_response = ResponseWrap(start_response)
-        context = Context(environment)
+        context = Context(environment, self.config)
         try:
             self._handle_request(context)
         except:
@@ -167,6 +168,7 @@ class Server(object):
             raise RuntimeError("No known config format used to start uwsgi!")
 
     def _handle_request(self, context):
+        exc = None
         try:
             session_loaded = False
             for route in self._dic.router.matching_routes(context):
@@ -203,7 +205,7 @@ class Server(object):
         except RouteNotFound:
             return
         except:
-            exc = sys.exc_info()
+            exc = sys.exc_info()[1]
         log.error(
             "Error while dispatching to: %r",
             (
@@ -214,14 +216,14 @@ class Server(object):
         )
         if self._error_method is not None:
             try:
-                self._error_method(context=context, exc=exc[1])
+                self._error_method(context=context, exc=exc)
                 return
             except DispatchFinished:
                 return
             except:
                 exc = sys.exc_info()[1]
         try:
-            self._default_error_method(context=context, exc=exc[1])
+            self._default_error_method(context=context, exc=exc)
         except:
             log.exception("Error in default_error_method")
             log.critical("Error in default_error_method")
@@ -265,6 +267,7 @@ class Server(object):
             "site_url": self._jinja_site_url,
             "url_for": self._jinja_url_for,
             "as_json": self._jinja_as_json,
+            "date_format": date_format,
         }
         self._dic.view = View(config, extra_functions)
 
