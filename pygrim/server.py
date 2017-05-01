@@ -43,6 +43,7 @@ class Server(object):
         self._initialize_basic_components()
         self._methods = {}
         self._not_found_method = None
+        self._error_method = None
 
     def __call__(self, environment, start_response):
         start_response = ResponseWrap(start_response)
@@ -211,7 +212,7 @@ class Server(object):
                 else "<no route>"
             )
         )
-        if hasattr(self, "_error_method"):
+        if self._error_method is not None:
             try:
                 self._error_method(context=context, exc=exc[1])
                 return
