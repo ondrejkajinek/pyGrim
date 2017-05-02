@@ -5,6 +5,16 @@ from json import dumps as json_dumps
 from os import getcwd, path
 
 
+def _suppress_none(self, variable):
+    return (
+        ""
+        if variable is None
+        else variable
+    )
+
+_suppress_none.contextfunction = True
+
+
 class View(object):
 
     def __init__(self, config, extra_functions):
@@ -29,6 +39,9 @@ class View(object):
             "url_for": extra_functions["url_for"]
         })
         self._env.globals.update(extra_functions)
+        if config.get("jinja:suppress_none"):
+            self._env.finalize = _suppress_none
+
         self._initialize_assets(config)
         self._initialize_extensions(config)
 

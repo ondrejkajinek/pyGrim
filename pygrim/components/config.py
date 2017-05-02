@@ -16,6 +16,7 @@ DEFAULT_CONFIG = {
         "i18n": {
             "enabled": False
         },
+        "suppress_none": True,
         "template_path": "templates"
     },
     "logging": {

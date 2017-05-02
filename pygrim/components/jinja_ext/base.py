@@ -52,9 +52,6 @@ class BaseExtension(Extension):
     def site_url(self, context, site):
         return path.join(self.base_url(context), site)
 
-    def suppress_none(self, value):
-        return "" if value is None else value
-
     def _get_filters(self):
         return {
             "as_date": self.as_date,
@@ -62,7 +59,6 @@ class BaseExtension(Extension):
             "base_url": self.base_url,
             "date_format": self.date_format,
             "site_url": self.site_url,
-            "sn": self.suppress_none
         }
 
     def _get_functions(self):
