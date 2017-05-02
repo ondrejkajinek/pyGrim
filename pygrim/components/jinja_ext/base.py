@@ -2,7 +2,6 @@
 
 from datetime import date, datetime
 from dateutil.parser import parse as parse_dt
-from jinja2 import escape, Markup
 from jinja2.ext import Extension
 from json import dumps as json_dumps
 from os import path
@@ -19,7 +18,6 @@ class BaseExtension(Extension):
 
     def __init__(self, environment):
         super(BaseExtension, self).__init__(environment)
-
         environment.filters.update(self._get_filters())
         environment.globals.update(self._get_functions())
 
@@ -51,17 +49,11 @@ class BaseExtension(Extension):
 
         return obj.strftime(format_str)
 
-    def print_css(self, css_list):
-        return Markup("\n".join(
-            """<link href="%s" rel="stylesheet" type="text/css" />""" % (
-                escape(css),
-            )
-            for css
-            in css_list
-        ))
-
     def site_url(self, context, site):
         return path.join(self.base_url(context), site)
+
+    def suppress_none(self, value):
+        return "" if value is None else value
 
     def _get_filters(self):
         return {
@@ -69,12 +61,12 @@ class BaseExtension(Extension):
             "as_json": self.as_json,
             "base_url": self.base_url,
             "date_format": self.date_format,
-            "site_url": self.site_url
+            "site_url": self.site_url,
+            "sn": self.suppress_none
         }
 
     def _get_functions(self):
         return {
             "base_url": self.base_url,
-            "print_css": self.print_css,
             "site_url": self.site_url
         }
