@@ -143,6 +143,12 @@ class Context(object):
             self._response.status, http_responses[self._response.status]
         )
 
+    def is_request_get(self):
+        return self._request.environment["request_method"] == "GET"
+
+    def is_request_post(self):
+        return self._request.environment["request_method"] == "POST"
+
     def load_session(self, session_handler):
         self.session = session_handler.load(self._request)
 
