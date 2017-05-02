@@ -4,8 +4,8 @@ from yaml import load as yaml_load, parser as yaml_parser
 
 
 DEFAULT_CONFIG = {
-    "grim": {
-        "mode": "debug"
+    "pygrim": {
+        "debug": True
     },
     "jinja": {
         "debug": True,

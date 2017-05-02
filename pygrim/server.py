@@ -5,7 +5,8 @@ from .components import initialize_loggers
 from .components.functions import date_format
 from .http import Context
 from .router_exceptions import (
-    RouteSuccessfullyDispatched, RouteNotFound, RoutePassed, DispatchFinished
+    DispatchFinished, RouteSuccessfullyDispatched, RouteNotFound,
+    RouteNotRegistered, RoutePassed
 )
 from .session import MockSession, SessionStorage, FileSessionStorage
 from .session import RedisSessionStorage, RedisSentinelSessionStorage
@@ -246,7 +247,6 @@ class Server(object):
 
         self.config = ConfigObject(self._get_config_path())
         self._register_logger(self.config)
-        self._dic.mode = self.config.get("grim:mode")
         self._dic.router = Router()
 
         if self.config.get("view:enabled", True):
@@ -296,7 +296,14 @@ class Server(object):
 
     def _jinja_url_for(self, route, params=None):
         params = params or {}
-        url = self._dic.router.url_for(route, params)
+        try:
+            url = self._dic.router.url_for(route, params)
+        except RouteNotRegistered:
+            if self.config.get("pygrim:debug", True) is False:
+                url = "#"
+            else:
+                raise
+
         return url
 
 # eof

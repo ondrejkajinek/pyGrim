@@ -3,7 +3,7 @@
 from logging import getLogger
 from os.path import join as path_join
 from re import compile as re_compile
-from ..router_exceptions import RouteAlreadyExists
+from ..router_exceptions import RouteAlreadyExists, RouteNotRegistered
 from .route import Route, RouteGroup
 
 log = getLogger("pygrim.components.router")
@@ -62,7 +62,7 @@ class Router(object):
 
     def _get_named_route(self, name):
         if not self._has_named_route(name):
-            raise RuntimeError(u"Route %r was not found" % name)
+            raise RouteNotRegistered()
         return self._named_routes[name]
 
     def _get_named_routes(self):
