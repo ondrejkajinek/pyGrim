@@ -1,5 +1,7 @@
 # coding: utf8
 
+from collections import Mapping
+from copy import deepcopy
 from yaml import load as yaml_load, parser as yaml_parser
 
 
@@ -41,9 +43,9 @@ class ConfigObject(object):
     SEPARATOR = ":"
 
     def __init__(self, path):
-        config = DEFAULT_CONFIG
-        config.update(self._load_config(path))
-        self.config = config
+        self.config = self._deep_update(
+            deepcopy(DEFAULT_CONFIG), self._load_config(path)
+        )
 
     def get(self, key, *args, **kwargs):
         try:
@@ -59,6 +61,16 @@ class ConfigObject(object):
                 return kwargs["default"]
             else:
                 raise
+
+    def _deep_update(self, original, override):
+        for key, value in override.iteritems():
+            if isinstance(value, Mapping):
+                new_value = self._deep_update(original.get(key, {}), value)
+                original[key] = new_value
+            else:
+                original[key] = override[key]
+
+        return original
 
     def _load_config(self, path):
         try:
