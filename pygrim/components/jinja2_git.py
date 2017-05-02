@@ -1,6 +1,6 @@
 # coding: utf8
 
-from jinja2.ext import Extension
+from jinja2o.ext import Extension
 
 
 class GitExtension(Extension):
@@ -17,11 +17,6 @@ class GitExtension(Extension):
         napíše emailovou adresu pozpátku
         """
         return email[-1::-1]
-
-    def as_date(self, datum, strf=None):
-        if isinstance(datum, basestring):
-            datum = dt_parser(datum)
-        return datum.strftime(strf)
 
     def _get_filters(self):
         return {

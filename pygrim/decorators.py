@@ -2,6 +2,8 @@
 
 from functools import wraps
 from uwsgi import log as uwsgi_log
+from logging import getLogger
+log = getLogger(__name__)
 
 
 class BaseDecorator(object):
@@ -62,5 +64,24 @@ class template_method(object):
             context.view_data.update(res.get("data") or {})
             context.template = res.get("_template", self._template)
             args[0].display(context)
+
+        return wrapper
+
+
+class uses_data(object):
+
+    def __init__(self, method):
+        self._method = method
+
+    def __call__(self, func):
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            server = args[0]
+            method = server._methods[self._method]
+            context = kwargs.get("context")
+            context.view_data.update(method(context)['data'])
+            res = func(*args, **kwargs)
+            return res
 
         return wrapper
