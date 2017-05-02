@@ -62,6 +62,10 @@ class Context(object):
             "value": value
         }
 
+    def add_css(self, *args):
+        extra = self.view_data.setdefault("extra_css", set())
+        extra.update(set(args))
+
     def add_js(self, *args, **kwargs):
         location_path = "header" if kwargs.get("header", True) else "footer"
         sync_path = "sync" if kwargs.get("sync", True) else "async"
