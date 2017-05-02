@@ -1,7 +1,7 @@
 # coding: utf8
 
 from logging import getLogger
-from pyGrim import error_method, method, not_found_method
+from pyGrim import error_method, method, not_found_method, template_method
 
 log = getLogger(__file__)
 
@@ -30,12 +30,13 @@ class Test(object):
         self.display(context)
 
     @method()
+    @template_method("layout.jinja")
     def test_cookie(self, context):
-        context.view_data.update({
-            "text": "COOKIES = %r" % context.get_cookies()
-        })
-        context.template = "layout.jinja"
-        self.display(context)
+        return {
+            "data": {
+                "text": "COOKIES = %r" % context.get_cookies()
+            }
+        }
 
     @method()
     def template_test(self, context, template):

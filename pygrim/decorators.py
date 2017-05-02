@@ -46,3 +46,21 @@ class not_found_method(method):
     def __call__(self, func):
         func._not_found = True
         return super(not_found_method, self).__call__(func)
+
+
+class template_method(object):
+
+    def __init__(self, template):
+        self._template = template
+
+    def __call__(self, func):
+
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            res = func(*args, **kwargs)
+            context = kwargs.get("context")
+            context.view_data.update(res.get("data") or {})
+            context.template = res.get("_template", self._template)
+            args[0].display(context)
+
+        return wrapper
