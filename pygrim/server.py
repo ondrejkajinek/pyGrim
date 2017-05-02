@@ -2,18 +2,19 @@
 
 from .components import ConfigObject, DependencyContainer, Router, View
 from .components import initialize_loggers
-from .components.functions import date_format
 from .http import Context
 from .router_exceptions import (
-    RouteSuccessfullyDispatched, RouteNotFound, RoutePassed, DispatchFinished
+    DispatchFinished, RouteSuccessfullyDispatched, RouteNotFound,
+    RouteNotRegistered, RoutePassed
 )
 from .session import MockSession, SessionStorage, FileSessionStorage
 from .session import RedisSessionStorage, RedisSentinelSessionStorage
 
 from inspect import getmembers, ismethod
-from json import dumps as json_dumps
+from jinja2 import escape, Markup
 from logging import getLogger
 from os import path
+from string import strip as string_strip
 from sys import exc_info
 from uwsgi import opt as uwsgi_opt
 
@@ -246,7 +247,6 @@ class Server(object):
 
         self.config = ConfigObject(self._get_config_path())
         self._register_logger(self.config)
-        self._dic.mode = self.config.get("grim:mode")
         self._dic.router = Router()
 
         if self.config.get("view:enabled", True):
@@ -274,29 +274,64 @@ class Server(object):
 
     def _register_view(self, config):
         extra_functions = {
-            "base_url": self._jinja_base_url,
-            "site_url": self._jinja_site_url,
+            "print_css": self._jinja_print_css,
+            "print_js": self._jinja_print_js,
             "url_for": self._jinja_url_for,
-            "as_json": self._jinja_as_json,
-            "date_format": date_format,
         }
         self._dic.view = View(config, extra_functions)
 
-    # jinja extra methods
-    def _jinja_as_json(self, data):
-        return json_dumps(data)
+    def _static_file_mtime(self, static_file):
 
-    def _jinja_base_url(self, context):
-        return "%s%s" % (
-            context.get_request_url(), context.get_request_root_uri()
+        def get_static_file_abs_path(static_file):
+            for option, mapping in self.config.get("uwsgi").iteritems():
+                if option == "static-map":
+                    prefix, mapped_dir = map(
+                        string_strip, mapping.split("=")
+                    )
+                    if static_file.startswith(prefix):
+                        return path.join(
+                            mapped_dir,
+                            path.relpath(static_file, prefix)
+                        )
+            else:
+                return ""
+
+        abs_path = get_static_file_abs_path(static_file)
+        return (
+            "v=%d" % int(path.getmtime(abs_path))
+            if path.isfile(abs_path)
+            else ""
         )
 
-    def _jinja_site_url(self, context, site):
-        return path.join(self._jinja_base_url(context), site)
+    # jinja extra methods
+    def _jinja_print_css(self, css_list):
+        return Markup("\n".join(
+            """<link href="%s?%s" rel="stylesheet" type="text/css" />""" % (
+                escape(css), self._static_file_mtime(css)
+            )
+            for css
+            in css_list
+        ))
+
+    def _jinja_print_js(self, js_list, sync=True):
+        return Markup("\n".join(
+            """<script %ssrc="%s?%s"></script>""" % (
+                "" if sync else "async ", js, self._static_file_mtime(js)
+            )
+            for js
+            in js_list
+        ))
 
     def _jinja_url_for(self, route, params=None):
         params = params or {}
-        url = self._dic.router.url_for(route, params)
+        try:
+            url = self._dic.router.url_for(route, params)
+        except RouteNotRegistered:
+            if self.config.get("pygrim:debug", True) is False:
+                url = "#"
+            else:
+                raise
+
         return url
 
 # eof

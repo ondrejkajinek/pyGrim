@@ -21,6 +21,10 @@ class RouteNotFound(BaseRouterException):
     pass
 
 
+class RouteNotRegistered(BaseRouterException):
+    pass
+
+
 class RoutePassed(BaseRouterException):
     pass
 

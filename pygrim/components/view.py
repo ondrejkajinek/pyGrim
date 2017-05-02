@@ -5,9 +5,18 @@ from json import dumps as json_dumps
 from os import getcwd, path
 
 
+def _suppress_none(self, variable):
+    return (
+        ""
+        if variable is None
+        else variable
+    )
+
+_suppress_none.contextfunction = True
+
+
 class View(object):
 
-    # TODO: add filters
     def __init__(self, config, extra_functions):
         self._debug = config.get("jinja:debug", False)
         self._dump_switch = config.get("jinja:dump_switch", "jkxd")
@@ -26,8 +35,14 @@ class View(object):
                 )
             )
         )
+        self._env.filters.update({
+            "url_for": extra_functions["url_for"]
+        })
         self._env.globals.update(extra_functions)
-        self._env.filters.update(extra_functions)
+        if config.get("jinja:suppress_none"):
+            self._env.finalize = _suppress_none
+
+        self._initialize_assets(config)
         self._initialize_extensions(config)
 
     def display(self, context):
@@ -44,7 +59,6 @@ class View(object):
                 "Trying to render response but no template has been set."
             )
 
-        # load flash data from session
         if context.session is not None:
             context.view_data["flashes"] = context.session.get_flashes()
 
@@ -53,7 +67,22 @@ class View(object):
             context.template = self._dump_switch
 
         context.view_data.update({
+            "css": tuple(self._css | set(
+                set(context.view_data.pop("extra_css", ()))
+            )),
             "debug": self._debug,
+            "js_header_sync": tuple(self._js["header"]["sync"] | set(
+                context.view_data.pop("extra_js_header_sync", ())
+            )),
+            "js_header_async": tuple(self._js["header"]["async"] | set(
+                context.view_data.pop("extra_js_header_async", ())
+            )),
+            "js_footer_sync": tuple(self._js["footer"]["sync"] | set(
+                context.view_data.pop("extra_js_footer_sync", ())
+            )),
+            "js_footer_async": tuple(self._js["footer"]["async"] | set(
+                context.view_data.pop("extra_js_footer_async", ())
+            ))
         })
         if context.template == self._dump_switch:
             headers = {
@@ -75,7 +104,7 @@ class View(object):
 
     def _get_extensions(self, config):
         extensions = [
-            # "pygrim.components.jinja2_git.GitExtension"
+            "pygrim.components.jinja_ext.BaseExtension"
         ]
         if self._has_i18n(config):
             extensions.append("jinja2.ext.i18n")
@@ -84,6 +113,20 @@ class View(object):
 
     def _has_i18n(self, config):
         return config.get("jinja:i18n:enabled", False)
+
+    def _initialize_assets(self, config):
+        self._css = set(config.get("assets:css", ()))
+        self._js = {
+            "header": {
+                "async": set(),
+                "sync": set()
+            },
+            "footer": {
+                "async": set(),
+                "sync": set()
+            }
+        }
+        self._js.update(config.get("assets:js", {}))
 
     def _initialize_extensions(self, config):
         if self._has_i18n(config):
