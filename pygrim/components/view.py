@@ -25,6 +25,9 @@ class View(object):
                 )
             )
         )
+        self._env.filters.update({
+            "url_for": extra_functions["url_for"]
+        })
         self._env.globals.update(extra_functions)
         self._initialize_assets(config)
         self._initialize_extensions(config)
