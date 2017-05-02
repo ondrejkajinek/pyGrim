@@ -80,7 +80,7 @@ class uses_data(object):
             server = args[0]
             method = server._methods[self._method]
             context = kwargs.get("context")
-            context.view_data.update(method(context)['data'])
+            context.view_data.update(method(context)["data"])
             res = func(*args, **kwargs)
             return res
 
