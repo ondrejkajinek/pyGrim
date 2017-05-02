@@ -1,3 +1,9 @@
+pygrim (0.1.5) testing; urgency=low
+
+  * Auto suppress_none
+
+ -- Jan Kolda <kolda@grandit.cz>  Tue, 02 May 2017 15:03:16 +0200
+
 pygrim (0.1.4) testing; urgency=low
 
   * date_format helper 
