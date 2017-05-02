@@ -2,7 +2,6 @@
 
 from .components import ConfigObject, DependencyContainer, Router, View
 from .components import initialize_loggers
-from .components.functions import date_format
 from .http import Context
 from .router_exceptions import (
     DispatchFinished, RouteSuccessfullyDispatched, RouteNotFound,
@@ -12,9 +11,7 @@ from .session import MockSession, SessionStorage, FileSessionStorage
 from .session import RedisSessionStorage, RedisSentinelSessionStorage
 
 from inspect import getmembers, ismethod
-from json import dumps as json_dumps
 from logging import getLogger
-from os import path
 from sys import exc_info
 from uwsgi import opt as uwsgi_opt
 
@@ -274,26 +271,11 @@ class Server(object):
 
     def _register_view(self, config):
         extra_functions = {
-            "base_url": self._jinja_base_url,
-            "site_url": self._jinja_site_url,
             "url_for": self._jinja_url_for,
-            "as_json": self._jinja_as_json,
-            "date_format": date_format,
         }
         self._dic.view = View(config, extra_functions)
 
     # jinja extra methods
-    def _jinja_as_json(self, data):
-        return json_dumps(data)
-
-    def _jinja_base_url(self, context):
-        return "%s%s" % (
-            context.get_request_url(), context.get_request_root_uri()
-        )
-
-    def _jinja_site_url(self, context, site):
-        return path.join(self._jinja_base_url(context), site)
-
     def _jinja_url_for(self, route, params=None):
         params = params or {}
         try:

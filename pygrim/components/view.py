@@ -75,7 +75,7 @@ class View(object):
 
     def _get_extensions(self, config):
         extensions = [
-            # "pygrim.components.jinja2_git.GitExtension"
+            "pygrim.components.jinja_ext.BaseExtension"
         ]
         if self._has_i18n(config):
             extensions.append("jinja2.ext.i18n")
