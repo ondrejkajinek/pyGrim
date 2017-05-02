@@ -1,7 +1,5 @@
 # coding: utf8
 
-import sys
-
 from .components import ConfigObject, DependencyContainer, Router, View
 from .components import initialize_loggers
 from .components.functions import date_format
@@ -16,6 +14,7 @@ from inspect import getmembers, ismethod
 from json import dumps as json_dumps
 from logging import getLogger
 from os import path
+from sys import exc_info
 from uwsgi import opt as uwsgi_opt
 
 
@@ -50,7 +49,7 @@ class Server(object):
         start_response = ResponseWrap(start_response)
         context = Context(environment, self.config)
         try:
-            self._handle_request(context)
+            self._handle_request(context=context)
         except:
             log.exception("Fatal Error")
             start_response("500: Fatal Server Error", [])
@@ -167,45 +166,17 @@ class Server(object):
         else:
             raise RuntimeError("No known config format used to start uwsgi!")
 
-    def _handle_request(self, context):
-        exc = None
+    def _handle_by_route(self, route, context):
         try:
-            session_loaded = False
-            for route in self._dic.router.matching_routes(context):
-                if route.requires_session() and context.session is None:
-                    context.load_session(self.session_handler)
-                    session_loaded = True
-                    log.debug(
-                        "Session handler:%r loaded session:%r",
-                        type(self.session_handler), context.session
-                    )
+            route.dispatch(context=context)
+        except DispatchFinished:
+            pass
+        except RoutePassed:
+            raise
 
-                try:
-                    route.dispatch(context=context)
-                except DispatchFinished:
-                    pass
-                except RoutePassed:
-                    continue
+        raise RouteSuccessfullyDispatched()
 
-                raise RouteSuccessfullyDispatched()
-            else:
-                not_found_method = (
-                    self._not_found_method or self._default_not_found_method
-                )
-                try:
-                    not_found_method(context=context)
-                except DispatchFinished:
-                    raise RouteNotFound
-        except RouteSuccessfullyDispatched:
-            log.debug("Dispatch succeded on: %r", context.current_route)
-            if session_loaded:
-                context.save_session(self.session_handler)
-
-            return
-        except RouteNotFound:
-            return
-        except:
-            exc = sys.exc_info()[1]
+    def _handle_error(self, context, exc):
         log.error(
             "Error while dispatching to: %r",
             (
@@ -221,14 +192,54 @@ class Server(object):
             except DispatchFinished:
                 return
             except:
-                exc = sys.exc_info()[1]
+                exc = exc_info()[1]
+
         try:
             self._default_error_method(context=context, exc=exc)
         except:
-            log.exception("Error in default_error_method")
             log.critical("Error in default_error_method")
+            log.exception("Error in default_error_method")
             raise
-        # endtry
+
+    def _handle_not_found(self, context):
+        not_found_method = (
+            self._not_found_method or self._default_not_found_method
+        )
+        try:
+            not_found_method(context=context)
+        except DispatchFinished:
+            pass
+
+        raise RouteNotFound
+
+    def _handle_request(self, context):
+        try:
+            session_loaded = False
+            for route in self._dic.router.matching_routes(context):
+                if route.requires_session() and context.session is None:
+                    context.load_session(self.session_handler)
+                    session_loaded = True
+                    log.debug(
+                        "Session handler: %r loaded session: %r",
+                        type(self.session_handler), context.session
+                    )
+
+                try:
+                    self._handle_by_route(route=route, context=context)
+                except RoutePassed:
+                    continue
+            else:
+                self._handle_not_found(context=context)
+        except RouteSuccessfullyDispatched:
+            log.debug("Dispatch succeded on: %r", context.current_route)
+            if session_loaded:
+                context.save_session(self.session_handler)
+
+            return
+        except RouteNotFound:
+            return
+        except:
+            self._handle_error(context=context, exc=exc_info()[1])
 
     def _initialize_basic_components(self):
         self._dic = DependencyContainer()
