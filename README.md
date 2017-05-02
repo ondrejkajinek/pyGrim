@@ -1,9 +1,10 @@
-# PyGrim - another lightweight Python 2 web framework
+# PyGrim - another lightweight Python 2 web app framework
 
 ## Dependencies
 - Python 2
 - uwsgi with yaml support
 - PyYAML
+- dateutils
 
 ## Example
 First, change paths in pygrim.yaml to the ones you are really using.
@@ -13,7 +14,13 @@ Second, make sure at least one of your pythonpath in your yaml config points to 
 Start the server with
 
 ```
-uwsgi_python27 --yaml <path-to-yaml-file>
+uwsgi --yaml <path-to-yaml-file>
+```
+
+If you get error telling `no app loaded`, add the following line to `uwsgi` section of your yaml config:
+
+```
+plugin: python27
 ```
 
 ## How do I...?
