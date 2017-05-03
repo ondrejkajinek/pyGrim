@@ -40,7 +40,7 @@ class Router(object):
 
             self.pop_group()
         else:
-            raise ValueError("Unknown type:%s to map" % (type(route),))
+            raise ValueError("Unknown type: %s to map" % (type(route),))
 
     def matching_routes(self, context):
         for route in self._routes:
@@ -64,6 +64,7 @@ class Router(object):
     def _get_named_route(self, name):
         if not self._has_named_route(name):
             raise RouteNotRegistered()
+
         return self._named_routes[name]
 
     def _get_named_routes(self):
@@ -90,4 +91,5 @@ class Router(object):
     def _has_named_route(self, route_name):
         if self._named_routes is None:
             self._get_named_routes()
+
         return route_name in self._named_routes
