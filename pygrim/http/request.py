@@ -2,6 +2,7 @@
 
 from .grim_dicts import ImmutableDict, NormalizedImmutableDict
 from logging import getLogger
+from string import strip as string_strip
 from urllib import unquote_plus
 
 import re
@@ -123,10 +124,7 @@ class Request(object):
         parsed = {}
         for part in parts:
             key, value = (
-                map(
-                    lambda x: x.strip(),
-                    map(unquote_plus, part.split("=", 1))
-                )
+                map(string_strip, map(unquote_plus, part.split("=", 1)))
                 if "=" in part
                 else (unquote_plus(part.strip()), None)
             )
