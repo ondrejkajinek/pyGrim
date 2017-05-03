@@ -1,6 +1,6 @@
 # coding: utf8
 
-from .components import ConfigObject, DependencyContainer, Router, View
+from .components import ConfigObject, Router, View
 from .components import initialize_loggers
 from .http import Context
 from .router_exceptions import (
@@ -66,7 +66,7 @@ class Server(object):
         return
 
     def display(self, *args, **kwargs):
-        self._dic.view.display(*args, **kwargs)
+        self.view.display(*args, **kwargs)
         raise DispatchFinished()
 
     def redirect(self, context, **kwargs):
@@ -75,7 +75,7 @@ class Server(object):
         elif "route_name" in kwargs:
             url = "".join((
                 context.get_request_url(),
-                self._dic.router.url_for(
+                self.router.url_for(
                     kwargs.pop("route_name"),
                     kwargs.pop("params", None) or {}
                 )
@@ -89,7 +89,7 @@ class Server(object):
     def do_postfork(self):
         self._collect_exposed_methods()
         if hasattr(self, "_route_register_func"):
-            self._route_register_func(self._dic.router)
+            self._route_register_func(self.router)
             self._finalize_routes()
             log.debug("Routes loaded")
         else:
@@ -134,7 +134,7 @@ class Server(object):
         context.set_response_status(404)
 
     def _finalize_routes(self):
-        for route in self._dic.router.get_routes():
+        for route in self.router.get_routes():
             try:
                 method = self._methods[route.get_handle_name()]
             except KeyError:
@@ -216,7 +216,7 @@ class Server(object):
     def _handle_request(self, context):
         try:
             session_loaded = False
-            for route in self._dic.router.matching_routes(context):
+            for route in self.router.matching_routes(context):
                 if route.requires_session() and context.session is None:
                     context.load_session(self.session_handler)
                     session_loaded = True
@@ -243,11 +243,9 @@ class Server(object):
             self._handle_error(context=context, exc=exc_info()[1])
 
     def _initialize_basic_components(self):
-        self._dic = DependencyContainer()
-
         self.config = ConfigObject(self._get_config_path())
         self._register_logger(self.config)
-        self._dic.router = Router()
+        self.router = Router()
 
         if self.config.get("view:enabled", True):
             self._register_view(self.config)
@@ -278,7 +276,7 @@ class Server(object):
             "print_js": self._jinja_print_js,
             "url_for": self._jinja_url_for,
         }
-        self._dic.view = View(config, extra_functions)
+        self.view = View(config, extra_functions)
 
     def _static_file_mtime(self, static_file):
 
@@ -325,7 +323,7 @@ class Server(object):
     def _jinja_url_for(self, route, params=None):
         params = params or {}
         try:
-            url = self._dic.router.url_for(route, params)
+            url = self.router.url_for(route, params)
         except RouteNotRegistered:
             if self.config.get("pygrim:debug", True) is False:
                 url = "#"
