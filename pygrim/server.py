@@ -232,10 +232,11 @@ class Server(object):
             log.debug("Dispatch succeded on: %r", context.current_route)
             if session_loaded:
                 context.save_session(self.session_handler)
-
-            return
         except RouteNotFound:
-            return
+            log.debug(
+                "No route found to handle request %r, handled by not_found",
+                context.get_request_uri()
+            )
         except:
             self._handle_error(context=context, exc=exc_info()[1])
 
