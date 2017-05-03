@@ -85,8 +85,10 @@ class Server(object):
             raise RuntimeError("redirect needs url or route_name params")
         raise DispatchFinished()
 
-    # napojit na postfork
     def do_postfork(self):
+        """
+        This method needs to be called in uwsgi postfork
+        """
         self._collect_exposed_methods()
         if hasattr(self, "_route_register_func"):
             self._route_register_func(self.router)
