@@ -27,6 +27,9 @@ class BaseDecorator(object):
 
 
 class method(BaseDecorator):
+    """
+    Exposes method to server so that it can be used for route handling
+    """
 
     def __call__(self, func):
         self._expose(func)
@@ -40,6 +43,11 @@ class method(BaseDecorator):
 
 
 class error_method(method):
+    """
+    Marks method as an error handler.
+    Such method is used when error occurs during request handling.
+    Also exposes method, see method decorator.
+    """
 
     def __call__(self, func):
         func._error = True
@@ -47,6 +55,11 @@ class error_method(method):
 
 
 class not_found_method(method):
+    """
+    Marks method as not-found handler.
+    Such method is called when no route matches requested url.
+    Also exposes method, see method decorator.
+    """
 
     def __call__(self, func):
         func._not_found = True
