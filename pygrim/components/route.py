@@ -26,7 +26,6 @@ class Route(object):
         # pyGrim will assign requested method on its postfork event
         self._handle = None
         self._handle_name = handle_name
-        self._is_regex = type(pattern) == self.REGEXP_TYPE
         self._methods = tuple(map(
             lambda x: x.upper(),
             (
@@ -54,12 +53,14 @@ class Route(object):
         return self._name
 
     def get_pattern(self):
-        pattern = (
+        return (
             self._pattern.pattern
-            if self._is_regex
+            if self.is_regex()
             else self._pattern
         )
-        return pattern.strip("/")
+
+    def is_regex(self, pattern=None):
+        return type(pattern or self._pattern) == self.REGEXP_TYPE
 
     def matches(self, context):
         return (
@@ -74,7 +75,7 @@ class Route(object):
         self._pattern = pattern
 
     def url_for(self, params):
-        if self._is_regex:
+        if self.is_regex():
             readable, param_names = self._pattern_to_readable()
             query_params = {
                 key: params[key]
@@ -104,23 +105,19 @@ class Route(object):
         return readable, param_names
 
     def _strip_trailing_slash(self, pattern):
-        if self._is_regex:
-            return re.compile(
-                self.TRAILING_SLASH_REGEXP.sub("", pattern.pattern)
-            )
-        else:
-            return pattern.rstrip("/")
+        return (
+            re.compile(self.TRAILING_SLASH_REGEXP.sub("", pattern.pattern))
+            if self.is_regex(pattern)
+            else pattern.rstrip("/")
+        )
 
     def _supports_http_method(self, method):
         return method in self._methods
 
     def _uri_matches(self, context):
         uri = context.get_request_uri() or "/"
-        log.debug(
-            "matching %r with  %r",
-            self._pattern.pattern if self._is_regex else self._pattern, uri
-        )
-        if self._is_regex:
+        log.debug("matching %r with  %r", self.get_pattern(), uri)
+        if self.is_regex():
             matches = self._pattern.match(uri)
             match = matches is not None
             route_params = matches.groupdict()

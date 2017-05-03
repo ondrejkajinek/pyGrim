@@ -22,15 +22,16 @@ class Router(object):
     def map(self, route):
         if isinstance(route, Route):
             full_pattern = path_join(
-                "/" + self.group_pattern(), route.get_pattern()
+                "/" + self.group_pattern(), route.get_pattern().strip("/")
             )
             if full_pattern != "/":
                 full_pattern = full_pattern.rstrip("/")
 
-            if route._is_regex:
-                route.set_pattern(re_compile(full_pattern))
-            else:
-                route.set_pattern(full_pattern)
+            route.set_pattern(
+                re_compile(full_pattern)
+                if route.is_regex()
+                else full_pattern
+            )
             self._routes.append(route)
         elif isinstance(route, RouteGroup):
             self.push_group(route.pattern.strip("/"))
