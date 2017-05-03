@@ -72,3 +72,6 @@ upgrade_pip_package ()
 pip install -U pip
 
 upgrade_pip_package uWSGI 2.0.13
+upgrade_pip_package Jinja2	2.9.5
+upgrade_pip_package PyYAML
+upgrade_pip_package python-dateutil
