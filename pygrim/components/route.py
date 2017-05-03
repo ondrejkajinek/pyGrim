@@ -120,7 +120,7 @@ class Route(object):
         if self.is_regex():
             matches = self._pattern.match(uri)
             match = matches is not None
-            route_params = matches.groupdict()
+            route_params = matches.groupdict() if matches else {}
         else:
             match = self._pattern == uri
             route_params = {}
