@@ -77,7 +77,7 @@ class Server(object):
 
     def redirect(self, context, **kwargs):
         if "url" in kwargs:
-            context.redirect(kwargs.pop("url"), **kwargs)
+            url = kwargs.pop("url")
         elif "route_name" in kwargs:
             url = "".join((
                 context.get_request_url(),
@@ -86,9 +86,10 @@ class Server(object):
                     kwargs.pop("params", None) or {}
                 )
             ))
-            context.redirect(url, **kwargs)
         else:
             raise RuntimeError("redirect needs url or route_name params")
+
+        context.redirect(url, **kwargs)
         raise DispatchFinished()
 
     def do_postfork(self):
