@@ -46,9 +46,7 @@ class View(object):
         self._initialize_extensions(config)
 
     def display(self, context):
-        body, headers = self.render(context)
-        context.set_response_body(body)
-        context.add_response_headers(headers)
+        context.set_response_body(self.render(context))
 
     def get_template_directory(self):
         return self._env.loader.searchpath
@@ -85,13 +83,10 @@ class View(object):
             ))
         })
         if context.template == self._dump_switch:
-            headers = {
-                "Content-Type": "application/json"
-            }
+            context.set_response_content_type("application/json")
             result = json_dumps(context.view_data)
         else:
             template = self._env.get_template(context.template)
-            headers = {}
             context.view_data.update({
                 "context": context
             })
@@ -100,7 +95,7 @@ class View(object):
         if context.session is not None:
             context.session.del_flashes()  # smazem flashes
 
-        return result, headers
+        return result
 
     def _get_extensions(self, config):
         extensions = [
