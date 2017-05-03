@@ -40,6 +40,12 @@ class Server(object):
         "yaml", "ini"
     )
 
+    KNOWN_SESSION_HANDLERS = {
+        "file": FileSessionStorage,
+        "redis": RedisSessionStorage,
+        "redis-sentinel": RedisSentinelSessionStorage
+    }
+
     def __init__(self):
         self._initialize_basic_components()
         self._methods = {}
@@ -151,13 +157,9 @@ class Server(object):
 
     def _find_session_handler(self):
         storage_type = self.config.get("session:type")
-        if storage_type == "file":
-            storage_class = FileSessionStorage
-        elif storage_type == "redis":
-            storage_class = RedisSessionStorage
-        elif storage_type == "redis-sentinel":
-            storage_class = RedisSentinelSessionStorage
-        else:
+        try:
+            storage_class = self.KNOWN_SESSION_HANDLERS[storage_type]
+        except KeyError:
             raise RuntimeError("Unknown session handler: %r", storage_type)
 
         return storage_class
