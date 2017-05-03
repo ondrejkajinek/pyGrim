@@ -115,17 +115,9 @@ class Server(object):
         return self.display(*args, **kwargs)
 
     def _collect_exposed_methods(self):
-        def is_exposed(member, member_name):
-            return (
-                getattr(member, "_exposed", False) is True
-            )
-
-        for member_name, member in getmembers(self, predicate=ismethod):
-            if is_exposed(member, member_name):
-                try:
-                    self._methods[member._dispatch_name] = member
-                except AttributeError:
-                    self._methods[member_name] = member
+        for unused_, member in getmembers(self, predicate=ismethod):
+            if getattr(member, "_exposed", False) is True:
+                self._methods[member._dispatch_name] = member
 
                 if getattr(member, "_not_found", False) is True:
                     self._not_found_method = member

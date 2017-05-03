@@ -28,18 +28,21 @@ class BaseDecorator(object):
 
 class method(BaseDecorator):
     """
-    Exposes method to server so that it can be used for route handling
+    Exposes method to server so that it can be used for route handling.
+    Every decorator that is supposed to expose methods has to be
+    properly derived from this class.
     """
 
     def __call__(self, func):
         self._expose(func)
         func._session = bool(self._kwargs.get("session"))
+        func._dispatch_name = self._kwargs.pop("dispatch_name", func.__name__)
 
         @wraps(func)
         def wrapper(*args, **kwargs):
             return func(*args, **kwargs)
 
-        return wrapper
+        return super(method, self).__call__(wrapper)
 
 
 class error_method(method):
