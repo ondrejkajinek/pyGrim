@@ -123,11 +123,12 @@ class Route(object):
         if self._is_regex:
             matches = self._pattern.match(uri)
             match = matches is not None
-            if match:
-                context.set_route_params(matches.groupdict())
+            route_params = matches.groupdict()
         else:
             match = self._pattern == uri
-            if match:
-                context.set_route_params({})
+            route_params = {}
+
+        if match:
+            context.set_route_params(route_params)
 
         return match
