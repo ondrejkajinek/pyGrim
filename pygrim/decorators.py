@@ -12,6 +12,9 @@ class BaseDecorator(object):
         self._args = args
         self._kwargs = kwargs
 
+    def __call__(self, func):
+        return func
+
     def _expose(self, func):
         if func.__name__.startswith("_"):
             uwsgi_log(
@@ -50,10 +53,15 @@ class not_found_method(method):
         return super(not_found_method, self).__call__(func)
 
 
-class template_method(object):
+class template_display(BaseDecorator):
+    """
+    Takes result of decorated method (expects {"data": view_data}),
+    puts it to context, sets specified template and displays it.
+    """
 
-    def __init__(self, template):
+    def __init__(self, template, *args, **kwargs):
         self._template = template
+        super(template_display, self).__init__(*args, **kwargs)
 
     def __call__(self, func):
 
@@ -65,10 +73,24 @@ class template_method(object):
             context.template = res.get("_template", self._template)
             args[0].display(context)
 
-        return wrapper
+        return super(template_display, self).__call__(wrapper)
 
 
-class uses_data(object):
+class template_method(template_display, method):
+    """
+    Combines the funcionality of template_display and method decorators
+    """
+
+    def __init__(self, *args, **kwargs):
+        args = list(args)
+        template = kwargs.pop("template", args.pop(0))
+        super(template_method, self).__init__(template, *args, **kwargs)
+
+    def __call__(self, func):
+        return super(template_method, self).__call__(func)
+
+
+class uses_data(BaseDecorator):
 
     def __init__(self, method):
         self._method = method
