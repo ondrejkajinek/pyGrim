@@ -54,13 +54,12 @@ class Route(object):
         return self._name
 
     def get_pattern(self):
-        patt = (
+        pattern = (
             self._pattern.pattern
             if self._is_regex
             else self._pattern
         )
-        patt = patt.strip("/")
-        return patt
+        return pattern.strip("/")
 
     def matches(self, context):
         return (
