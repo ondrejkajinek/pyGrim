@@ -51,6 +51,9 @@ class BaseExtension(Extension):
 
         return obj.strftime(format_str).decode('utf-8')
 
+    def minutes_from_seconds(self, seconds):
+        return "%d:%d" % (seconds // 60, seconds % 60)
+
     def site_url(self, context, site):
         return path.join(self.base_url(context), site)
 
@@ -60,6 +63,7 @@ class BaseExtension(Extension):
             "as_json": self.as_json,
             "base_url": self.base_url,
             "date_format": self.date_format,
+            "mins_from_secs": self.minutes_from_seconds,
             "site_url": self.site_url,
         }
 
