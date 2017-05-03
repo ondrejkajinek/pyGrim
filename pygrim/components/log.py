@@ -42,12 +42,12 @@ def initialize_loggers(config):
         if log_file and log_file != "/dev/null":
             handler = LockingFileHandler(log_file)
     elif logger_type == "syslog":
-        host = config.get("logging:host", "localhost")
-        port = config.get("logging:port", 514)
         socket = config.get("logging:socket", "")
         if socket:
             handler = logging.handlers.SysLogHandler(address=socket)
         else:
+            host = config.get("logging:host", "localhost")
+            port = config.getint("logging:port", 514)
             handler = logging.handlers.SysLogHandler(address=(host, port))
     elif logger_type in ("stdout", "stderr"):
         handler = logging.handlers.StreamHandler(
