@@ -35,16 +35,18 @@ class BaseExtension(Extension):
             context.get_request_url(), context.get_request_root_uri()
         )
 
-    def date_format(self, obj, format_str):
-        if isinstance(obj, basestring):
-            if obj.isdigit():
-                obj = int(obj)
-            else:
-                obj = parse_dt(obj)
-
-        if isinstance(obj, (int, long)):
-            obj = datetime.datetime.strptime(str(obj), "%s")
-        elif not isinstance(obj, DTS):
+    def date_format(self, source, format_str):
+        if isinstance(source, basestring):
+            obj = (
+                datetime.fromtimestamp(float(source))
+                if source.isdigit()
+                else parse_dt(source)
+            )
+        elif isinstance(source, (int, long)):
+            obj = datetime.fromtimestamp(source)
+        elif isinstance(source, DTS):
+            obj = source
+        else:
             return None
 
         return obj.strftime(format_str).decode('utf-8')
