@@ -110,6 +110,7 @@ class uses_data(BaseDecorator):
 
     def __init__(self, method):
         self._method = method
+        super(uses_data, self).__init__()
 
     def __call__(self, func):
 
@@ -122,4 +123,4 @@ class uses_data(BaseDecorator):
             res = func(*args, **kwargs)
             return res
 
-        return wrapper
+        return super(uses_data, self).__call__(wrapper)
