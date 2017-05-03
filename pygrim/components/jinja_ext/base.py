@@ -47,7 +47,7 @@ class BaseExtension(Extension):
         elif not isinstance(obj, DTS):
             return None
 
-        return obj.strftime(format_str)
+        return obj.strftime(format_str).decode('utf-8')
 
     def site_url(self, context, site):
         return path.join(self.base_url(context), site)
