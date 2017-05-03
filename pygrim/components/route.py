@@ -1,8 +1,7 @@
 # coding: utf8
 
-import re
-
 from logging import getLogger
+from re import compile as re_compile
 from string import upper as string_upper
 from urllib import quote_plus
 
@@ -17,10 +16,10 @@ class RouteGroup(list):
 
 class Route(object):
 
-    REGEXP_TYPE = type(re.compile(r""))
+    REGEXP_TYPE = type(re_compile(r""))
 
-    TRAILING_SLASH_REGEXP = re.compile("/\??$")
-    URL_PARAM_REGEXP = re.compile("\(\?P<([^>]+)>[^)]+\)")
+    TRAILING_SLASH_REGEXP = re_compile("/\??$")
+    URL_PARAM_REGEXP = re_compile("\(\?P<([^>]+)>[^)]+\)")
 
     def __init__(self, methods, pattern, handle_name, name=None):
         # temporary
@@ -117,7 +116,7 @@ class Route(object):
 
     def _strip_trailing_slash(self, pattern):
         return (
-            re.compile(self.TRAILING_SLASH_REGEXP.sub("", pattern.pattern))
+            re_compile(self.TRAILING_SLASH_REGEXP.sub("", pattern.pattern))
             if self.is_regex(pattern)
             else pattern.rstrip("/")
         )

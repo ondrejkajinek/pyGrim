@@ -3,11 +3,10 @@
 # from compatibility import http_responses
 from datetime import datetime, timedelta
 from logging import getLogger
+from os import SEEK_END
 from urllib import quote_plus as url_quoteplus
 
 log = getLogger("pygrim.http.response")
-
-import os
 
 
 class Response(object):
@@ -52,7 +51,7 @@ class Response(object):
             if isinstance(self.body, (basestring,)):
                 self.headers["Content-Length"] = str(len(self.body))
             elif hasattr(self.body, "seek") and hasattr(self.body, "tell"):
-                self.body.seek(0, os.SEEK_END)
+                self.body.seek(0, SEEK_END)
                 self.headers["Content-Length"] = str(self.body.tell())
                 self.body.seek(0)
             else:

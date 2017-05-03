@@ -2,10 +2,9 @@
 
 from .grim_dicts import ImmutableDict, NormalizedImmutableDict
 from logging import getLogger
+from re import compile as re_compile, IGNORECASE as re_IGNORECASE
 from string import strip as string_strip
 from urllib import unquote_plus
-
-import re
 
 log = getLogger("pygrim.http.request")
 
@@ -17,7 +16,7 @@ class Request(object):
         "https": 443
     }
 
-    HOST_REGEXP = re.compile(r"^(\[[a-f0-9:.]+\])(:\d+)?\Z", re.IGNORECASE)
+    HOST_REGEXP = re_compile(r"^(\[[a-f0-9:.]+\])(:\d+)?\Z", re_IGNORECASE)
 
     IP_KEYS = (
         "X_FORWARDED_FOR", "HTTP_X_FORWARDED_FOR", "CLIENT_IP"
