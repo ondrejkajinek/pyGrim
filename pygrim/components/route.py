@@ -3,6 +3,7 @@
 import re
 
 from logging import getLogger
+from string import upper as string_upper
 from urllib import quote_plus
 
 log = getLogger("pygrim.components.route")
@@ -27,7 +28,7 @@ class Route(object):
         self._handle = None
         self._handle_name = handle_name
         self._methods = tuple(map(
-            lambda x: x.upper(),
+            string_upper,
             (
                 (methods,)
                 if isinstance(methods, basestring)
