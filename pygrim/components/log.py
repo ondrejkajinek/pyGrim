@@ -20,11 +20,7 @@ def initialize_loggers(config):
         logger.removeHandler(logger.handlers[0])
 
     logger_type = config.get("logging:type", "file").lower()
-    log_format = (
-        config.get(
-            "logging:format", _default_log_format(logger_type)
-        )
-    )
+    log_format = config.get("logging:format", _default_log_format(logger_type))
 
     if "$(serviceName)s" in log_format:
         log_format = log_format.replace(
