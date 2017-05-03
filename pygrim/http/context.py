@@ -175,6 +175,9 @@ class Context(object):
     def set_response_body(self, body):
         self._response.body = body
 
+    def set_response_content_type(self, content_type):
+        self._response.headers["Content-Type"] = content_type
+
     def set_response_status(self, status):
         self._response.status = status
 
