@@ -43,17 +43,16 @@ class Request(object):
             if self._params[method] is None:
                 self._parse_query_params(method)
 
-            source = self._params[method]
+            value = self._params[method]
+            if key is not None:
+                value = value.get(key, fallback)
         except KeyError:
             log.warning(
                 "Trying to get param sent by unknown method %r", method
             )
-            return None
+            value = None
 
-        if key is not None:
-            return source.get(key, fallback)
-        else:
-            return source
+        return value
 
     def _get_host(self, env):
         try:
