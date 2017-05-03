@@ -75,6 +75,14 @@ class Route(object):
         self._pattern = pattern
 
     def url_for(self, params):
+
+        def ensure_string(text):
+            return (
+                text.encode("utf8")
+                if isinstance(text, unicode)
+                else text
+            )
+
         if self.is_regex():
             readable, param_names = self._pattern_to_readable()
             query_params = {
@@ -90,7 +98,9 @@ class Route(object):
 
         if query_params:
             url += "?%s" % "&".join(
-                "%s=%s" % tuple(map(quote_plus, map(str, (key, value))))
+                "%s=%s" % tuple(
+                    map(quote_plus, map(ensure_string, (key, value)))
+                )
                 for key, value
                 in query_params.iteritems()
             )
