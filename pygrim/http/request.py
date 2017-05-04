@@ -40,7 +40,7 @@ class Request(object):
     def request_param(self, method, key=None, fallback=None):
         try:
             if self._params[method] is None:
-                self._parse_query_params(method)
+                self._params[method] = self._parse_query_params(method)
 
             value = self._params[method]
             if key is not None:
@@ -107,7 +107,7 @@ class Request(object):
         self._headers = NormalizedImmutableDict(headers)
 
     def _parse_query_params(self, method):
-        self._params[method] = self._parse_string(
+        return self._parse_string(
             self._get_method_param_string(method)
         )
 
