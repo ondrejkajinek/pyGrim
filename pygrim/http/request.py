@@ -19,7 +19,8 @@ class Request(object):
     HOST_REGEXP = re_compile(r"^(\[[a-f0-9:.]+\])(:\d+)?\Z", re_IGNORECASE)
 
     IP_KEYS = (
-        "X_FORWARDED_FOR", "HTTP_X_FORWARDED_FOR", "CLIENT_IP", "REMOTE_ADDR"
+        "X_REAL_IP", "X_FORWARDED_FOR", "HTTP_X_FORWARDED_FOR", "CLIENT_IP",
+        "REMOTE_ADDR"
     )
 
     def __init__(self, environment):
@@ -102,7 +103,7 @@ class Request(object):
                 upper_key.startswith("X_") or
                 upper_key.startswith("HTTP_")
             ):
-                headers[key] = environment.pop(key)
+                headers[key] = environment.get(key)
 
         self._headers = NormalizedImmutableDict(headers)
 
