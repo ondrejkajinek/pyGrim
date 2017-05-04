@@ -19,7 +19,7 @@ class Request(object):
     HOST_REGEXP = re_compile(r"^(\[[a-f0-9:.]+\])(:\d+)?\Z", re_IGNORECASE)
 
     IP_KEYS = (
-        "X_FORWARDED_FOR", "HTTP_X_FORWARDED_FOR", "CLIENT_IP"
+        "X_FORWARDED_FOR", "HTTP_X_FORWARDED_FOR", "CLIENT_IP", "REMOTE_ADDR"
     )
 
     def __init__(self, environment):
@@ -69,12 +69,12 @@ class Request(object):
     def _get_ip(self, env):
         for key in self.IP_KEYS:
             try:
-                ip = env[key]
+                ip = env[key].split(",")[0].strip()
                 break
             except KeyError:
                 pass
         else:
-            ip = env["REMOTE_ADDR"]
+            ip = None
 
         return ip
 
