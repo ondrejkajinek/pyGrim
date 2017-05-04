@@ -20,6 +20,7 @@ class View(object):
     def __init__(self, config, extra_functions):
         self._debug = config.get("jinja:debug", False)
         self._dump_switch = config.get("jinja:dump_switch", "jkxd")
+        auto_reload = config.get("jinja:environment:auto_reload", True)
         self._env = Environment(
             extensions=self._get_extensions(config),
             loader=FileSystemLoader(
@@ -33,7 +34,8 @@ class View(object):
                     "jinja:environment:autoescape",
                     ("jinja",)
                 )
-            )
+            ),
+            auto_reload=auto_reload,
         )
         self._env.filters.update({
             "url_for": extra_functions["url_for"]
