@@ -1,10 +1,13 @@
 # coding: utf8
 
+from ..json2 import dumps as json_dumps
 from datetime import date, datetime
 from dateutil.parser import parse as parse_dt
 from jinja2.ext import Extension
-from ..json2 import dumps as json_dumps
+from logging import getLogger
 from os import path
+
+log = getLogger("pygrim.components.jinja_ext.base")
 
 DTS = (
     type(datetime.min),
@@ -28,7 +31,8 @@ class BaseExtension(Extension):
         return datum.strftime(strf)
 
     def as_json(self, data):
-        return json_dumps(data)
+        log.warning("Filter `as_json` is deprecated and will be removed soon.")
+        return self.to_json(data)
 
     def base_url(self, context):
         return "%s%s" % (
@@ -57,6 +61,9 @@ class BaseExtension(Extension):
     def site_url(self, context, site):
         return path.join(self.base_url(context), site)
 
+    def to_json(self, value, indent=None):
+        return json_dumps(value)
+
     def _get_filters(self):
         return {
             "as_date": self.as_date,
@@ -65,6 +72,7 @@ class BaseExtension(Extension):
             "date_format": self.date_format,
             "mins_from_secs": self.minutes_from_seconds,
             "site_url": self.site_url,
+            "tojson": self.to_json
         }
 
     def _get_functions(self):
