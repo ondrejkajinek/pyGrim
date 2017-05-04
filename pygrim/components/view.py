@@ -1,7 +1,7 @@
 # coding: utf8
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
-from json import dumps as json_dumps
+from .json2 import dumps as json_dumps
 from os import getcwd, path
 
 

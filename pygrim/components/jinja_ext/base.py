@@ -3,7 +3,7 @@
 from datetime import date, datetime
 from dateutil.parser import parse as parse_dt
 from jinja2.ext import Extension
-from json import dumps as json_dumps
+from ..json2 import dumps as json_dumps
 from os import path
 
 DTS = (

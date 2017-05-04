@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 import subprocess
 import os
 
-version = '0.1.5'
+version = '0.1.6'
 name = 'pygrim'
 desc = 'lightweight python frontend framework'
 
