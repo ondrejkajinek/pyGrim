@@ -1,7 +1,7 @@
 # coding: utf8
 
-from jinja2 import Environment, FileSystemLoader, select_autoescape
 from .json2 import dumps as json_dumps
+from jinja2 import Environment, FileSystemLoader, select_autoescape
 from os import getcwd, path
 
 
@@ -95,7 +95,7 @@ class View(object):
             result = template.render(**context.view_data)
 
         if context.session is not None:
-            context.session.del_flashes()  # smazem flashes
+            context.session.del_flashes()
 
         return result
 
