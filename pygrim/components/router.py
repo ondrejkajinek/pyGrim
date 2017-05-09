@@ -79,7 +79,7 @@ class Router(object):
     def group_pattern(self):
         pattern = (
             path_join(*tuple(
-                group_pattern
+                group_pattern.strip("/")
                 for group_pattern
                 in self._route_groups
             ))
