@@ -2,7 +2,6 @@
 
 # from compatibility import http_responses
 from datetime import datetime, timedelta
-from io import BytesIO, StringIO
 from logging import getLogger
 from os import SEEK_END
 from urllib import quote_plus as url_quoteplus
@@ -49,18 +48,24 @@ class Response(object):
             if isinstance(self.body, unicode):
                 self.body = self.body.encode("utf-8")
 
-            if isinstance(self.body, (basestring,)):
+            if isinstance(self.body, str):
                 self.headers["Content-Length"] = len(self.body)
-            elif isinstance(self.body, (BytesIO, StringIO)):
-                self.body.seek(0, SEEK_END)
-                self.headers["Content-Length"] = self.body.tell()
-                self.body.seek(0)
-                self.body = self.body.getvalue()
             else:
-                log.warning(
-                    "Unable to get Content-Length for content %r", self.body
-                )
-                self.headers["Content-Length"] = 0
+                if hasattr(self.body, "seek") and hasattr(self.body, "tell"):
+                    self.body.seek(0, SEEK_END)
+                    self.headers["Content-Length"] = self.body.tell()
+                    self.body.seek(0)
+                else:
+                    log.warning(
+                        "Unable to get Content-Length for type %r",
+                        type(self.body)
+                    )
+
+                try:
+                    self.body = self.body.read()
+                except AttributeError:
+                    log.critical("Can't read read response body content!")
+                    log.exception("Can't read read response body content!")
 
         self.headers = [
             (key, str(value))
