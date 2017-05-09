@@ -49,10 +49,10 @@ class Response(object):
                 self.body = self.body.encode("utf-8")
 
             if isinstance(self.body, (basestring,)):
-                self.headers["Content-Length"] = str(len(self.body))
+                self.headers["Content-Length"] = len(self.body)
             elif hasattr(self.body, "seek") and hasattr(self.body, "tell"):
                 self.body.seek(0, SEEK_END)
-                self.headers["Content-Length"] = str(self.body.tell())
+                self.headers["Content-Length"] = self.body.tell()
                 self.body.seek(0)
             else:
                 log.warning(
