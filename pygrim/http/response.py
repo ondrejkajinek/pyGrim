@@ -51,7 +51,11 @@ class Response(object):
             if isinstance(self.body, str):
                 self.headers["Content-Length"] = len(self.body)
             else:
-                if hasattr(self.body, "seek") and hasattr(self.body, "tell"):
+                if (
+                    "Content-Length" not in self.headers and
+                    hasattr(self.body, "seek") and
+                    hasattr(self.body, "tell")
+                ):
                     self.body.seek(0, SEEK_END)
                     self.headers["Content-Length"] = self.body.tell()
                     self.body.seek(0)
