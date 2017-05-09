@@ -19,6 +19,8 @@ class Route(object):
     REGEXP_TYPE = type(re_compile(r""))
 
     TRAILING_SLASH_REGEXP = re_compile("/\??$")
+    URL_FORMAT_REGEXP = re_compile("%\(([^)]+)\)s")
+    URL_OPTIONAL_REGEXP = re_compile("([^%])\((.*?)\)\?")
     URL_PARAM_REGEXP = re_compile("\(\?P<([^>]+)>[^)]+\)")
 
     def __init__(self, methods, pattern, handle_name, name=None):
@@ -84,12 +86,15 @@ class Route(object):
             )
 
         if self.is_regex():
-            readable, param_names = self._pattern_to_readable()
+            readable, param_names, optional_names = self._pattern_to_readable()
+            for name in optional_names:
+                params.setdefault(name, "")
+
             query_params = {
                 key: params[key]
                 for key
                 in params.iterkeys()
-                if key not in param_names
+                if key not in (param_names.union(optional_names))
             }
             url = readable % params
         else:
@@ -111,8 +116,21 @@ class Route(object):
     def _pattern_to_readable(self):
         param_names = self.URL_PARAM_REGEXP.findall(self._pattern.pattern)
         readable = self.URL_PARAM_REGEXP.sub(r"%(\1)s", self._pattern.pattern)
+        optional_names = set()
+        for optional in self.URL_OPTIONAL_REGEXP.findall(readable):
+            optional_names.update(
+                set(self.URL_FORMAT_REGEXP.findall(optional[1]))
+            )
+
+        readable = self.URL_OPTIONAL_REGEXP.sub(r"\1\2", readable)
         readable = readable.rstrip("$")
-        return readable, param_names
+        mandatory_names = set(param_names) - set(optional_names)
+        if len(mandatory_names) + len(optional_names) < len(param_names):
+            raise RuntimeError(
+                "Some keys are duplicate in route %r" % self._pattern.pattern
+            )
+
+        return readable, mandatory_names, optional_names
 
     def _strip_trailing_slash(self, pattern):
         return (
