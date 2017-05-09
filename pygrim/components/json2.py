@@ -1,241 +1,176 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+# coding: utf8
 
-
-import datetime
-# tenhle import mi do namespace da vsechno potrebne ja vlastne
-#   jen predefinuji funkci dumps
-from json import *
-import uuid
-
-
-# TODO SJEDNOTIT IPMLEMENTACI dpmps2 a dumps2fd pres StringIO
-
-import types
-import unicodedata
+from collections import Iterable
+from cStringIO import StringIO
+from datetime import date, datetime, timedelta
 from decimal import Decimal
-import collections
+from types import GeneratorType
+from unicodedata import normalize as unicodedata_normalize
+from uuid import UUID
 
-# JSON nepodporuje tyto hodnoty je treba to osetrit nejak u nas
-Infinity = float("inf")
-NegInfinity = float("-inf")
-NaN = float("NaN")
+# import everything from json to current namespace
+# redefine functions as required
+from json import *
+
+
+# TODO: unify implementation of dumps2 and dumps2fs using StringIO
+
+# JSON does not support these values, so we mark them as invalid
+InvalidJsonFloatValues = map(float, ("inf", "-inf", "NaN"))
 """
+TODO: translate
 Jaký je rozdíl mezi reálným číslem a ženou?
 Reálné číslo s periodou je racionální.
 """
 
-InvalidJsonFloatTypes = (Infinity, NegInfinity, NaN)
+
+def _dump_boolean(source):
+    return "true" if source is True else "false"
+
+
+def _dump_datetime(source):
+    return '"%s"' % source.isoformat()
+
+
+def _dump_dict(source, nice, depth):
+    separator = ","
+    indent_step = "    "
+    if nice:
+        indent = depth * indent_step
+        nl = "\n"
+    else:
+        indent = ""
+        nl = ""
+
+    lead = "{"
+    ind = ""
+    trail = "}"
+    if nice:
+        separator += nl
+        lead += nl
+        ind += indent + indent_step
+        trail = nl + indent + trail
+
+    ind += '"%s":%s'
+    items = (
+        ind % (
+            key.encode("utf8") if isinstance(key, unicode) else str(key),
+            _dumps(value, nice=nice, depth=depth + 1)
+        )
+        for key, value
+        in source.iteritems()
+    )
+
+    return "%s%s%s" % (lead, separator.join(items), trail)
+
+
+def _dump_iterable(source, nice, depth):
+    return "[%s]" % ",".join(
+        _dumps(i, nice=nice, depth=depth) for i in source
+    )
+
+
+def _dump_none():
+    return "null"
+
+
+def _dump_number(source):
+    if source in InvalidJsonFloatValues:
+        raise TypeError("JSON nemuze obsahovat float s hodnotou: %s" % source)
+
+    return str(source)
+
+
+def _dump_string(source):
+    return _dump_unicode(source.decode("utf8"))
+
+
+def _dump_timedelta(source):
+    return '"%s"' % source.total_seconds()
+
+
+def _dump_unicode(source):
+    norm = unicodedata_normalize("NFC", source)
+    norm = norm.replace('\\', '\\\\')
+    norm = norm.replace('\x1F', "")  # ^_ - Unit separator
+    norm = norm.replace('\x07', "")  # ^G - Bell, rings the bell...
+    norm = "".join(
+        ch if ord(ch) < 128 else "\u%04x" % ord(ch)
+        for ch
+        in norm
+    )
+    norm = norm.replace('"', '\\"')
+    norm = norm.replace('\n', '\\n')
+    norm = norm.replace("\r", "")
+    norm = norm.replace("\t", "")
+    norm = norm.replace(chr(7), "")
+    return '"%s"' % norm.encode("utf8")
+
+
+def _dump_uuid(source):
+    return '"%s"' % (str(source),)
+
+
+def _dumps(obj, nice=None, depth=0):
+    output = StringIO()
+    if obj is None:
+        output.write(_dump_none())
+    elif isinstance(obj, str):
+        output.write(_dump_string(obj))
+    elif isinstance(obj, unicode):
+        output.write(_dump_unicode(obj))
+    elif isinstance(obj, bool):
+        output.write(_dump_boolean(obj))
+    elif isinstance(obj, (Decimal, float)):
+        output.write(_dump_number(float(obj)))
+    elif isinstance(obj, (int, long)):
+        output.write(_dump_number(obj))
+    elif isinstance(obj, dict):
+        output.write(_dump_dict(obj, nice, depth))
+    elif isinstance(obj, (list, tuple, set, GeneratorType, Iterable)):
+        output.write(_dump_iterable(obj, nice, depth))
+    elif isinstance(obj, UUID):
+        output.write(_dump_uuid(obj))
+    elif isinstance(obj, (datetime, date)):
+        output.write(_dump_datetime(obj))
+    elif isinstance(obj, timedelta):
+        output.write(_dump_timedelta(obj))
+    elif hasattr(obj, "_asdict"):
+        output.write(_dump_dict(obj._asdict(), nice, depth))
+    elif hasattr(obj, "toJson"):
+        output.write(obj.toJson(func=_dumps, nice=nice, depth=depth))
+    else:
+        raise TypeError(type(obj), dir(obj), repr(obj))
+
+    res = output.getvalue()
+    output.close()
+    return res
 
 
 def dumps2(obj, nice=None, depth=0):
-    separator = ","
-    indent = ""
-    indent_step = "    "
-    nl = ""
-    if nice:
-        indent = depth * indent_step
-        nl = "\n"
-
-    if isinstance(obj, str):
-        obj = obj.decode("utf8")
-    if isinstance(obj, unicode):
-        norm = unicodedata.normalize("NFC", obj)
-        norm = norm.replace('\\', '\\\\')
-        norm = norm.replace('\x1F', "")  # ^_ - Unit separator
-        norm = norm.replace('\x07', "")  # ^G - Bell, rings the bell...
-        norm = "".join([
-            ch if ord(ch) < 128 else "\u%04x" % ord(ch)
-            for ch in norm
-        ])
-        norm = norm.replace('"', '\\"')
-        norm = norm.replace('\n', '\\n')
-        norm = norm.replace("\r", "")
-        norm = norm.replace("\t", "")
-        norm = norm.replace(chr(7), "")
-        return '"%s"' % norm.encode("utf8")
-    if isinstance(obj, bool):
-        return "true" if obj is True else "false"
-    if isinstance(obj, Decimal):
-        obj = float(obj)  # no jo no, mas lepsi reseni?
-    if isinstance(obj, float):
-        if obj in InvalidJsonFloatTypes:
-            raise TypeError(
-                "JSON nemuze obsahovat float s hodnotou: %s" % obj)
-        return str(obj)
-    if isinstance(obj, (int, float, long)):
-        return str(obj)
-    if hasattr(obj, "_asdict"):
-        # je to hnus velebnosti takle pres hasattr, ale je to blby
-        obj = obj._asdict()
-    #    # nic se nevraci, chceme jen split nasledujici podminku
-    if isinstance(obj, dict):
-        # pro prehlednost:
-        sep = separator
-        lead = "{"
-        ind = ""
-        trail = "}"
-        if nice:
-            sep += nl
-            lead += nl
-            ind += indent+indent_step
-            trail = nl + indent + trail
-        # endif nice
-        ind += '"%s":%s'
-        items = []
-        for k, v in obj.iteritems():
-            if isinstance(k, unicode):
-                k = k.encode("utf8")
-            else:
-                k = str(k)
-            # endif
-            items.append(ind % (k, dumps2(v, nice=nice, depth=depth+1)))
-        # endfor
-        return lead + sep.join(items) + trail
-    if isinstance(obj, (
-            list, tuple, set, types.GeneratorType,
-            collections.Iterable)):
-        return "[" + separator.join(
-            dumps2(i, nice=nice, depth=depth) for i in obj
-            ) + "]"
-    if isinstance(obj, uuid.UUID):
-        return '"%s"' % (str(obj),)
-    if obj is None:
-        return "null"
-    if isinstance(obj, (datetime.datetime, datetime.date)):
-        return '"%s"' % obj.isoformat()
-    if hasattr(obj, "toJson"):
-        return obj.toJson(func=dumps2, nice=nice, depth=depth)
-    if isinstance(obj, datetime.timedelta):
-        return '"%s"' % obj.total_seconds()
-    raise TypeError(type(obj), dir(obj), repr(obj))
-# enddef dumps2
+    return _dumps(obj, nice, depth)
 
 
 def dumps2fd(obj, fd=None, nice=None, depth=0):
-    separator = ","
-    indent = ""
-    indent_step = "    "
-    nl = ""
-    if nice:
-        indent = depth * indent_step
-        nl = "\n"
+    fd.write(_dumps(obj, nice, depth))
 
-    if isinstance(obj, str):
-        obj = obj.decode("utf8")
-    if isinstance(obj, unicode):
-        norm = unicodedata.normalize("NFC", obj)
-        norm = norm.replace('\\', '\\\\')
-        norm = norm.replace('\x1F', "")  # ^_ - Unit separator
-        norm = norm.replace('\x07', "")  # ^G - Bell, rings the bell...
-        norm = "".join([
-            ch if ord(ch) < 128 else "\u%04x" % ord(ch)
-            for ch in norm
-        ])
-        norm = norm.replace('"', '\\"')
-        norm = norm.replace('\n', '\\n')
-        norm = norm.replace("\r", "")
-        norm = norm.replace("\t", "")
-        norm = norm.replace(chr(7), "")
-        fd.write('"%s"' % norm.encode("utf8"))
-        return
-    if isinstance(obj, bool):
-        fd.write("true" if obj is True else "false")
-        return
-    if isinstance(obj, Decimal):
-        obj = float(obj)  # no jo no, mas lepsi reseni?
-    if isinstance(obj, float):
-        if obj in InvalidJsonFloatTypes:
-            raise TypeError(
-                "JSON nemuze obsahovat float s hodnotou: %s" % obj)
-        fd.write(str(obj))
-        return
-    if (
-            isinstance(obj, int) or
-            isinstance(obj, float) or
-            isinstance(obj, long)):
-        fd.write(str(obj))
-        return
-    if isinstance(obj, tuple) and hasattr(obj, "_asdict"):
-        # je to hnus velebnosti takle pres hasattr, ale je to blby
-        obj = obj._asdict()
-    #    # nic se nevraci, chceme jen split nasledujici podminku
-    if isinstance(obj, dict):
-        # pro prehlednost:
-        sep = separator
-        lead = "{"
-        ind = ""
-        trail = "}"
-        if nice:
-            sep += nl
-            lead += nl
-            ind += indent+indent_step
-            trail = nl + indent + trail
-        # endif nice
-        ind += '"%s":%s'
-
-        fd.write(lead)
-
-        first = True
-        for k, v in obj.iteritems():
-            if not first:
-                fd.write(sep)
-            if isinstance(k, unicode):
-                k = k.encode("utf8")
-            else:
-                k = str(k)
-            fd.write('"%s":' % k)
-            for part in dumps2fd(v, fd, nice=nice, depth=depth+1):
-                fd.write(part)
-            first = False
-        fd.write(trail)
-
-    if (
-            isinstance(obj, list) or
-            isinstance(obj, tuple) or
-            isinstance(obj, set) or
-            isinstance(obj, types.GeneratorType)
-            ):
-        fd.write("[")
-        first = True
-        for part in obj:
-            if not first:
-                fd.write(", ")
-            fd.write(dumps2fd(part, fd, nice=nice, depth=depth))
-        fd.write("]")
-        return
-    if isinstance(obj, uuid.UUID):
-        fd.write(str(obj))
-        return
-    if obj is None:
-        fd.write("null")
-        return
-    if isinstance(obj, datetime.datetime) or isinstance(obj, datetime.date):
-        fd.write('"%s"' % obj.isoformat())
-        return
-    if hasattr(obj, "toJson"):
-        fd.write(obj.toJson(func=dumps2, nice=nice, depth=depth))
-        return
-    if isinstance(obj, datetime.timedelta):
-        fd.write('"%s"' % obj.total_seconds())
-        return
-    raise TypeError(type(obj), dir(obj))
-# enddef dumps2
 
 dumps = dumps2
 
+
 if __name__ == "__main__":
     test = {
-        datetime.datetime.now(): set([5, 4, "ADSF"]),
+        datetime.now(): set((5, 4, "ADSF")),
         2345234: ("a", "b"),
         "asdf": [dict(x=1)],
-        "d": datetime.datetime.now(),
+        "d": datetime.now(),
         "B": [False, True],
         "NNNNNNNNNNNNNNN": None,
-        "FL": (float(2)/3, 0.0),
+        "FL": (2.0 / 3, 0.0),
         "Uvozovky": "'`\"",
     }
     print test
     print
     print dumps2(test)
     print dumps2(test, nice=True)
+    print loads(dumps2(test))

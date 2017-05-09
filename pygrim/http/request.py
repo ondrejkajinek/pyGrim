@@ -19,7 +19,8 @@ class Request(object):
     HOST_REGEXP = re_compile(r"^(\[[a-f0-9:.]+\])(:\d+)?\Z", re_IGNORECASE)
 
     IP_KEYS = (
-        "X_REAL_IP", "X_FORWARDED_FOR", "HTTP_X_FORWARDED_FOR", "CLIENT_IP"
+        "X_REAL_IP", "X_FORWARDED_FOR", "HTTP_X_FORWARDED_FOR", "CLIENT_IP",
+        "REMOTE_ADDR"
     )
 
     def __init__(self, environment):
@@ -40,7 +41,7 @@ class Request(object):
     def request_param(self, method, key=None, fallback=None):
         try:
             if self._params[method] is None:
-                self._parse_query_params(method)
+                self._params[method] = self._parse_query_params(method)
 
             value = self._params[method]
             if key is not None:
@@ -68,11 +69,13 @@ class Request(object):
 
     def _get_ip(self, env):
         for key in self.IP_KEYS:
-            ip = env.get(key)
-            if ip:
+            try:
+                ip = env[key].split(",")[0].strip()
                 break
+            except KeyError:
+                pass
         else:
-            ip = env["REMOTE_ADDR"]
+            ip = None
 
         return ip
 
@@ -105,7 +108,7 @@ class Request(object):
         self._headers = NormalizedImmutableDict(headers)
 
     def _parse_query_params(self, method):
-        self._params[method] = self._parse_string(
+        return self._parse_string(
             self._get_method_param_string(method)
         )
 
