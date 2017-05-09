@@ -80,7 +80,7 @@ class Route(object):
             return (
                 text.encode("utf8")
                 if isinstance(text, unicode)
-                else text
+                else str(text)
             )
 
         if self.is_regex():
