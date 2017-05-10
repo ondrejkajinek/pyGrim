@@ -97,11 +97,11 @@ class Server(object):
         This method needs to be called in uwsgi postfork
         """
         self._collect_exposed_methods()
-        try:
+        if hasattr(self, "_route_register_func"):
             self._route_register_func(self.router)
             self._finalize_routes()
             log.debug("Routes loaded")
-        except AttributeError:
+        else:
             log.warning("There is no function to register routes!")
 
         try:
