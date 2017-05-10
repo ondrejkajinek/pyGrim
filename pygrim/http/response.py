@@ -2,6 +2,7 @@
 
 # from compatibility import http_responses
 from datetime import datetime, timedelta
+from inspect import isgeneratorfunction
 from logging import getLogger
 from os import SEEK_END
 from urllib import quote_plus as url_quoteplus
@@ -39,6 +40,7 @@ class Response(object):
             "Content-Type": "text/html"
         }
         self.status = 200
+        self.is_generator_function = False
 
     def finalize(self):
         if self.status in self.NO_CONTENT_STATUSES:
@@ -50,6 +52,8 @@ class Response(object):
 
             if isinstance(self.body, str):
                 self.headers["Content-Length"] = len(self.body)
+            elif isgeneratorfunction(self.body):
+                self.is_generator_function = True
             else:
                 if (
                     "Content-Length" not in self.headers and

@@ -98,6 +98,9 @@ class Context(object):
     def finalize_response(self):
         self._response.finalize()
 
+    def generates_response(self):
+        return self._response.is_generator_function
+
     def get_cookies(self):
         return self._request.cookies.copy()
 
