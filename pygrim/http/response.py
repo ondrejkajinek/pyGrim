@@ -1,6 +1,5 @@
 # coding: utf8
 
-# from compatibility import http_responses
 from datetime import datetime, timedelta
 from inspect import isgeneratorfunction
 from logging import getLogger
