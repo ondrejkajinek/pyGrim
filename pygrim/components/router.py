@@ -22,7 +22,7 @@ class Router(object):
     def map(self, route):
         if isinstance(route, Route):
             full_pattern = path_join(
-                "/" + self.group_pattern(), route.get_pattern().strip("/")
+                "/" + self._group_pattern(), route.get_pattern().strip("/")
             )
             if full_pattern != "/":
                 full_pattern = full_pattern.rstrip("/")
@@ -76,7 +76,7 @@ class Router(object):
                     raise RouteAlreadyExists
                 self._named_routes[name] = route
 
-    def group_pattern(self):
+    def _group_pattern(self):
         pattern = (
             path_join(*tuple(
                 group_pattern.strip("/")
