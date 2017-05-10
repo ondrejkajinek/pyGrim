@@ -336,5 +336,3 @@ class Server(object):
                 raise
 
         return url
-
-# eof

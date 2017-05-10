@@ -40,7 +40,6 @@ def connect_redis_sentinel(config, section="session:args:"):
     except ImportError:
         log.exception("Nemohu naimportovat python pyckage: redis")
         return
-    # endtry
 
     class SentinelWrapper(object):
 
@@ -48,7 +47,6 @@ def connect_redis_sentinel(config, section="session:args:"):
             self.sentinel_conn = sentinel_conn
             self.master_group_name = master_group_name
             self._discover()
-        # enddef
 
         def _discover(self):
             self.master = self.sentinel_conn.master_for(
@@ -60,7 +58,6 @@ def connect_redis_sentinel(config, section="session:args:"):
 
         def __getattr__(self, attr):
             return getattr(self.master, attr)
-        # enddef
 
     sentinel_hosts = config.get(section + "sentinels")
     sentinel_hosts = [
@@ -96,7 +93,3 @@ def connect_redis_sentinel(config, section="session:args:"):
     )
 
     return SentinelWrapper(sentinel_obj, master_group_name)
-# enddef
-
-
-# eof
