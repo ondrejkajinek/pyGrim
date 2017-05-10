@@ -34,7 +34,7 @@ class Router(object):
             )
             self._routes.append(route)
         elif isinstance(route, RouteGroup):
-            self.push_group(route.pattern.strip("/"))
+            self.push_group(route.get_pattern().strip("/"))
             for one in route:
                 self.map(one)
 

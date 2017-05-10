@@ -8,22 +8,46 @@ from urllib import quote_plus
 log = getLogger("pygrim.components.route")
 
 
-class RouteGroup(list):
-    def __init__(self, pattern, *args, **kwargs):
-        self.pattern = pattern
-        super(RouteGroup, self).__init__(*args, **kwargs)
-
-
-class Route(object):
+class RouteObject(object):
 
     REGEXP_TYPE = type(re_compile(r""))
-
     TRAILING_SLASH_REGEXP = re_compile("/\??$")
+
+    def __init__(self, pattern, *args, **kwargs):
+        super(RouteObject, self).__init__(*args, **kwargs)
+        self._pattern = self._strip_trailing_slash(pattern)
+
+    def get_pattern(self):
+        return (
+            self._pattern.pattern
+            if self.is_regex()
+            else self._pattern
+        )
+
+    def is_regex(self, pattern=None):
+        return type(pattern or self._pattern) == self.REGEXP_TYPE
+
+    def _strip_trailing_slash(self, pattern):
+        return (
+            re_compile(self.TRAILING_SLASH_REGEXP.sub("", pattern.pattern))
+            if self.is_regex(pattern)
+            else pattern.rstrip("/")
+        )
+
+
+class RouteGroup(RouteObject, list):
+    def __init__(self, pattern, *args, **kwargs):
+        super(RouteGroup, self).__init__(pattern, *args, **kwargs)
+
+
+class Route(RouteObject):
+
     URL_FORMAT_REGEXP = re_compile("%\(([^)]+)\)s")
     URL_OPTIONAL_REGEXP = re_compile("([^%])\((.*?)\)\?")
     URL_PARAM_REGEXP = re_compile("\(\?P<([^>]+)>[^)]+\)")
 
     def __init__(self, methods, pattern, handle_name, name=None):
+        super(Route, self).__init__(pattern)
         # temporary
         # pyGrim will assign requested method on its postfork event
         self._handle = None
@@ -37,7 +61,6 @@ class Route(object):
             )
         ))
         self._name = name
-        self._pattern = self._strip_trailing_slash(pattern)
 
     def assign_method(self, method):
         self._handle = method
@@ -53,16 +76,6 @@ class Route(object):
 
     def get_name(self):
         return self._name
-
-    def get_pattern(self):
-        return (
-            self._pattern.pattern
-            if self.is_regex()
-            else self._pattern
-        )
-
-    def is_regex(self, pattern=None):
-        return type(pattern or self._pattern) == self.REGEXP_TYPE
 
     def matches(self, context):
         return (
@@ -131,13 +144,6 @@ class Route(object):
             )
 
         return readable, mandatory_names, optional_names
-
-    def _strip_trailing_slash(self, pattern):
-        return (
-            re_compile(self.TRAILING_SLASH_REGEXP.sub("", pattern.pattern))
-            if self.is_regex(pattern)
-            else pattern.rstrip("/")
-        )
 
     def _supports_http_method(self, method):
         return method in self._methods
