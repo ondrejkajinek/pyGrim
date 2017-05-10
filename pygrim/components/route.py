@@ -124,7 +124,7 @@ class Route(RouteObject):
             )
 
         log.debug("Route constructed url: %r for params: %r" % (url, params))
-        return "/%s" % url.lstrip("/")
+        return "/%s" % url.strip("/")
 
     def _pattern_to_readable(self):
         param_names = self.URL_PARAM_REGEXP.findall(self._pattern.pattern)
