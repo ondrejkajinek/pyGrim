@@ -119,7 +119,8 @@ class uses_data(BaseDecorator):
             server = args[0]
             method = server._methods[self._method]
             context = kwargs.get("context")
-            context.view_data.update(method(context)["data"])
+            method_returned = method(context) or {}
+            context.view_data.update(method_returned.get("data", {}))
             res = func(*args, **kwargs)
             return res
 
