@@ -109,10 +109,8 @@ class Server(object):
         else:
             log.warning("There is no function to register routes!")
 
-        try:
+        if hasattr(self, "postfork"):
             self.postfork()
-        except AttributeError:
-            pass
 
     def render(self, *args, **kwargs):
         log.warning(
