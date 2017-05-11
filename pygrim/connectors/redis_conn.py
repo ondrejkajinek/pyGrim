@@ -1,44 +1,39 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
+# coding: utf8
+
 from logging import getLogger
+from string import strip as string_strip
+
 log = getLogger("jsonrpc.connectors.redis")
 
 
 def connect_redis(config, section="session:args:"):
     """
-    helper funkce pro napojeni mongo databaze
-        Host=       #server na kterem to bezi
-        Port=       #port kde to bezi
-        Password=   #heslo - optional pokud je neuvedene jede se bez hesla
-        Database=   #cislo databaze
+    helper function for connecting to redis storage
+        Host        server where redis is running
+        Port        port used for connection to redis
+        Password    password, optional
+        Database    db number
     """
+
     try:
         import redis
     except ImportError:
-        log.exception("Nemohu naimportovat python pyckage: redis")
+        log.exception("Cannot import python pyckage: redis")
         return
-    # endtry
 
-    host = config.get(section + "host")
-    port = config.getint(section + "port", 6379)
-    db_num = config.getint(section + "database")
-    password = config.get(section + "password", None)
-
-    client = redis.StrictRedis(
-        host=host,
-        port=port,
-        db=db_num,
-        password=password
+    return redis.StrictRedis(
+        host=config.get(section + "host"),
+        port=config.getint(section + "port", 6379),
+        db=config.getint(section + "database"),
+        password=config.get(section + "password", None)
     )
-    return client
-# enddef connect_redis
 
 
 def connect_redis_sentinel(config, section="session:args:"):
     try:
         from redis.sentinel import Sentinel
     except ImportError:
-        log.exception("Nemohu naimportovat python pyckage: redis")
+        log.exception("Cannot import python pyckage: redis")
         return
 
     class SentinelWrapper(object):
@@ -50,21 +45,22 @@ def connect_redis_sentinel(config, section="session:args:"):
 
         def _discover(self):
             self.master = self.sentinel_conn.master_for(
-                self.master_group_name)
+                self.master_group_name
+            )
             # slave nepotrebujeme ;-)
             # self.slave = self.sentinel_conn.slave_for(
-            #     self.master_group_name)
-        # enddef
+            #     self.master_group_name
+            # )
 
         def __getattr__(self, attr):
             return getattr(self.master, attr)
 
-    sentinel_hosts = config.get(section + "sentinels")
-    sentinel_hosts = [
-        i.strip().split(":", 1)
-        for i in sentinel_hosts.split(",")
+    sentinel_hosts = tuple(
+        map(string_strip, i.split(":", 1))
+        for i
+        in config.get(section + "sentinels", "").split(",")
         if i.strip()
-    ]
+    )
 
     sh_len = len(sentinel_hosts)
 
@@ -78,18 +74,13 @@ def connect_redis_sentinel(config, section="session:args:"):
             " -> DANGER –> "
             "for more informations read the docs"
         )
-    # endif
-
-    timeout = float(config.get(section + "socket_timeout", 0.1))
-    master_group_name = config.get(section + "master_group_name")
-    db_num = config.getint(section + "database")
-    password = config.get(section + "password", None)
 
     sentinel_obj = Sentinel(
         sentinel_hosts,
-        socket_timeout=timeout,
-        db=db_num,
-        password=password
+        socket_timeout=config.getfloat(section + "socket_timeout", 0.1),
+        db=config.getint(section + "database"),
+        password=config.get(section + "password", None)
     )
 
+    master_group_name = config.get(section + "master_group_name")
     return SentinelWrapper(sentinel_obj, master_group_name)
