@@ -1,3 +1,9 @@
+pygrim (0.1.12) testing; urgency=low
+
+  * JSON na JSON2
+
+ -- Jan Kolda <kolda@grandit.cz>  Fri, 12 May 2017 13:23:13 +0200
+
 pygrim (0.1.11) testing; urgency=medium
 
   * json fixes 
