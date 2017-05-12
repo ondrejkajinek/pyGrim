@@ -36,4 +36,9 @@ class Routes(object):
                 )
             ]
         ))
-        router.pop_group()
+        router.map(RouteGroup(
+            re_compile("/regroup/(?P<group>[^/]+)"),
+            (
+                Route(("GET",), "/print", "test_re_group"),
+            )
+        ))

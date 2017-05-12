@@ -25,7 +25,6 @@ class RedisSessionStorageBase(SessionStorage):
     def delete(self, session):
         self.redis.delete(session.get_id())
         return True
-    # enddef
 
     def load(self, request):
         session_id, session_new = self._get_id(request)
@@ -35,14 +34,11 @@ class RedisSessionStorageBase(SessionStorage):
                 session = pickle.loads(data)
             else:
                 session = {}
-            # endif
         except IOError:
             log.exception("Loading session failed!")
             raise SessionLoadError()
         else:
             return Session(session_id, session, session_new)
-        # endtry
-    # enddef
 
     def save(self, session):
         try:
@@ -53,14 +49,9 @@ class RedisSessionStorageBase(SessionStorage):
             )
             if ret is not True:
                 raise ValueError("Session not stored to redis")
-            # endif
         except:
             log.exception("Saving session failed!")
             raise SessionSaveError()
-        # endtry
-    # enddef
-
-# endclass
 
 
 class RedisSessionStorage(RedisSessionStorageBase):
@@ -68,8 +59,6 @@ class RedisSessionStorage(RedisSessionStorageBase):
     def __init__(self, config):
         super(RedisSessionStorage, self).__init__(config)
         self.redis = connect_redis(config, section="session:args:")
-    # enddef
-# endclass
 
 
 class RedisSentinelSessionStorage(RedisSessionStorageBase):
@@ -77,8 +66,3 @@ class RedisSentinelSessionStorage(RedisSessionStorageBase):
     def __init__(self, config):
         super(RedisSentinelSessionStorage, self).__init__(config)
         self.redis = connect_redis_sentinel(config, section="session:args:")
-    # enddef
-# endclass
-
-
-# eof

@@ -67,7 +67,12 @@ class Server(object):
                 context.get_response_status_code(),
                 context.get_response_headers()
             )
-            yield context.get_response_body()
+            body = context.get_response_body()
+            if context.generates_response():
+                for part in body():
+                    yield part
+            else:
+                yield body
 
         return
 
@@ -329,5 +334,3 @@ class Server(object):
                 raise
 
         return url
-
-# eof

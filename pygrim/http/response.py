@@ -1,7 +1,7 @@
 # coding: utf8
 
-# from compatibility import http_responses
 from datetime import datetime, timedelta
+from inspect import isgeneratorfunction
 from logging import getLogger
 from os import SEEK_END
 from urllib import quote_plus as url_quoteplus
@@ -39,6 +39,7 @@ class Response(object):
             "Content-Type": "text/html"
         }
         self.status = 200
+        self.is_generator_function = False
 
     def finalize(self):
         if self.status in self.NO_CONTENT_STATUSES:
@@ -48,17 +49,30 @@ class Response(object):
             if isinstance(self.body, unicode):
                 self.body = self.body.encode("utf-8")
 
-            if isinstance(self.body, (basestring,)):
-                self.headers["Content-Length"] = str(len(self.body))
-            elif hasattr(self.body, "seek") and hasattr(self.body, "tell"):
-                self.body.seek(0, SEEK_END)
-                self.headers["Content-Length"] = str(self.body.tell())
-                self.body.seek(0)
+            if isinstance(self.body, str):
+                self.headers["Content-Length"] = len(self.body)
+            elif isgeneratorfunction(self.body):
+                self.is_generator_function = True
             else:
-                log.warning(
-                    "Unable to get Content-Length for content %r", self.body
-                )
-                self.headers["Content-Length"] = 0
+                if "Content-Length" not in self.headers:
+                    if (
+                        hasattr(self.body, "seek") and
+                        hasattr(self.body, "tell")
+                    ):
+                        self.body.seek(0, SEEK_END)
+                        self.headers["Content-Length"] = self.body.tell()
+                        self.body.seek(0)
+                    else:
+                        log.warning(
+                            "Unable to get Content-Length for type %r",
+                            type(self.body)
+                        )
+
+                try:
+                    self.body = self.body.read()
+                except AttributeError:
+                    log.critical("Can't read read response body content!")
+                    log.exception("Can't read read response body content!")
 
         self.headers = [
             (key, str(value))

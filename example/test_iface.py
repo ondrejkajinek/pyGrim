@@ -54,6 +54,14 @@ class Test(object):
         context.template = "layout.jinja"
         self.render(context)
 
+    @template_method("layout.jinja")
+    def test_re_group(self, context, group):
+        return {
+            "data": {
+                "text": "/regroup/%s/print" % group
+            }
+        }
+
     @method()
     def ise(self, context):
         # this will cause ValueError ;)

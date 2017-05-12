@@ -18,12 +18,11 @@ def find_files(where, suffixes=("py",)):
             f.rsplit(".", 1)[-1] in suffixes
         )
     ]
-# enddef
 
 
 def get_git_val(*val):
     return subprocess.check_output(['git'] + list(val)).strip()
-# enddef
+
 
 if __name__ == "__main__":
     args = dict(
@@ -41,6 +40,3 @@ if __name__ == "__main__":
     )
 
     setup(**args)
-# endif __main__
-
-# eof
