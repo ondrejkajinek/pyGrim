@@ -1,6 +1,7 @@
 # coding: utf8
 
-from .json2 import dumps as json_dumps
+from .abstract_view import AbstractView
+from ..json2 import dumps as json_dumps
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from os import getcwd, path
 
@@ -15,7 +16,7 @@ def _suppress_none(self, variable):
 _suppress_none.contextfunction = True
 
 
-class View(object):
+class JinjaView(AbstractView):
 
     def __init__(self, config, extra_functions):
         self._debug = config.get("jinja:debug", False)
@@ -46,9 +47,6 @@ class View(object):
 
         self._initialize_assets(config)
         self._initialize_extensions(config)
-
-    def display(self, context):
-        context.set_response_body(self.render(context))
 
     def get_template_directory(self):
         return self._env.loader.searchpath

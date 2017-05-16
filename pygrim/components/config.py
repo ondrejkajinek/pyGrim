@@ -33,7 +33,8 @@ DEFAULT_CONFIG = {
         }
     },
     "view": {
-        "enabled": True
+        "enabled": True,
+        "type": "jinja"
     }
 }
 

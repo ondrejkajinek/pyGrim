@@ -7,3 +7,4 @@ from .session import (
     FileSessionStorage, MockSession, RedisSessionStorage,
     RedisSentinelSessionStorage, SessionStorage
 )
+from .view import AbstractView, JinjaView, MockView
