@@ -164,6 +164,9 @@ class Server(object):
             else:
                 route.assign_method(method)
 
+    def _find_router_class(self):
+        return Router
+
     def _find_session_handler(self):
         storage_type = self.config.get("session:type")
         try:
@@ -268,11 +271,20 @@ class Server(object):
     def _initialize_basic_components(self):
         self.config = ConfigObject(self._get_config_path())
         self._register_logger(self.config)
-        self.router = Router()
-
+        self._register_router()
         self._register_view()
         self._register_session_handler()
         log.debug("Basic components initialized")
+
+    def _register_router(self):
+        router_class = self._find_router_class()
+        router = router_class()
+        if not isinstance(router, AbstractRouter):
+            raise ValueError(
+                "Router class has to be derived from AbstractRouter"
+            )
+
+        self.router = router
 
     def _register_session_handler(self):
         if self.config.get("session:enabled", False):
