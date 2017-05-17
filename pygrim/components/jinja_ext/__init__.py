@@ -1,3 +1,3 @@
 # coding: utf8
 
-from base import BaseExtension
+from .base import BaseExtension

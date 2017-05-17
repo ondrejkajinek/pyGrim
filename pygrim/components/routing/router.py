@@ -1,15 +1,21 @@
 # coding: utf8
 
+from .exceptions import RouteAlreadyExists, RouteNotRegistered
+from .route import Route, RouteGroup
 from logging import getLogger
 from os.path import join as path_join
 from re import compile as re_compile
-from ..router_exceptions import RouteAlreadyExists, RouteNotRegistered
-from .route import Route, RouteGroup
 
 log = getLogger("pygrim.components.router")
 
 
-class Router(object):
+class AbstractRouter(object):
+
+    def __init__(self):
+        raise NotImplementedError()
+
+
+class Router(AbstractRouter):
 
     def __init__(self):
         self._named_routes = None

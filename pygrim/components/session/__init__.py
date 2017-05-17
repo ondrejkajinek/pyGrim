@@ -1,6 +1,5 @@
 # coding: utf8
 
-from .session_storage import SessionStorage
 from .file_session_storage import FileSessionStorage
 from .redis_session_storage import RedisSessionStorage
 from .redis_session_storage import RedisSentinelSessionStorage

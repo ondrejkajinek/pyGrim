@@ -1,17 +1,18 @@
 # coding: utf8
 
-from .components import ConfigObject, Router
-from .components import initialize_loggers
+from .components.config import ConfigObject
+from .components.log import initialize_loggers
+from .components.routing import AbstractRouter, Router
+from .components.routing import (
+    DispatchFinished, RouteSuccessfullyDispatched, RouteNotFound,
+    RouteNotRegistered, RoutePassed
+)
 from .components.session import (
     FileSessionStorage, MockSession, RedisSessionStorage,
     RedisSentinelSessionStorage, SessionStorage
 )
 from .components.view import AbstractView, JinjaView, MockView
 from .http import Context
-from .router_exceptions import (
-    DispatchFinished, RouteSuccessfullyDispatched, RouteNotFound,
-    RouteNotRegistered, RoutePassed
-)
 
 from inspect import getmembers, ismethod
 from jinja2 import escape, Markup
