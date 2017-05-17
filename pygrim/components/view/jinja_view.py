@@ -98,13 +98,12 @@ class JinjaView(AbstractView):
         return result
 
     def _get_extensions(self, config):
-        extensions = set(
-            "pygrim.components.jinja_ext.BaseExtension"
-        )
+        extensions = set((
+            "pygrim.components.jinja_ext.BaseExtension",
+        ))
         extensions.update(
             config.get("jinja:extensions", ())
         )
-
         return list(extensions)
 
     def _initialize_assets(self, config):
