@@ -17,7 +17,7 @@ def find_files(where, suffixes=("py",)):
 
 
 def get_git_val(*val):
-    return subprocess.check_output(['git'] + list(val)).strip()
+    return subprocess.check_output(["git"] + list(val)).strip()
 
 
 def get_version():
@@ -27,22 +27,22 @@ def get_version():
     return version
 
 
-name = 'pygrim'
-desc = 'lightweight python frontend framework'
+name = "pygrim"
+desc = "lightweight python frontend framework"
 
 if __name__ == "__main__":
-    args = dict(
-        name=name,
-        version=get_version(),
-        description=desc,
-        author=get_git_val('config', 'user.name'),
-        author_email=get_git_val('config', 'user.email'),
-        url='http://www.grandit.cz/',
-        packages=find_packages(),
-        install_requires=(
-            'Python >= 2.7',
-            'compatibility >= 0.0.2',
+    args = {
+        "name": name,
+        "version": get_version(),
+        "description": desc,
+        "author": get_git_val("config", "user.name"),
+        "author_email": get_git_val("config", "user.email"),
+        "url": "http://www.grandit.cz/",
+        "packages": find_packages(),
+        "install_requires": (
+            "Python >= 2.7",
+            "compatibility >= 0.0.2",
         )
-    )
+    }
 
     setup(**args)

@@ -36,7 +36,6 @@ buildDeb:
 	cd build/${PACKAGE_NAME}-${VERSION} && \
 		$(ENV) debuild -us -uc
 
-
 pkg: deb
 
 debtest: deb
@@ -63,7 +62,6 @@ linkItems:
 	( \
 		ln -sf `pwd`/pygrim /usr/local/lib/python${PY_VERSION}/dist-packages/pygrim  \
     )
-
 
 postinstall:
 	( \
