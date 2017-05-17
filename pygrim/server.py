@@ -19,7 +19,10 @@ from logging import getLogger
 from os import path
 from string import strip as string_strip
 from sys import exc_info
-from uwsgi import opt as uwsgi_opt
+try:
+    from uwsgi import opt as uwsgi_opt
+except ImportError:
+    uwsgi_opt = {}
 
 
 log = getLogger("pygrim.server")
