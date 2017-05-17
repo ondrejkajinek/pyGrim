@@ -283,7 +283,7 @@ class Server(object):
         handler = storage_class(self.config)
         if not isinstance(handler, SessionStorage):
             raise ValueError(
-                "SessionHandler should be derived from SessionStorage"
+                "Session handler has to be derived from SessionStorage"
             )
 
         self.session_handler = handler
@@ -304,9 +304,7 @@ class Server(object):
         }
         view = view_class(self.config, extra_functions)
         if not isinstance(view, AbstractView):
-            raise ValueError(
-                "View class should be derived from AbstractView"
-            )
+            raise ValueError("View class has to be derived from AbstractView")
 
         self.view = view
 
