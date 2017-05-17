@@ -1,7 +1,12 @@
 # coding: utf8
 
+from __future__ import print_function
 from functools import wraps
-from uwsgi import log as uwsgi_log
+try:
+    from uwsgi import log as uwsgi_log
+except ImportError:
+    uwsgi_log = print
+
 from logging import getLogger
 log = getLogger(__name__)
 

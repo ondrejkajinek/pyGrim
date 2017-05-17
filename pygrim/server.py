@@ -1,14 +1,17 @@
 # coding: utf8
 
-from .components import ConfigObject, Router, View
+from .components import ConfigObject, Router
 from .components import initialize_loggers
+from .components.session import (
+    FileSessionStorage, MockSession, RedisSessionStorage,
+    RedisSentinelSessionStorage, SessionStorage
+)
+from .components.view import AbstractView, JinjaView, MockView
 from .http import Context
 from .router_exceptions import (
     DispatchFinished, RouteSuccessfullyDispatched, RouteNotFound,
     RouteNotRegistered, RoutePassed
 )
-from .session import MockSession, SessionStorage, FileSessionStorage
-from .session import RedisSessionStorage, RedisSentinelSessionStorage
 
 from inspect import getmembers, ismethod
 from jinja2 import escape, Markup
@@ -16,7 +19,10 @@ from logging import getLogger
 from os import path
 from string import strip as string_strip
 from sys import exc_info
-from uwsgi import opt as uwsgi_opt
+try:
+    from uwsgi import opt as uwsgi_opt
+except ImportError:
+    uwsgi_opt = {}
 
 
 log = getLogger("pygrim.server")
@@ -44,6 +50,10 @@ class Server(object):
         "file": FileSessionStorage,
         "redis": RedisSessionStorage,
         "redis-sentinel": RedisSentinelSessionStorage
+    }
+
+    KNOWN_VIEW_CLASSES = {
+        "jinja": JinjaView
     }
 
     def __init__(self):
@@ -162,6 +172,15 @@ class Server(object):
 
         return storage_class
 
+    def _find_view_class(self):
+        view_type = self.config.get("view:type")
+        try:
+            view_class = self.KNOWN_VIEW_CLASSES[view_type]
+        except KeyError:
+            raise RuntimeError("Unknown view class: %r", view_class)
+
+        return view_class
+
     def _get_config_path(self):
         for key in self.KNOWN_CONFIG_FORMATS:
             if key in uwsgi_opt:
@@ -250,9 +269,7 @@ class Server(object):
         self._register_logger(self.config)
         self.router = Router()
 
-        if self.config.get("view:enabled", True):
-            self._register_view(self.config)
-
+        self._register_view()
         self._register_session_handler()
         log.debug("Basic components initialized")
 
@@ -273,13 +290,24 @@ class Server(object):
     def _register_logger(self, config):
         initialize_loggers(config)
 
-    def _register_view(self, config):
+    def _register_view(self):
+        if self.config.get("view:enabled", True):
+            view_class = self._find_view_class()
+        else:
+            view_class = MockView
+
         extra_functions = {
             "print_css": self._jinja_print_css,
             "print_js": self._jinja_print_js,
             "url_for": self._jinja_url_for,
         }
-        self.view = View(config, extra_functions)
+        view = view_class(self.config, extra_functions)
+        if not isinstance(view, AbstractView):
+            raise ValueError(
+                "View class should be derived from AbstractView"
+            )
+
+        self.view = view
 
     def _static_file_mtime(self, static_file):
 
