@@ -4,10 +4,6 @@ from setuptools import setup, find_packages
 import subprocess
 import os
 
-version = '0.1.12'
-name = 'pygrim'
-desc = 'lightweight python frontend framework'
-
 
 def find_files(where, suffixes=("py",)):
     return [
@@ -24,10 +20,20 @@ def get_git_val(*val):
     return subprocess.check_output(['git'] + list(val)).strip()
 
 
+def get_version():
+    with open("debian/version") as version_in:
+        version = version_in.read().strip()
+
+    return version
+
+
+name = 'pygrim'
+desc = 'lightweight python frontend framework'
+
 if __name__ == "__main__":
     args = dict(
         name=name,
-        version=version,
+        version=get_version(),
         description=desc,
         author=get_git_val('config', 'user.name'),
         author_email=get_git_val('config', 'user.email'),
