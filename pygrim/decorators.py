@@ -8,7 +8,7 @@ except ImportError:
     uwsgi_log = print
 
 from logging import getLogger
-log = getLogger(__name__)
+log = getLogger("pygrim.decorators")
 
 
 class BaseDecorator(object):
