@@ -98,16 +98,13 @@ class JinjaView(AbstractView):
         return result
 
     def _get_extensions(self, config):
-        extensions = [
-            "pygrim.components.jinja_ext.BaseExtension"
-        ]
-        if self._has_i18n(config):
-            extensions.append("jinja2.ext.i18n")
-
-        return extensions
-
-    def _has_i18n(self, config):
-        return config.get("jinja:i18n:enabled", False)
+        extensions = set((
+            "pygrim.components.jinja_ext.BaseExtension",
+        ))
+        extensions.update(
+            config.get("jinja:extensions", ())
+        )
+        return list(extensions)
 
     def _initialize_assets(self, config):
         self._css = set(config.get("assets:css", ()))
@@ -124,7 +121,7 @@ class JinjaView(AbstractView):
         self._js.update(config.get("assets:js", {}))
 
     def _initialize_extensions(self, config):
-        if self._has_i18n(config):
+        if "jinja2.ext.i18n" in self._env.extensions:
             self._initialize_i18n(config)
 
     def _initialize_i18n(self, config):
