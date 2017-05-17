@@ -15,9 +15,7 @@ DEFAULT_CONFIG = {
         "environment": {
             "autoescape": ("jinja",)
         },
-        "i18n": {
-            "enabled": False
-        },
+        "extensions": [],
         "suppress_none": True,
         "template_path": "templates"
     },
