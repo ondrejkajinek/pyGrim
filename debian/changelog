@@ -1,6 +1,18 @@
+pygrim (0.1.14) testing; urgency=low
+
+  * version
+
+ -- Jan Kolda <kolda@grandit.cz>  Mon, 22 May 2017 15:10:54 +0200
+
+pygrim (0.1.13) testing; urgency=low
+
+  * extension for jinja
+
+ -- Jan Kolda <kolda@grandit.cz>  Wed, 17 May 2017 12:51:00 +0200
+
 pygrim (0.1.12) testing; urgency=low
 
-  * JSON na JSON2
+  * JSON to JSON2
 
  -- Jan Kolda <kolda@grandit.cz>  Fri, 12 May 2017 13:23:13 +0200
 
@@ -12,19 +24,19 @@ pygrim (0.1.11) testing; urgency=medium
 
 pygrim (0.1.10) testing; urgency=low
 
-  * oprava ziskavani ip
+  * fixed obtaining IP
 
  -- Miroslav Čech <cech@grandit.cz>  Thu, 04 May 2017 11:52:42 +0200
 
 pygrim (0.1.9) testing; urgency=low
 
-   * oprava baleni
+   * packaging fix
 
  -- Miroslav Čech <cech@grandit.cz>  Thu, 04 May 2017 10:28:26 +0200
 
 pygrim (0.1.8) testing; urgency=low
 
-  * moznost zakazat autoreload_sablon 
+  * added posibility to disable template autoreloading
 
  -- Miroslav Čech <cech@grandit.cz>  Thu, 04 May 2017 10:12:03 +0200
 
@@ -36,7 +48,7 @@ pygrim (0.1.7) testing; urgency=low
 
 pygrim (0.1.6) testing; urgency=low
 
-  * oprava utf
+  * utf fix
 
  -- Miroslav Čech <cech@grandit.cz>  Wed, 03 May 2017 14:24:12 +0200
 

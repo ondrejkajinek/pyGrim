@@ -14,7 +14,7 @@ from .components.session import (
 from .components.view import AbstractView, JinjaView, MockView
 from .http import Context
 
-from inspect import getmembers, ismethod
+from inspect import getmembers, ismethod, getmro
 from jinja2 import escape, Markup
 from logging import getLogger
 from os import path
@@ -61,7 +61,8 @@ class Server(object):
         self._initialize_basic_components()
         self._methods = {}
         self._not_found_method = None
-        self._error_method = None
+        self._default_error_method = self.__default_error_method
+        self._custom_error_handlers = {}
 
     def __call__(self, environment, start_response):
         start_response = ResponseWrap(start_response)
@@ -138,10 +139,24 @@ class Server(object):
                 if getattr(member, "_not_found", False) is True:
                     self._not_found_method = member
 
-                if getattr(member, "_error", False) is True:
-                    self._error_method = member
+                if getattr(member, "_default_error", False) is True:
+                    self._default_error_method = member
 
-    def _default_error_method(self, context, exc):
+                errs = getattr(member, "_error", ())
+                for err_cls in errs:
+                    if err_cls in self._custom_error_handlers:
+                        raise RuntimeError(
+                            "duplicate handling of error %r with %r and %r",
+                            err_cls,
+                            self._custom_error_handlers[err_cls], member
+                        )
+                    # endif
+                    log.debug("Registered %r to handle %r", member, err_cls)
+                    self._custom_error_handlers[err_cls] = member
+                # endfor
+            # endfor
+
+    def __default_error_method(self, context, exc):
         log.exception(exc.message)
         context.set_response_body("Internal Server Error")
         context.set_response_status(500)
@@ -211,14 +226,21 @@ class Server(object):
                 else "<no route>"
             )
         )
-        if self._error_method is not None:
-            try:
-                self._error_method(context=context, exc=exc)
-                return
-            except DispatchFinished:
-                return
-            except:
-                exc = exc_info()[1]
+        try:
+
+            for one in getmro(exc.__class__):
+                log.debug("Looking up error handler for %r", one)
+                if one in self._custom_error_handlers:
+                    self._custom_error_handlers[one](context=context, exc=exc)
+                    return
+                # endif
+            if self._default_error_method is not None:
+                    self._default_error_method(context=context, exc=exc)
+                    return
+        except DispatchFinished:
+            return
+        except:
+            exc = exc_info()[1]
 
         try:
             self._default_error_method(context=context, exc=exc)
@@ -265,6 +287,7 @@ class Server(object):
                 "No route found to handle request %r, handled by not_found",
                 context.get_request_uri()
             )
+            self._handle_not_found(context=context)
         except:
             self._handle_error(context=context, exc=exc_info()[1])
 
