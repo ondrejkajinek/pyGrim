@@ -27,6 +27,7 @@ prePackCheck:
 deb: prePackCheck clean buildDeb
 
 buildDeb:
+	${EDITOR} debian/version
 	DEBFULLNAME="${AUTHOR}" DEBEMAIL="${AUTHOR_EMAIL}" dch -v `python setup.py -V` --distribution testing ${CSV} ${REV}
 	python setup.py sdist
 	mkdir build
