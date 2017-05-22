@@ -50,6 +50,28 @@ class method(BaseDecorator):
         return super(method, self).__call__(wrapper)
 
 
+class error_handler(method):
+    """
+    Marks method as an error handler.
+    Such method is used when error occurs during request handling.
+    Also exposes method, see method decorator.
+    """
+
+    def __init__(self, *args, **kwargs):
+        super(error_handler, self).__init__(**kwargs)
+        for one in args:
+            if not issubclass(one, BaseException):
+                raise RuntimeError(
+                    "%s must be subclass of Basexception" % (one,)
+                )
+        self.err_classes = args
+    # enddef
+
+    def __call__(self, func):
+        func._error = self.err_classes
+        return super(error_handler, self).__call__(func)
+
+
 class error_method(method):
     """
     Marks method as an error handler.
@@ -58,7 +80,7 @@ class error_method(method):
     """
 
     def __call__(self, func):
-        func._error = True
+        func._default_error = True
         return super(error_method, self).__call__(func)
 
 
