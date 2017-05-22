@@ -1,3 +1,9 @@
+pygrim (0.1.13) testing; urgency=low
+
+  * Pridani extension
+
+ -- Jan Kolda <kolda@grandit.cz>  Wed, 17 May 2017 12:51:00 +0200
+
 pygrim (0.1.12) testing; urgency=low
 
   * JSON na JSON2
