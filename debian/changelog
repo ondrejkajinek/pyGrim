@@ -1,3 +1,9 @@
+pygrim (0.1.15) testing; urgency=medium
+
+  * fixed error method handling
+
+ -- Václav Pokluda <vaclav.pokluda@grandit.cz>  Tue, 23 May 2017 11:59:09 +0200
+
 pygrim (0.1.14) testing; urgency=low
 
   * version
