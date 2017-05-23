@@ -244,6 +244,8 @@ class Server(object):
 
         try:
             self._default_error_method(context=context, exc=exc)
+        except DispatchFinished:
+            return
         except:
             log.critical("Error in default_error_method")
             log.exception("Error in default_error_method")
