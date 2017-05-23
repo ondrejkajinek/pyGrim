@@ -20,8 +20,10 @@ prePackCheck:
 
 deb: prePackCheck clean buildDeb
 
-buildDeb:
+editversion:
 	${EDITOR} debian/version
+
+buildDeb: editversion
 	$(eval VERSION := $(shell cat debian/version))
 	$(eval ARCHIVE := $(PACKAGE_NAME)-$(VERSION).tar.gz)
 	$(eval ORIG_ARCHIVE := $(PACKAGE_NAME)_$(VERSION).orig.tar.gz)
