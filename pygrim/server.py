@@ -218,7 +218,7 @@ class Server(object):
         raise RouteSuccessfullyDispatched()
 
     def _handle_error(self, context, exc):
-        log.error(
+        log.exception(
             "Error while dispatching to: %r",
             (
                 context.current_route._handle_name
@@ -232,11 +232,10 @@ class Server(object):
                 log.debug("Looking up error handler for %r", one)
                 if one in self._custom_error_handlers:
                     self._custom_error_handlers[one](context=context, exc=exc)
-                    return
-                # endif
+                    raise DispatchFinished
             if self._default_error_method is not None:
-                    self._default_error_method(context=context, exc=exc)
-                    return
+                self._default_error_method(context=context, exc=exc)
+                raise DispatchFinished
         except DispatchFinished:
             return
         except:

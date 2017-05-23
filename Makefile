@@ -15,7 +15,7 @@ all: deb
 
 prePackCheck:
 	( \
-		apt-get install devscripts fakeroot python-all\
+		apt-get install devscripts fakeroot python-all \
 	)
 
 deb: prePackCheck clean buildDeb
@@ -55,7 +55,6 @@ clean:
 sdist:
 	./setup.py sdist
 
-
 install:
 	python setup.py install
 
@@ -67,7 +66,7 @@ linkItems:
 postinstall:
 	( \
     	bash `pwd`/debian/postinst \
-    )
+	)
 
 installPackages:
 	( \

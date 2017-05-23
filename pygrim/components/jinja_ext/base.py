@@ -5,6 +5,7 @@ from datetime import date, datetime
 from dateutil.parser import parse as parse_dt
 from jinja2.ext import Extension
 from logging import getLogger
+from re import compile as re_compile, IGNORECASE as re_IGNORECASE
 from os import path
 
 log = getLogger("pygrim.components.jinja_ext.base")
@@ -16,6 +17,13 @@ DTS = (
 
 
 class BaseExtension(Extension):
+
+    DASH_SQUEEZER = re_compile("r/-{2,}")
+    ENVELOPE_REGEXP = re_compile(r"/envelope/\d+\.jpeg", re_IGNORECASE)
+    ENVELOPE_FORMATTER = re_compile(r"\d+")
+    SEO_DASHED = (" ", "/", "\\", ":")
+    SEO_REMOVED = ("*", "?", "\"", "<", ">", "|", ",")
+    SIZE_PREFIXES = ("", "ki", "Mi", "Gi", "Ti")
 
     tags = set()
 
@@ -55,8 +63,30 @@ class BaseExtension(Extension):
 
         return obj.strftime(format_str).decode('utf-8')
 
+    def fit_image(self, path, size=160):
+        if not path.startswith("/"):
+            path = "//img.mopa.cz/fit,img,%s,;%s" % size, path
+        elif self.ENVELOPE_REGEXP.match(path):
+            path = self.ENVELOPE_FORMATTER.sub("%s/\g<0>" % size, path)
+
+        return path
+
     def minutes_from_seconds(self, seconds):
         return "%d:%d" % (seconds // 60, seconds % 60)
+
+    def readable_size(self, size, precision=0):
+        index = 0
+        while size >= 1024:
+            size /= 1024.0
+            index += 1
+
+        return ("%%0.%df %%sB" % precision) % (size, self.SIZE_PREFIXES[index])
+
+    def seo(self, text):
+        return self.DASH_SQUEEZER.sub(
+            "-",
+            self._seo_dashize(self._seo_remove(text))
+        )
 
     def site_url(self, context, site):
         return path.join(self.base_url(context), site)
@@ -70,7 +100,10 @@ class BaseExtension(Extension):
             "as_json": self.as_json,
             "base_url": self.base_url,
             "date_format": self.date_format,
+            "fit_image": self.fit_image,
             "mins_from_secs": self.minutes_from_seconds,
+            "readable_size": self.readable_size,
+            "seo": self.seo,
             "site_url": self.site_url,
             "tojson": self.to_json
         }
@@ -80,3 +113,9 @@ class BaseExtension(Extension):
             "base_url": self.base_url,
             "site_url": self.site_url
         }
+
+    def _seo_dashize(self, text):
+        return "".join("-" if c in self.SEO_DASHED else c for c in text)
+
+    def _seo_remove(self, text):
+        return "".join("" if c in self.SEO_REMOVED else c for c in text)
