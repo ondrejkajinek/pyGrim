@@ -275,10 +275,9 @@ class Server(object):
             for route in self.router.matching_routes(context):
                 try:
                     self._handle_by_route(route=route, context=context)
+                    break
                 except RoutePassed:
                     continue
-                else:
-                    break
             else:
                 raise RouteNotFound()
         except RouteNotFound:
