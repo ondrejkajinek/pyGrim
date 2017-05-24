@@ -68,7 +68,7 @@ class error_handler(method):
     # enddef
 
     def __call__(self, func):
-        func._error = self.err_classes
+        func._custom_error = self.err_classes
         return super(error_handler, self).__call__(func)
 
 
@@ -80,7 +80,7 @@ class error_method(method):
     """
 
     def __call__(self, func):
-        func._default_error = True
+        func._error = True
         return super(error_method, self).__call__(func)
 
 

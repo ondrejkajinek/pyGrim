@@ -59,8 +59,8 @@ class Server(object):
     def __init__(self):
         self._initialize_basic_components()
         self._methods = {}
-        self._not_found_method = None
-        self._default_error_method = self.__default_error_method
+        self._not_found_method = self._default_not_found_method
+        self._error_method = self._default_error_method
         self._custom_error_handlers = {}
 
     def __call__(self, environment, start_response):
@@ -138,10 +138,10 @@ class Server(object):
                 if getattr(member, "_not_found", False) is True:
                     self._not_found_method = member
 
-                if getattr(member, "_default_error", False) is True:
-                    self._default_error_method = member
+                if getattr(member, "_error", False) is True:
+                    self._error_method = member
 
-                errs = getattr(member, "_error", ())
+                errs = getattr(member, "_custom_error", ())
                 for err_cls in errs:
                     if err_cls in self._custom_error_handlers:
                         raise RuntimeError(
@@ -155,7 +155,7 @@ class Server(object):
                 # endfor
             # endfor
 
-    def __default_error_method(self, context, exc):
+    def _default_error_method(self, context, exc):
         log.exception(exc.message)
         context.set_response_body("Internal Server Error")
         context.set_response_status(500)
@@ -239,9 +239,8 @@ class Server(object):
                 if one in self._custom_error_handlers:
                     self._custom_error_handlers[one](context=context, exc=exc)
                     raise DispatchFinished
-            if self._default_error_method is not None:
-                self._default_error_method(context=context, exc=exc)
-                raise DispatchFinished
+            self._error_method(context=context, exc=exc)
+            raise DispatchFinished
         except DispatchFinished:
             return
         except:
@@ -261,13 +260,11 @@ class Server(object):
             "No route found to handle request %r",
             context.get_request_uri()
         )
-        not_found_method = (
-            self._not_found_method or self._default_not_found_method
-        )
         try:
-            not_found_method(context=context)
+            self._not_found_method(context=context)
         except DispatchFinished:
             pass
+
         log.debug("RouteNotFound exception successfully handled")
 
     def _handle_request(self, context):
