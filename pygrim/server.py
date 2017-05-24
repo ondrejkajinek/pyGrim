@@ -103,7 +103,7 @@ class Server(object):
                 )
             ))
         else:
-            raise RuntimeError("redirect needs url or route_name params")
+            raise RuntimeError("Redirect needs 'url' or 'route_name' param.")
 
         context.redirect(url, **kwargs)
         raise DispatchFinished()
@@ -170,7 +170,7 @@ class Server(object):
                 method = self._methods[route.get_handle_name()]
             except KeyError:
                 raise RuntimeError(
-                    u"Server has no method %r to handle route %r" % (
+                    "Server has no method %r to handle route %r." % (
                         route._handle_name,
                         route.get_name() or route.get_pattern()
                     )
@@ -186,7 +186,7 @@ class Server(object):
         try:
             storage_class = self.KNOWN_SESSION_HANDLERS[storage_type]
         except KeyError:
-            raise RuntimeError("Unknown session handler: %r", storage_type)
+            raise RuntimeError("Unknown session handler: %r.", storage_type)
 
         return storage_class
 
@@ -195,7 +195,7 @@ class Server(object):
         try:
             view_class = self.KNOWN_VIEW_CLASSES[view_type]
         except KeyError:
-            raise RuntimeError("Unknown view class: %r", view_class)
+            raise RuntimeError("Unknown view class: %r.", view_class)
 
         return view_class
 
@@ -217,15 +217,13 @@ class Server(object):
         except RoutePassed:
             raise
 
-        log.debug(
-            "Dispatch succeded on: %r", context.current_route
-        )
+        log.debug("Dispatch succeded on: %r.", context.current_route)
         if context.session_loaded():
             context.save_session(self.session_handler)
 
     def _handle_error(self, context, exc):
         log.exception(
-            "Error while dispatching to: %r",
+            "Error while dispatching to: %r.",
             (
                 context.current_route._handle_name
                 if context.current_route
@@ -235,7 +233,7 @@ class Server(object):
         try:
 
             for one in getmro(exc.__class__):
-                log.debug("Looking up error handler for %r", one)
+                log.debug("Looking up error handler for %r.", one)
                 if one in self._custom_error_handlers:
                     self._custom_error_handlers[one](context=context, exc=exc)
                     raise DispatchFinished
@@ -251,13 +249,13 @@ class Server(object):
         except DispatchFinished:
             return
         except:
-            log.critical("Error in default_error_method")
-            log.exception("Error in default_error_method")
+            log.critical("Error in default_error_method.")
+            log.exception("Error in default_error_method.")
             raise
 
     def _handle_not_found(self, context):
         log.debug(
-            "No route found to handle request %r",
+            "No route found to handle request %r.",
             context.get_request_uri()
         )
         try:
@@ -265,7 +263,7 @@ class Server(object):
         except DispatchFinished:
             pass
 
-        log.debug("RouteNotFound exception successfully handled")
+        log.debug("RouteNotFound exception successfully handled.")
 
     def _handle_request(self, context):
         try:
@@ -288,14 +286,14 @@ class Server(object):
         self._register_router()
         self._register_view()
         self._register_session_handler()
-        log.debug("Basic components initialized")
+        log.debug("Basic components initialized.")
 
     def _register_router(self):
         router_class = self._find_router_class()
         router = router_class()
         if not isinstance(router, AbstractRouter):
             raise ValueError(
-                "Router class has to be derived from AbstractRouter"
+                "Router class has to be derived from AbstractRouter."
             )
 
         self.router = router
@@ -309,7 +307,7 @@ class Server(object):
         handler = storage_class(self.config)
         if not isinstance(handler, SessionStorage):
             raise ValueError(
-                "Session handler has to be derived from SessionStorage"
+                "Session handler has to be derived from SessionStorage."
             )
 
         self.session_handler = handler
@@ -330,7 +328,7 @@ class Server(object):
         }
         view = view_class(self.config, extra_functions)
         if not isinstance(view, AbstractView):
-            raise ValueError("View class has to be derived from AbstractView")
+            raise ValueError("View class has to be derived from AbstractView.")
 
         self.view = view
 
