@@ -260,8 +260,6 @@ class Server(object):
         except DispatchFinished:
             pass
 
-        raise RouteNotFound
-
     def _handle_request(self, context):
         try:
             session_loaded = False
@@ -279,7 +277,7 @@ class Server(object):
                 except RoutePassed:
                     continue
             else:
-                self._handle_not_found(context=context)
+                raise RouteNotFound()
         except RouteSuccessfullyDispatched:
             log.debug("Dispatch succeded on: %r", context.current_route)
             if session_loaded:
@@ -289,6 +287,7 @@ class Server(object):
                 "No route found to handle request %r, handled by not_found",
                 context.get_request_uri()
             )
+            self._handle_not_found(context=context)
         except:
             self._handle_error(context=context, exc=exc_info()[1])
 
