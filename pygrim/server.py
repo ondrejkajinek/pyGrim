@@ -1,6 +1,9 @@
 # coding: utf8
 
 from .components.config import ConfigObject
+from .components.exceptions import (
+    WrongRouterBase, WrongSessionHandlerBase, WrongViewBase
+)
 from .components.log import initialize_loggers
 from .components.routing import AbstractRouter, Router
 from .components.routing import (
@@ -290,9 +293,7 @@ class Server(object):
         router_class = self._find_router_class()
         router = router_class()
         if not isinstance(router, AbstractRouter):
-            raise ValueError(
-                "Router class has to be derived from AbstractRouter."
-            )
+            raise WrongRouterBase(router)
 
         self.router = router
 
@@ -304,9 +305,7 @@ class Server(object):
 
         handler = storage_class(self.config)
         if not isinstance(handler, SessionStorage):
-            raise ValueError(
-                "Session handler has to be derived from SessionStorage."
-            )
+            raise WrongSessionHandlerBase(handler)
 
         self.session_handler = handler
 
@@ -326,7 +325,7 @@ class Server(object):
         }
         view = view_class(self.config, extra_functions)
         if not isinstance(view, AbstractView):
-            raise ValueError("View class has to be derived from AbstractView.")
+            raise WrongViewBase(view)
 
         self.view = view
 
