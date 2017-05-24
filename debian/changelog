@@ -1,3 +1,9 @@
+pygrim (0.1.16) testing; urgency=medium
+
+  * fixed route not found handling
+
+ -- Václav Pokluda <vaclav.pokluda@grandit.cz>  Wed, 24 May 2017 13:06:41 +0200
+
 pygrim (0.1.15) testing; urgency=medium
 
   * fixed error method handling
