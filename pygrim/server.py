@@ -248,6 +248,10 @@ class Server(object):
             raise
 
     def _handle_not_found(self, context):
+        log.debug(
+            "No route found to handle request %r",
+            context.get_request_uri()
+        )
         not_found_method = (
             self._not_found_method or self._default_not_found_method
         )
@@ -255,6 +259,7 @@ class Server(object):
             not_found_method(context=context)
         except DispatchFinished:
             pass
+        log.debug("RouteNotFound exception successfully handled")
 
     def _handle_request(self, context):
         try:
@@ -276,12 +281,7 @@ class Server(object):
             else:
                 raise RouteNotFound()
         except RouteNotFound:
-            log.debug(
-                "No route found to handle request %r",
-                context.get_request_uri()
-            )
             self._handle_not_found(context=context)
-            log.debug("RouteNotFound exception successfully handled")
         except:
             self._handle_error(context=context, exc=exc_info()[1])
 
