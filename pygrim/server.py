@@ -283,10 +283,11 @@ class Server(object):
                 context.save_session(self.session_handler)
         except RouteNotFound:
             log.debug(
-                "No route found to handle request %r, handled by not_found",
+                "No route found to handle request %r",
                 context.get_request_uri()
             )
             self._handle_not_found(context=context)
+            log.debug("RouteNotFound exception successfully handled")
         except:
             self._handle_error(context=context, exc=exc_info()[1])
 
