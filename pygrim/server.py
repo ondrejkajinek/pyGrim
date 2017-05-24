@@ -4,8 +4,7 @@ from .components.config import ConfigObject
 from .components.log import initialize_loggers
 from .components.routing import AbstractRouter, Router
 from .components.routing import (
-    DispatchFinished, RouteSuccessfullyDispatched, RouteNotFound,
-    RouteNotRegistered, RoutePassed
+    DispatchFinished, RouteNotFound, RouteNotRegistered, RoutePassed
 )
 from .components.session import (
     FileSessionStorage, MockSession, RedisSessionStorage,
@@ -215,8 +214,6 @@ class Server(object):
         except RoutePassed:
             raise
 
-        raise RouteSuccessfullyDispatched()
-
     def _handle_error(self, context, exc):
         log.exception(
             "Error while dispatching to: %r",
@@ -275,12 +272,15 @@ class Server(object):
                     self._handle_by_route(route=route, context=context)
                 except RoutePassed:
                     continue
+                else:
+                    log.debug(
+                        "Dispatch succeded on: %r", context.current_route
+                    )
+                    if session_loaded:
+                        context.save_session(self.session_handler)
+                    break
             else:
                 raise RouteNotFound()
-        except RouteSuccessfullyDispatched:
-            log.debug("Dispatch succeded on: %r", context.current_route)
-            if session_loaded:
-                context.save_session(self.session_handler)
         except RouteNotFound:
             log.debug(
                 "No route found to handle request %r",

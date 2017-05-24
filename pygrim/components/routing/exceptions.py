@@ -13,10 +13,6 @@ class RouteAlreadyExists(BaseRouterException):
         )
 
 
-class RouteSuccessfullyDispatched(BaseRouterException):
-    pass
-
-
 class RouteNotFound(BaseRouterException):
     pass
 
