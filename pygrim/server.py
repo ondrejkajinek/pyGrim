@@ -133,27 +133,7 @@ class Server(object):
     def _collect_exposed_methods(self):
         for unused_, member in getmembers(self, predicate=ismethod):
             if getattr(member, "_exposed", False) is True:
-                self._methods[member._dispatch_name] = member
-
-                if getattr(member, "_not_found", False) is True:
-                    self._not_found_method = member
-
-                if getattr(member, "_error", False) is True:
-                    self._error_method = member
-
-                errs = getattr(member, "_custom_error", ())
-                for err_cls in errs:
-                    if err_cls in self._custom_error_handlers:
-                        raise RuntimeError(
-                            "duplicate handling of error %r with %r and %r",
-                            err_cls,
-                            self._custom_error_handlers[err_cls], member
-                        )
-                    # endif
-                    log.debug("Registered %r to handle %r", member, err_cls)
-                    self._custom_error_handlers[err_cls] = member
-                # endfor
-            # endfor
+                self._process_exposed_method(member)
 
     def _default_error_method(self, context, exc):
         log.exception(exc.message)
@@ -287,6 +267,24 @@ class Server(object):
         self._register_view()
         self._register_session_handler()
         log.debug("Basic components initialized.")
+
+    def _process_exposed_method(self, method):
+        self._methods[method._dispatch_name] = method
+
+        if getattr(method, "_not_found", False) is True:
+            self._not_found_method = method
+
+        if getattr(method, "_error", False) is True:
+            self._error_method = method
+
+        for err_cls in getattr(method, "_custom_error", ()):
+            if err_cls in self._custom_error_handlers:
+                raise RuntimeError(
+                    "Duplicate handling of error %r with %r and %r.",
+                    err_cls, self._custom_error_handlers[err_cls], method
+                )
+            log.debug("Registered %r to handle %r.", method, err_cls)
+            self._custom_error_handlers[err_cls] = method
 
     def _register_router(self):
         router_class = self._find_router_class()
