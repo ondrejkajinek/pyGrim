@@ -207,7 +207,7 @@ class Server(object):
             raise RuntimeError("No known config format used to start uwsgi!")
 
     def _handle_by_route(self, route, context):
-        if route.requires_session() and not context.session_loaded():
+        if route.requires_session():
             context.load_session(self.session_handler)
 
         try:

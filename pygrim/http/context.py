@@ -149,12 +149,13 @@ class Context(object):
         return self._request.environment["request_method"] == "POST"
 
     def load_session(self, session_handler):
-        self.session = session_handler.load(self._request)
-        self._session_loaded = True
-        log.debug(
-            "Session handler: %r loaded session: %r",
-            type(session_handler), self.session
-        )
+        if self._session_loaded is False:
+            self.session = session_handler.load(self._request)
+            self._session_loaded = True
+            log.debug(
+                "Session handler: %r loaded session: %r",
+                type(session_handler), self.session
+            )
 
     def pop_route_params(self):
         params = self._route_params.copy()
