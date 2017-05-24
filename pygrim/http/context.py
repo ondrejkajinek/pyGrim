@@ -28,10 +28,6 @@ class Context(object):
         self._response = Response()
         self._route_params = None
         self._session_loaded = False
-        self._targets = {
-            "request": self._request,
-            "response": self._response
-        }
 
         self.set_route_params()
 
