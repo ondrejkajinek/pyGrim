@@ -207,12 +207,21 @@ class Server(object):
             raise RuntimeError("No known config format used to start uwsgi!")
 
     def _handle_by_route(self, route, context):
+        if route.requires_session() and not context.session_loaded():
+            context.load_session(self.session_handler)
+
         try:
             route.dispatch(context=context)
         except DispatchFinished:
             pass
         except RoutePassed:
             raise
+
+        log.debug(
+            "Dispatch succeded on: %r", context.current_route
+        )
+        if context.session_loaded():
+            context.save_session(self.session_handler)
 
     def _handle_error(self, context, exc):
         log.exception(
@@ -264,19 +273,11 @@ class Server(object):
     def _handle_request(self, context):
         try:
             for route in self.router.matching_routes(context):
-                if route.requires_session() and not context.session_loaded():
-                    context.load_session(self.session_handler)
-
                 try:
                     self._handle_by_route(route=route, context=context)
                 except RoutePassed:
                     continue
                 else:
-                    log.debug(
-                        "Dispatch succeded on: %r", context.current_route
-                    )
-                    if context.session_loaded():
-                        context.save_session(self.session_handler)
                     break
             else:
                 raise RouteNotFound()
