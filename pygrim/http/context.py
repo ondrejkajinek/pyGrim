@@ -3,11 +3,14 @@
 from .grim_dicts import ImmutableDict
 from .request import Request
 from .response import Response
+from logging import getLogger
 
 try:
     from compatibility import http_responses
 except ImportError:
     from .codes import http_responses
+
+log = getLogger("pygrim.http.context")
 
 
 class Context(object):
@@ -24,6 +27,7 @@ class Context(object):
         self._request = Request(environment)
         self._response = Response()
         self._route_params = None
+        self._session_loaded = False
         self._targets = {
             "request": self._request,
             "response": self._response
@@ -146,6 +150,11 @@ class Context(object):
 
     def load_session(self, session_handler):
         self.session = session_handler.load(self._request)
+        self._session_loaded = True
+        log.debug(
+            "Session handler: %r loaded session: %r",
+            type(session_handler), self.session
+        )
 
     def pop_route_params(self):
         params = self._route_params.copy()
@@ -162,6 +171,9 @@ class Context(object):
             self.add_cookie(
                 **session_handler.cookie_for(self.session)
             )
+
+    def session_loaded(self):
+        return self._session_loaded
 
     def set_response_body(self, body):
         self._response.body = body

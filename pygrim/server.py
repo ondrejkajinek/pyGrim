@@ -258,15 +258,9 @@ class Server(object):
 
     def _handle_request(self, context):
         try:
-            session_loaded = False
             for route in self.router.matching_routes(context):
-                if route.requires_session() and context.session is None:
+                if route.requires_session() and not context.session_loaded():
                     context.load_session(self.session_handler)
-                    session_loaded = True
-                    log.debug(
-                        "Session handler: %r loaded session: %r",
-                        type(self.session_handler), context.session
-                    )
 
                 try:
                     self._handle_by_route(route=route, context=context)
@@ -276,7 +270,7 @@ class Server(object):
                     log.debug(
                         "Dispatch succeded on: %r", context.current_route
                     )
-                    if session_loaded:
+                    if context.session_loaded():
                         context.save_session(self.session_handler)
                     break
             else:
