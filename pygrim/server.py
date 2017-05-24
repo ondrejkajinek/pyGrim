@@ -289,7 +289,6 @@ class Server(object):
                 "No route found to handle request %r, handled by not_found",
                 context.get_request_uri()
             )
-            self._handle_not_found(context=context)
         except:
             self._handle_error(context=context, exc=exc_info()[1])
 
