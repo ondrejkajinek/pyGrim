@@ -91,8 +91,12 @@ class not_found_method(method):
     Also exposes method, see method decorator.
     """
 
+    def __init__(self, *args, **kwargs):
+        super(not_found_method, self).__init__(**kwargs)
+        self._not_found_prefixes = args or ("",)
+
     def __call__(self, func):
-        func._not_found = True
+        func._not_found = self._not_found_prefixes
         return super(not_found_method, self).__call__(func)
 
 

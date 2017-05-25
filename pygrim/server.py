@@ -62,7 +62,10 @@ class Server(object):
     def __init__(self):
         self._initialize_basic_components()
         self._methods = {}
-        self._not_found_method = self._default_not_found_method
+        # temporary
+        # self._not_found_methods will be changed to tuple
+        # during postfork-time method _collect_exposed_methods
+        self._not_found_methods = {}
         self._error_method = self._default_error_method
         self._custom_error_handlers = {}
 
@@ -138,6 +141,11 @@ class Server(object):
             if getattr(member, "_exposed", False) is True:
                 self._process_exposed_method(member)
 
+        if "" not in self._not_found_methods:
+            self._not_found_methods[""] = self._default_not_found_method
+
+        self._finalize_not_found_handlers()
+
     def _default_error_method(self, context, exc):
         log.exception(exc.message)
         context.set_response_body("Internal Server Error")
@@ -146,6 +154,17 @@ class Server(object):
     def _default_not_found_method(self, context):
         context.set_response_body("Not found")
         context.set_response_status(404)
+
+    def _finalize_not_found_handlers(self):
+        self._not_found_methods = tuple(
+            (prefix, self._not_found_methods[prefix])
+            for prefix
+            in sorted(
+                self._not_found_methods,
+                key=lambda x: x.count("/"),
+                reverse=True
+            )
+        )
 
     def _finalize_routes(self):
         for route in self.router.get_routes():
@@ -242,7 +261,11 @@ class Server(object):
             context.get_request_uri()
         )
         try:
-            self._not_found_method(context=context)
+            request_uri = context.get_request_uri()
+            for prefix, handle in self._not_found_methods:
+                if request_uri.startswith(prefix):
+                    handle(context=context)
+                    break
         except DispatchFinished:
             pass
 
@@ -274,8 +297,8 @@ class Server(object):
     def _process_exposed_method(self, method):
         self._methods[method._dispatch_name] = method
 
-        if getattr(method, "_not_found", False) is True:
-            self._not_found_method = method
+        for prefix in getattr(method, "_not_found", ()):
+            self._process_not_found_method(method, prefix)
 
         if getattr(method, "_error", False) is True:
             self._error_method = method
@@ -288,6 +311,15 @@ class Server(object):
                 )
             log.debug("Registered %r to handle %r.", method, err_cls)
             self._custom_error_handlers[err_cls] = method
+
+    def _process_not_found_method(self, method, prefix):
+        if prefix in self._not_found_methods:
+            raise RuntimeError(
+                "Duplicate handling of not-found %r with %r and %r.",
+                prefix, self._not_found_methods[prefix], method
+            )
+        log.debug("Method %r registered to handle not-found state", method)
+        self._not_found_methods[prefix] = method
 
     def _register_router(self):
         router_class = self._find_router_class()
