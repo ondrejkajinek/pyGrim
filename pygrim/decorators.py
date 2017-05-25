@@ -20,16 +20,6 @@ class BaseDecorator(object):
     def __call__(self, func):
         return func
 
-    def _expose(self, func):
-        if func.__name__.startswith("_"):
-            uwsgi_log(
-                "pygrim WARNING: Internal method %r will not be exposed!" % (
-                    func.__name__
-                )
-            )
-        else:
-            func._exposed = True
-
 
 class method(BaseDecorator):
     """
@@ -48,6 +38,16 @@ class method(BaseDecorator):
             return func(*args, **kwargs)
 
         return super(method, self).__call__(wrapper)
+
+    def _expose(self, func):
+        if func.__name__.startswith("_"):
+            uwsgi_log(
+                "pygrim WARNING: Internal method %r will not be exposed!" % (
+                    func.__name__
+                )
+            )
+        else:
+            func._exposed = True
 
 
 class error_handler(method):
