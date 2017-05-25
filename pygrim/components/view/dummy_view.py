@@ -1,7 +1,7 @@
 # coding: utf8
 
 
-class MockView(object):
+class DummyView(object):
 
     def __init__(self, config, extra_functions):
         pass

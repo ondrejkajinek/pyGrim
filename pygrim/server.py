@@ -10,10 +10,10 @@ from .components.routing import (
     DispatchFinished, RouteNotFound, RouteNotRegistered, RoutePassed
 )
 from .components.session import (
-    FileSessionStorage, MockSession, RedisSessionStorage,
+    DummySession, FileSessionStorage, RedisSessionStorage,
     RedisSentinelSessionStorage, SessionStorage
 )
-from .components.view import AbstractView, JinjaView, MockView
+from .components.view import AbstractView, DummyView, JinjaView
 from .http import Context
 
 from inspect import getmembers, ismethod, getmro
@@ -301,7 +301,7 @@ class Server(object):
         if self.config.get("session:enabled", False):
             storage_class = self._find_session_handler()
         else:
-            storage_class = MockSession
+            storage_class = DummySession
 
         handler = storage_class(self.config)
         if not isinstance(handler, SessionStorage):
@@ -316,7 +316,7 @@ class Server(object):
         if self.config.get("view:enabled", True):
             view_class = self._find_view_class()
         else:
-            view_class = MockView
+            view_class = DummyView
 
         extra_functions = {
             "print_css": self._jinja_print_css,
