@@ -294,6 +294,19 @@ class Server(object):
         self._register_session_handler()
         log.debug("Basic components initialized.")
 
+    def _process_custom_error_handler(self, method, err_cls):
+        if err_cls in self._custom_error_handlers:
+            raise RuntimeError(
+                "Duplicate handling of error %r with %r and %r.",
+                err_cls, self._custom_error_handlers[err_cls], method
+            )
+        log.debug("Registered %r to handle %r.", method, err_cls)
+        self._custom_error_handlers[err_cls] = method
+
+    def _process_error_handler(self, method):
+        log.debug("Method %r registered as default exception handler", method)
+        self._error_method = method
+
     def _process_exposed_method(self, method):
         self._methods[method._dispatch_name] = method
 
@@ -301,16 +314,10 @@ class Server(object):
             self._process_not_found_method(method, prefix)
 
         if getattr(method, "_error", False) is True:
-            self._error_method = method
+            self._process_error_handler(method)
 
         for err_cls in getattr(method, "_custom_error", ()):
-            if err_cls in self._custom_error_handlers:
-                raise RuntimeError(
-                    "Duplicate handling of error %r with %r and %r.",
-                    err_cls, self._custom_error_handlers[err_cls], method
-                )
-            log.debug("Registered %r to handle %r.", method, err_cls)
-            self._custom_error_handlers[err_cls] = method
+            self._process_custom_error_handler(method, err_cls)
 
     def _process_not_found_method(self, method, prefix):
         if prefix in self._not_found_methods:
