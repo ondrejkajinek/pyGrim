@@ -332,16 +332,16 @@ class Server(object):
     def _static_file_mtime(self, static_file):
 
         def get_static_file_abs_path(static_file):
-            for option, mapping in self.config.get("uwsgi").iteritems():
-                if option == "static-map":
-                    prefix, mapped_dir = map(
-                        string_strip, mapping.split("=")
+            static_map = self.config.get("uwsgi:static-map", ())
+            if isinstance(static_map, basestring):
+                static_map = (static_map, )
+
+            for mapping in static_map:
+                prefix, mapped_dir = map(string_strip, mapping.split("="))
+                if static_file.startswith(prefix):
+                    return path.join(
+                        mapped_dir, path.relpath(static_file, prefix)
                     )
-                    if static_file.startswith(prefix):
-                        return path.join(
-                            mapped_dir,
-                            path.relpath(static_file, prefix)
-                        )
             else:
                 return ""
 
