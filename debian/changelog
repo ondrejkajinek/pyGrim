@@ -1,3 +1,9 @@
+pygrim (0.1.17) testing; urgency=medium
+
+  * force_ssl option + some changes in core server
+
+ -- Václav Pokluda <vaclav.pokluda@grandit.cz>  Fri, 26 May 2017 10:19:42 +0200
+
 pygrim (0.1.16) testing; urgency=medium
 
   * fixed route not found handling

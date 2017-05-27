@@ -18,6 +18,7 @@ class Context(object):
     def __init__(self, environment, config):
         self.config = config
         self._suppress_port = config.get("context:suppress_port", False)
+        self._force_https = config.get("context:force_https", False)
 
         self.current_route = None
         self.session = None
@@ -125,6 +126,8 @@ class Context(object):
         return "%s://%s" % (scheme, self.get_request_host_with_port(scheme))
 
     def get_request_scheme(self):
+        if self._force_https:
+            return "https"
         return self._request.environment["wsgi.url_scheme"]
 
     def get_response_body(self):
