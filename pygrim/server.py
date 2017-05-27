@@ -238,9 +238,9 @@ class Server(object):
                 log.debug("Looking up error handler for %r.", one)
                 if one in self._custom_error_handlers:
                     self._custom_error_handlers[one](context=context, exc=exc)
-                    raise DispatchFinished
+                    raise DispatchFinished()
             self._error_method(context=context, exc=exc)
-            raise DispatchFinished
+            raise DispatchFinished()
         except DispatchFinished:
             return
         except:
