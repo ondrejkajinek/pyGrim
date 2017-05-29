@@ -18,26 +18,12 @@ class BaseDecorator(object):
         self._kwargs = kwargs
 
     def __call__(self, func):
-        return func
-
-
-class method(BaseDecorator):
-    """
-    Exposes method to server so that it can be used for route handling.
-    Every decorator that is supposed to expose methods has to be
-    properly derived from this class.
-    """
-
-    def __call__(self, func):
-        func._session = bool(self._kwargs.get("session"))
-        func._dispatch_name = self._kwargs.pop("dispatch_name", func.__name__)
-        self._expose(func)
 
         @wraps(func)
         def wrapper(*args, **kwargs):
             return func(*args, **kwargs)
 
-        return super(method, self).__call__(wrapper)
+        return wrapper
 
     def _expose(self, func):
         if func._dispatch_name.startswith("_"):
@@ -47,7 +33,28 @@ class method(BaseDecorator):
                 )
             )
         else:
+            log.debug("Exposing %r", func)
             func._exposed = True
+
+
+class method(BaseDecorator):
+    """
+    Exposes method to server so that it can be used for route handling.
+    Every decorator that is supposed to expose methods has to be
+    properly derived from this class.
+    """
+    def __init__(self, *args, **kwargs):
+        self._session = bool(kwargs.pop("session", False))
+        self._dispatch_name = kwargs.pop("dispatch_name", None)
+        super(method, self).__init__(*args, **kwargs)
+
+    def __call__(self, func):
+        func._session = self._session
+        func._dispatch_name = self._dispatch_name or func.__name__
+
+        self._expose(func)
+
+        return super(method, self).__call__(func)
 
 
 class error_handler(method):
@@ -120,7 +127,8 @@ class template_display(BaseDecorator):
             context.template = res.get("_template", self._template)
             args[0].display(context)
 
-        return super(template_display, self).__call__(wrapper)
+        # super not called - no need to double wrap
+        return wrapper
 
 
 class template_method(template_display, method):
@@ -129,12 +137,17 @@ class template_method(template_display, method):
     """
 
     def __init__(self, *args, **kwargs):
-        args = list(args)
-        template = kwargs.pop("template", args.pop(0))
+        if "template" in kwargs:
+            template = kwargs.pop("template")
+        elif args:
+            template = args[0]
+            args = args[1:]
+        else:
+            raise RuntimeError(
+                "Error registering template_method withot template given"
+            )
+        # endif
         super(template_method, self).__init__(template, *args, **kwargs)
-
-    def __call__(self, func):
-        return super(template_method, self).__call__(func)
 
 
 class uses_data(BaseDecorator):
@@ -155,4 +168,7 @@ class uses_data(BaseDecorator):
             res = func(*args, **kwargs)
             return res
 
-        return super(uses_data, self).__call__(wrapper)
+        # super not called - no need to double wrap
+        return wrapper
+
+# eof
