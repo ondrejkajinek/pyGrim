@@ -41,7 +41,6 @@ if __name__ == "__main__":
         "packages": find_packages(),
         "install_requires": (
             "Python >= 2.7",
-            "compatibility >= 0.0.2",
         )
     }
 

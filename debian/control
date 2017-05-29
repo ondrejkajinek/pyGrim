@@ -8,7 +8,7 @@ X-Python-Version: >= 2.7
 
 Package: pygrim
 Architecture: all
-Depends: ${misc:Depends}, ${python:Depends}, python-dev, python-compatibility, python-pip
+Depends: ${misc:Depends}, ${python:Depends}, python-dev, python-pip
 X-Python-Version: >= 2.7
 Description: frontend framework
  written in python, inspired by php slim

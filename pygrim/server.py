@@ -1,17 +1,20 @@
 # coding: utf8
 
 from .components.config import ConfigObject
+from .components.exceptions import (
+    WrongRouterBase, WrongSessionHandlerBase, WrongViewBase
+)
 from .components.log import initialize_loggers
 from .components.routing import AbstractRouter, Router
 from .components.routing import (
-    DispatchFinished, RouteSuccessfullyDispatched, RouteNotFound,
-    RouteNotRegistered, RoutePassed
+    DispatchFinished, MissingRouteHandle, RouteNotFound, RouteNotRegistered,
+    RoutePassed
 )
 from .components.session import (
-    FileSessionStorage, MockSession, RedisSessionStorage,
+    DummySession, FileSessionStorage, RedisSessionStorage,
     RedisSentinelSessionStorage, SessionStorage
 )
-from .components.view import AbstractView, JinjaView, MockView
+from .components.view import AbstractView, DummyView, JinjaView
 from .http import Context
 
 from inspect import getmembers, ismethod, getmro
@@ -60,8 +63,11 @@ class Server(object):
     def __init__(self):
         self._initialize_basic_components()
         self._methods = {}
-        self._not_found_method = None
-        self._default_error_method = self.__default_error_method
+        # temporary
+        # self._not_found_methods will be changed to tuple
+        # during postfork-time method _collect_exposed_methods
+        self._not_found_methods = {}
+        self._error_method = self._default_error_method
         self._custom_error_handlers = {}
 
     def __call__(self, environment, start_response):
@@ -104,7 +110,7 @@ class Server(object):
                 )
             ))
         else:
-            raise RuntimeError("redirect needs url or route_name params")
+            raise RuntimeError("Redirect needs 'url' or 'route_name' param.")
 
         context.redirect(url, **kwargs)
         raise DispatchFinished()
@@ -134,29 +140,14 @@ class Server(object):
     def _collect_exposed_methods(self):
         for unused_, member in getmembers(self, predicate=ismethod):
             if getattr(member, "_exposed", False) is True:
-                self._methods[member._dispatch_name] = member
+                self._process_exposed_method(member)
 
-                if getattr(member, "_not_found", False) is True:
-                    self._not_found_method = member
+        if "" not in self._not_found_methods:
+            self._not_found_methods[""] = self._default_not_found_method
 
-                if getattr(member, "_default_error", False) is True:
-                    self._default_error_method = member
+        self._finalize_not_found_handlers()
 
-                errs = getattr(member, "_error", ())
-                for err_cls in errs:
-                    if err_cls in self._custom_error_handlers:
-                        raise RuntimeError(
-                            "duplicate handling of error %r with %r and %r",
-                            err_cls,
-                            self._custom_error_handlers[err_cls], member
-                        )
-                    # endif
-                    log.debug("Registered %r to handle %r", member, err_cls)
-                    self._custom_error_handlers[err_cls] = member
-                # endfor
-            # endfor
-
-    def __default_error_method(self, context, exc):
+    def _default_error_method(self, context, exc):
         log.exception(exc.message)
         context.set_response_body("Internal Server Error")
         context.set_response_status(500)
@@ -165,16 +156,25 @@ class Server(object):
         context.set_response_body("Not found")
         context.set_response_status(404)
 
+    def _finalize_not_found_handlers(self):
+        self._not_found_methods = tuple(
+            (prefix, self._not_found_methods[prefix])
+            for prefix
+            in sorted(
+                self._not_found_methods,
+                key=lambda x: x.count("/"),
+                reverse=True
+            )
+        )
+
     def _finalize_routes(self):
         for route in self.router.get_routes():
             try:
                 method = self._methods[route.get_handle_name()]
             except KeyError:
-                raise RuntimeError(
-                    u"Server has no method %r to handle route %r" % (
-                        route._handle_name,
-                        route.get_name() or route.get_pattern()
-                    )
+                raise MissingRouteHandle(
+                    route._handle_name,
+                    route.get_name() or route.get_pattern()
                 )
             else:
                 route.assign_method(method)
@@ -187,7 +187,7 @@ class Server(object):
         try:
             storage_class = self.KNOWN_SESSION_HANDLERS[storage_type]
         except KeyError:
-            raise RuntimeError("Unknown session handler: %r", storage_type)
+            raise RuntimeError("Unknown session handler: %r.", storage_type)
 
         return storage_class
 
@@ -196,7 +196,7 @@ class Server(object):
         try:
             view_class = self.KNOWN_VIEW_CLASSES[view_type]
         except KeyError:
-            raise RuntimeError("Unknown view class: %r", view_class)
+            raise RuntimeError("Unknown view class: %r.", view_class)
 
         return view_class
 
@@ -208,6 +208,9 @@ class Server(object):
             raise RuntimeError("No known config format used to start uwsgi!")
 
     def _handle_by_route(self, route, context):
+        if route.requires_session():
+            context.load_session(self.session_handler)
+
         try:
             route.dispatch(context=context)
         except DispatchFinished:
@@ -215,11 +218,13 @@ class Server(object):
         except RoutePassed:
             raise
 
-        raise RouteSuccessfullyDispatched()
+        log.debug("Dispatch succeded on: %r.", context.current_route)
+        if context.session_loaded():
+            context.save_session(self.session_handler)
 
     def _handle_error(self, context, exc):
-        log.error(
-            "Error while dispatching to: %r",
+        log.exception(
+            "Error while dispatching to: %r.",
             (
                 context.current_route._handle_name
                 if context.current_route
@@ -229,14 +234,12 @@ class Server(object):
         try:
 
             for one in getmro(exc.__class__):
-                log.debug("Looking up error handler for %r", one)
+                log.debug("Looking up error handler for %r.", one)
                 if one in self._custom_error_handlers:
                     self._custom_error_handlers[one](context=context, exc=exc)
-                    return
-                # endif
-            if self._default_error_method is not None:
-                    self._default_error_method(context=context, exc=exc)
-                    return
+                    raise DispatchFinished()
+            self._error_method(context=context, exc=exc)
+            raise DispatchFinished()
         except DispatchFinished:
             return
         except:
@@ -247,48 +250,37 @@ class Server(object):
         except DispatchFinished:
             return
         except:
-            log.critical("Error in default_error_method")
-            log.exception("Error in default_error_method")
+            log.critical("Error in default_error_method.")
+            log.exception("Error in default_error_method.")
             raise
 
     def _handle_not_found(self, context):
-        not_found_method = (
-            self._not_found_method or self._default_not_found_method
+        log.debug(
+            "No route found to handle request %r.",
+            context.get_request_uri()
         )
         try:
-            not_found_method(context=context)
+            request_uri = context.get_request_uri()
+            for prefix, handle in self._not_found_methods:
+                if request_uri.startswith(prefix):
+                    handle(context=context)
+                    break
         except DispatchFinished:
             pass
 
-        raise RouteNotFound
+        log.debug("RouteNotFound exception successfully handled.")
 
     def _handle_request(self, context):
         try:
-            session_loaded = False
             for route in self.router.matching_routes(context):
-                if route.requires_session() and context.session is None:
-                    context.load_session(self.session_handler)
-                    session_loaded = True
-                    log.debug(
-                        "Session handler: %r loaded session: %r",
-                        type(self.session_handler), context.session
-                    )
-
                 try:
                     self._handle_by_route(route=route, context=context)
+                    break
                 except RoutePassed:
                     continue
             else:
-                self._handle_not_found(context=context)
-        except RouteSuccessfullyDispatched:
-            log.debug("Dispatch succeded on: %r", context.current_route)
-            if session_loaded:
-                context.save_session(self.session_handler)
+                raise RouteNotFound()
         except RouteNotFound:
-            log.debug(
-                "No route found to handle request %r, handled by not_found",
-                context.get_request_uri()
-            )
             self._handle_not_found(context=context)
         except:
             self._handle_error(context=context, exc=exc_info()[1])
@@ -299,15 +291,47 @@ class Server(object):
         self._register_router()
         self._register_view()
         self._register_session_handler()
-        log.debug("Basic components initialized")
+        log.debug("Basic components initialized.")
+
+    def _process_custom_error_handler(self, method, err_cls):
+        if err_cls in self._custom_error_handlers:
+            raise RuntimeError(
+                "Duplicate handling of error %r with %r and %r.",
+                err_cls, self._custom_error_handlers[err_cls], method
+            )
+        log.debug("Registered %r to handle %r.", method, err_cls)
+        self._custom_error_handlers[err_cls] = method
+
+    def _process_error_handler(self, method):
+        log.debug("Method %r registered as default exception handler", method)
+        self._error_method = method
+
+    def _process_exposed_method(self, method):
+        self._methods[method._dispatch_name] = method
+
+        for prefix in getattr(method, "_not_found", ()):
+            self._process_not_found_method(method, prefix)
+
+        if getattr(method, "_error", False) is True:
+            self._process_error_handler(method)
+
+        for err_cls in getattr(method, "_custom_error", ()):
+            self._process_custom_error_handler(method, err_cls)
+
+    def _process_not_found_method(self, method, prefix):
+        if prefix in self._not_found_methods:
+            raise RuntimeError(
+                "Duplicate handling of not-found %r with %r and %r.",
+                prefix, self._not_found_methods[prefix], method
+            )
+        log.debug("Method %r registered to handle not-found state", method)
+        self._not_found_methods[prefix] = method
 
     def _register_router(self):
         router_class = self._find_router_class()
         router = router_class()
         if not isinstance(router, AbstractRouter):
-            raise ValueError(
-                "Router class has to be derived from AbstractRouter"
-            )
+            raise WrongRouterBase(router)
 
         self.router = router
 
@@ -315,13 +339,11 @@ class Server(object):
         if self.config.get("session:enabled", False):
             storage_class = self._find_session_handler()
         else:
-            storage_class = MockSession
+            storage_class = DummySession
 
         handler = storage_class(self.config)
         if not isinstance(handler, SessionStorage):
-            raise ValueError(
-                "Session handler has to be derived from SessionStorage"
-            )
+            raise WrongSessionHandlerBase(handler)
 
         self.session_handler = handler
 
@@ -332,7 +354,7 @@ class Server(object):
         if self.config.get("view:enabled", True):
             view_class = self._find_view_class()
         else:
-            view_class = MockView
+            view_class = DummyView
 
         extra_functions = {
             "print_css": self._jinja_print_css,
@@ -341,23 +363,23 @@ class Server(object):
         }
         view = view_class(self.config, extra_functions)
         if not isinstance(view, AbstractView):
-            raise ValueError("View class has to be derived from AbstractView")
+            raise WrongViewBase(view)
 
         self.view = view
 
     def _static_file_mtime(self, static_file):
 
         def get_static_file_abs_path(static_file):
-            for option, mapping in self.config.get("uwsgi").iteritems():
-                if option == "static-map":
-                    prefix, mapped_dir = map(
-                        string_strip, mapping.split("=")
+            static_map = self.config.get("uwsgi:static-map", ())
+            if isinstance(static_map, basestring):
+                static_map = (static_map, )
+
+            for mapping in static_map:
+                prefix, mapped_dir = map(string_strip, mapping.split("="))
+                if static_file.startswith(prefix):
+                    return path.join(
+                        mapped_dir, path.relpath(static_file, prefix)
                     )
-                    if static_file.startswith(prefix):
-                        return path.join(
-                            mapped_dir,
-                            path.relpath(static_file, prefix)
-                        )
             else:
                 return ""
 

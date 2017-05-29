@@ -1,5 +1,6 @@
 # coding: utf8
 
+from .abstract_router import AbstractRouter
 from .exceptions import RouteAlreadyExists, RouteNotRegistered
 from .route import Route, RouteGroup
 from logging import getLogger
@@ -7,12 +8,6 @@ from os.path import join as path_join
 from re import compile as re_compile
 
 log = getLogger("pygrim.components.router")
-
-
-class AbstractRouter(object):
-
-    def __init__(self):
-        raise NotImplementedError()
 
 
 class Router(AbstractRouter):

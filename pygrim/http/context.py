@@ -3,11 +3,14 @@
 from .grim_dicts import ImmutableDict
 from .request import Request
 from .response import Response
+from logging import getLogger
 
 try:
     from compatibility import http_responses
 except ImportError:
     from .codes import http_responses
+
+log = getLogger("pygrim.http.context")
 
 
 class Context(object):
@@ -15,6 +18,7 @@ class Context(object):
     def __init__(self, environment, config):
         self.config = config
         self._suppress_port = config.get("context:suppress_port", False)
+        self._force_https = config.get("context:force_https", False)
 
         self.current_route = None
         self.session = None
@@ -24,10 +28,7 @@ class Context(object):
         self._request = Request(environment)
         self._response = Response()
         self._route_params = None
-        self._targets = {
-            "request": self._request,
-            "response": self._response
-        }
+        self._session_loaded = False
 
         self.set_route_params()
 
@@ -125,6 +126,8 @@ class Context(object):
         return "%s://%s" % (scheme, self.get_request_host_with_port(scheme))
 
     def get_request_scheme(self):
+        if self._force_https:
+            return "https"
         return self._request.environment["wsgi.url_scheme"]
 
     def get_response_body(self):
@@ -145,7 +148,13 @@ class Context(object):
         return self._request.environment["request_method"] == "POST"
 
     def load_session(self, session_handler):
-        self.session = session_handler.load(self._request)
+        if self._session_loaded is False:
+            self.session = session_handler.load(self._request)
+            self._session_loaded = True
+            log.debug(
+                "Session handler: %r loaded session: %r",
+                type(session_handler), self.session
+            )
 
     def pop_route_params(self):
         params = self._route_params.copy()
@@ -162,6 +171,9 @@ class Context(object):
             self.add_cookie(
                 **session_handler.cookie_for(self.session)
             )
+
+    def session_loaded(self):
+        return self._session_loaded
 
     def set_response_body(self, body):
         self._response.body = body

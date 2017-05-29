@@ -4,7 +4,7 @@ from .session import Session
 from .session_storage import SessionStorage
 
 
-class MockSession(SessionStorage):
+class DummySession(SessionStorage):
 
     def delete(self, session):
         pass
