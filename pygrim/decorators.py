@@ -40,7 +40,7 @@ class method(BaseDecorator):
         return super(method, self).__call__(wrapper)
 
     def _expose(self, func):
-        if func.__name__.startswith("_"):
+        if func._dispatch_name.startswith("_"):
             uwsgi_log(
                 "pygrim WARNING: Internal method %r will not be exposed!" % (
                     func.__name__
