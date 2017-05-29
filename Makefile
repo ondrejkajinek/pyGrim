@@ -11,6 +11,9 @@ PACKAGES_REMOTE_DIR="/var/aptly/packages/"
 
 PY_VERSION=`python -c 'import sys; print(sys.version.split(" ",1)[0].rsplit(".",1)[0])'`
 
+LAST_TAG:=$(shell git describe --tags --match '${PACKAGE_NAME}*' --abbrev=0)
+COMMIT_MESSAGES:=`git log ${LAST_TAG}..HEAD --format=' %s ;' . | grep -v 'Merge branch')`
+
 all: deb
 
 prePackCheck:
@@ -20,15 +23,12 @@ prePackCheck:
 
 deb: prePackCheck clean buildDeb
 
-editversion:
-	${EDITOR} debian/version
+runGit:
+	python setup.py check
 
-buildDeb: editversion
-	$(eval VERSION := $(shell cat debian/version))
-	$(eval ARCHIVE := $(PACKAGE_NAME)-$(VERSION).tar.gz)
-	$(eval ORIG_ARCHIVE := $(PACKAGE_NAME)_$(VERSION).orig.tar.gz)
-	DEBFULLNAME="${AUTHOR}" DEBEMAIL="${AUTHOR_EMAIL}" \
-		dch -v `python setup.py -V` --distribution testing ${CSV} ${REV}
+buildDeb: runGit
+	#DEBFULLNAME="${AUTHOR}" DEBEMAIL="${AUTHOR_EMAIL}" \
+	#	dch -v `python setup.py -V` --distribution testing ${CSV} ${REV}
 	python setup.py sdist
 	mkdir build
 	cp dist/${ARCHIVE} build/${ORIG_ARCHIVE}
