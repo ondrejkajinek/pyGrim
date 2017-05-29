@@ -1,31 +1,11 @@
 # coding: utf8
 
 
-class BaseRouterException(Exception):
+class BaseRoutingException(Exception):
     pass
 
 
-class RouteAlreadyExists(BaseRouterException):
-
-    def __init__(self, name):
-        super(RouteAlreadyExists, self).__init__(
-            "Named route %r already exists." % name
-        )
-
-
-class RouteNotFound(BaseRouterException):
-    pass
-
-
-class RouteNotRegistered(BaseRouterException):
-    pass
-
-
-class RoutePassed(BaseRouterException):
-    pass
-
-
-class DispatchFinished(BaseRouterException):
+class DispatchFinished(BaseRoutingException):
     """Raised by:
     - server.display
     - server.redirect
@@ -33,3 +13,31 @@ Can be used by user to stop anything after. It means:
     - finish request (session, etc.)
     - return data to browser
 """
+
+
+class MissingRouteHandle(BaseRoutingException):
+
+    def __init__(self, handle, route):
+        super(MissingRouteHandle, self).__init__(
+            "Server has no method %r to handle route %r." % (handle, route)
+        )
+
+
+class RouteAlreadyExists(BaseRoutingException):
+
+    def __init__(self, name):
+        super(RouteAlreadyExists, self).__init__(
+            "Named route %r already exists." % name
+        )
+
+
+class RouteNotFound(BaseRoutingException):
+    pass
+
+
+class RouteNotRegistered(BaseRoutingException):
+    pass
+
+
+class RoutePassed(BaseRoutingException):
+    pass

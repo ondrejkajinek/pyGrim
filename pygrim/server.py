@@ -7,7 +7,8 @@ from .components.exceptions import (
 from .components.log import initialize_loggers
 from .components.routing import AbstractRouter, Router
 from .components.routing import (
-    DispatchFinished, RouteNotFound, RouteNotRegistered, RoutePassed
+    DispatchFinished, MissingRouteHandle, RouteNotFound, RouteNotRegistered,
+    RoutePassed
 )
 from .components.session import (
     DummySession, FileSessionStorage, RedisSessionStorage,
@@ -171,11 +172,9 @@ class Server(object):
             try:
                 method = self._methods[route.get_handle_name()]
             except KeyError:
-                raise RuntimeError(
-                    "Server has no method %r to handle route %r." % (
-                        route._handle_name,
-                        route.get_name() or route.get_pattern()
-                    )
+                raise MissingRouteHandle(
+                    route._handle_name,
+                    route.get_name() or route.get_pattern()
                 )
             else:
                 route.assign_method(method)
