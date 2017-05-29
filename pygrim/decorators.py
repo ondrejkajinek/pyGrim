@@ -29,9 +29,9 @@ class method(BaseDecorator):
     """
 
     def __call__(self, func):
-        self._expose(func)
         func._session = bool(self._kwargs.get("session"))
         func._dispatch_name = self._kwargs.pop("dispatch_name", func.__name__)
+        self._expose(func)
 
         @wraps(func)
         def wrapper(*args, **kwargs):
