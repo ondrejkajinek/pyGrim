@@ -1,0 +1,36 @@
+<li>
+    <div class="row align-items-end slider__weather">
+        <div class="col-4 col-sm-5">
+            <p class="slider__tit slider__date">
+                <small>Dnes je</small> <br>
+                <strong class="data_date">{{time.strftime('%A %-d.%-m.').decode("utf-8") }}</strong>
+                <br> <span class="data_time">{{time.strftime('%-H:%M')}}</span>
+            </p>
+            <i class="fa fa-calendar slider__calendar"></i>
+        </div>
+        <div class="col-8 col-sm-7">
+            <div class="row">
+                <div class="col-6">
+                    <p class="weather__flag text-lg-center"><img src="/files/flags/cz.png" alt="CZ"></p>
+                    <p class="weather__temp"><img src="{{forecast_cz.icon}}" alt="">
+                        <strong class="data_degrees_cz_day">{{forecast_cz.temp_max}}°</strong>/<span class="data_degrees_cz_night">{{forecast_cz.temp_min}}°</span>
+                    </p>
+                    <p class="weather__name">
+                        <small>Svátek slaví</small><br>
+                        <span class="data_holiday_cz">{{nameday_cz}}</span>
+                    </p>
+                </div>
+                <div class="col-6">
+                    <p class="weather__flag text-lg-center"><img src="/files/flags/sk.png" alt="SK"></p>
+                    <p class="weather__temp"><img src="{{forecast_sk.icon}}" alt="">
+                        <strong class="data_degrees_sk_day">{{forecast_sk.temp_max}}°</strong>/<span class="data_degrees_sk_night">{{forecast_sk.temp_min}}°</span>
+                    </p>
+                    <p class="weather__name">
+                        <small>Svátek slaví</small><br>
+                        <span class="data_holiday_sk">{{nameday_sk}}</span>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</li>

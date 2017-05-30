@@ -1,0 +1,52 @@
+<header class="header{% if context.current_route._handle_name != 'index' %} header--narr{% endif %}">
+    <div class="container">
+        <div class="header__nav row">
+            <div class="col-7 col-lg-3 col-xl-4" role="banner">
+                <h1><a class="header__logo" href="{{ 'index' | url_for }}"><img src="/files/logo-slagr.png" alt="Šlágr TV"></a></h1>
+            </div>
+
+            <div class="col-5 col-lg-9 col-xl-8 text-right">
+                <nav class="navigation" role="navigation">
+                    <h2 class="sr-only">Navigace</h2>
+                    <span class="navigation__responsive" aria-hidden="true">Menu <span><i class="fa fa-bars" aria-hidden="true"></i></span></span>
+                    <div class="navigation__body">
+                        <ul>
+                            <li class="navigation__item{% if context.current_route._handle_name == 'index' %} is--active{% endif %}"><a href="{{ 'index' | url_for }}">Úvod</a></li>
+                            <li class="navigation__item{% if context.current_route._handle_name == 'polls_list' %} is--active{% endif %}"><a href="{{ 'hitparady' | url_for }}">Hitparáda</a></li>
+                            <li class="navigation__item item--highlight"><a href="http://eshop.slagrtv.cz/" target="_blank">Koupit CD/DVD</a></li>
+                        </ul>
+                        <ul class="navigation__sub">
+                            <li class="navigation__item"><a href="http://www.slagrmobil.cz/" target="_blank"><img src="/files/slagr-mobil.png" alt="Šlágr Mobil"></a></li>
+                        </ul>
+                    </div>
+                </nav>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-sm-8 col-lg-7 slider__cont">
+                <ul class="header__slider">
+                </ul>
+            </div>
+
+            {% if context.current_route._handle_name == 'index' %}
+            <div class="col-sm-4 col-lg-5 col-xl-4 offset-xl-1 stream__cont">
+                <div class="stream">
+                    <div class="stream__box">
+                      <h2>Právě běží: <a data-toggle="modal" data-target="#stream"><span></span></a></h2>
+                </div>
+                <a class="stream__thumb" data-toggle="modal" data-target="#stream"><i class="fa fa-play-circle" aria-hidden="true"></i> Sledovat živě <span class="hidden-lg-up"><br></span></a>
+            </div>
+            {% else %}
+            <div class="stream__cont">
+                <div class="stream">
+                    <a class="stream__box" data-toggle="modal" data-target="#stream">
+                        <h2><span class="hidden-lg-down"><span class="stream__tit"><i class="fa fa-play-circle" aria-hidden="true"></i> Právě běží:</span> <span class="like__a"><span></span></span></span> <span class="hidden-xl-up stream__tit"><i class="fa fa-play-circle" aria-hidden="true"></i> Sledovat živě</span></h2>
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+          </div>
+      </div>
+  </div>
+</header>

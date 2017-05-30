@@ -1,0 +1,156 @@
+{% extends "@layout.jinja" %}
+
+{% set title = 'Hitparády' %}
+
+
+{% block main %}
+
+{% macro inputs(poll) %}
+  {% if poll.poll_type == 'klasik' %}
+    <p>Přidělte zlatou, stříbrnou a&nbsp;bronzovou medaili pro&nbsp;Vaše tři oblíbené interprety. K&nbsp;dispozici máte celkem tři medaile.</p>
+
+    <div class="row poll--medal">
+    <div class="col-4 col-sm-3">
+        <img src="/img/icons/med-1.png" title="První místo" alt="První místo">
+        <img src="/img/icons/med-2.png" title="Druhé místo" alt="Druhé místo">
+        <img src="/img/icons/med-3.png" title="Třetí místo" alt="Třetí místo">
+    </div>
+    </div>
+    {% for item in poll['items'] %}
+        {% set can_vote = "" %}
+        {#{% if poll.user_voted %}
+            {% set can_vote = " disabled " %}
+          {% endif %}
+        #}
+        <div class="poll-row poll--klasik">
+            <div class="row">
+                <div class="col-4 col-sm-3">
+                    <div class="poll__checkboxes d-flex flex-wrap align-items-center justify-content-center">
+                        <label title="První místo" class="custom-control custom-checkbox"><input type="checkbox"  name="{{item.id}}" value="1" class="custom-control-input gold" {{ can_vote }}><span class="custom-control-indicator control--gold"></span></label>
+                        <label title="Druhé místo" class="custom-control custom-checkbox"><input type="checkbox"  name="{{item.id}}" value="2" class="custom-control-input silver" {{ can_vote }}><span class="custom-control-indicator control--silver"></span></label>
+                        <label title="Třetí místo" class="custom-control custom-checkbox"><input type="checkbox"  name="{{item.id}}" value="3" class="custom-control-input bronze" {{ can_vote }}><span class="custom-control-indicator control--bronze"></span></label>
+                    </div>
+                </div>
+                <div class="col-8 col-sm-9 custom-control-description">
+                    <div class="row">
+                        <div class="col-sm-5"><strong>{{item.title}}</strong></div>
+                        <div class="col-sm-7"><em>{{item.description}}</em></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+
+        {% if poll.user_voted %}
+            <p> Už jste hlasoval </p>
+        {% endif %}
+
+        <button class="button" name="poll_id" value="{{poll.id}}" type="submit" disabled >Odeslat hlas</button>
+    {% elif poll.poll_type == 'stafle' %}
+        <p>Dejte svému favoritovi hlas - nalepte mu nálepku s&nbsp;palcem <i class="fa fa-thumbs-up" aria-hidden="true"></i>, k&nbsp;dispozici máte celkem tři nálepky.</p>
+        {% for item in poll['items'] %}
+
+        <label class="poll-row poll--stafle custom-control custom-checkbox">
+            <input type="checkbox" name="{{item.id}}" value="1" class="custom-control-input">
+            <span class="custom-control-indicator"></span>
+            <span class="custom-control-description">
+                <div class="row">
+                    <div class="col-sm-4"><strong>{{item.title}}</strong></div>
+                    <div class="col-sm-8"><em>{{item.description}}</em></div>
+                </div>
+            </span>
+        </label>
+        {% endfor %}
+        {% if poll.user_voted %}
+            <p> Už jste hlasoval </p>
+        {% endif %}
+
+        <button class="button" name="poll_id" value="{{poll.id}}" type="submit"  disabled >Odeslat hlasy</button>
+    {% elif poll.poll_type == 'duel' %}
+        <p>Zaškrtněte, kdo se Vám líbí více.</p>
+
+        <div class="row">
+            {% for item in poll['items'] %}
+            <div class="col-lg-5">
+                <label class="poll-row poll--duel custom-control custom-radio">
+                    <input id="radio1" name="{{poll.id}}" value="{{item.id}}" type="radio" class="custom-control-input">
+                    <span class="custom-control-indicator"></span>
+                    <span class="custom-control-description">
+                        <strong>{{item.title}}</strong><br><em>{{item.description}}</em>
+                    </span>
+                </label>
+            </div>
+              {% if not loop.last %}
+                <div class="col-lg-2 text-center">
+                    <p class="pt-3 pt-lg-4">vs.</p>
+                </div>
+              {% endif %}
+            {% endfor %}
+            {% if poll.user_voted %}
+                <p> Už jste hlasoval </p>
+            {% endif %}
+            <button class="button" name="poll_id" value="{{poll.id}}" type="submit"  disabled >Odeslat hlas</button>
+            <input type="hidden" name="kind" value="radio" />
+    {% endif %}
+{% endmacro %}
+
+
+
+	<div class="content pt-0" role="main">
+		<div class="title">
+			<div class="container">
+				<div class="row">
+					<div class="col-lg-8">
+						<h1>Hitparády</h1>
+                        {% for category in poll_categories %}
+                            <a
+                                class="badge badge--category {%if category.id == poll_category_current %}is--active{% endif %}"
+                                href="{{"hitparady" | url_for}}/{{category.id}}"
+                            >{{category.title}}</a>
+                        {% endfor %}
+					</div>
+					<div class="col-lg-4">
+						<p class="bread">
+							<a class="bread__home" href="{{ 'index' | url_for }}"><img src="/img/icons/favicon.png" alt="Úvod"></a>
+							<i class="fa fa-angle-left bread__sep hidden-md-down" aria-hidden="true"></i><i class="fa fa-angle-right bread__sep hidden-lg-up" aria-hidden="true"></i>
+							<a>Hitparády</a>
+						</p>
+					</div>
+				</div>
+			</div>
+		</div>
+
+
+		<div class="container">
+            {{ super() }} {# flash messages #}
+
+    		<div class="row">
+    			<div class="col-md-8">
+                {% for poll in polls %}
+    				<fieldset class="border-box">
+                        <legend><h3>{{poll.title}}</h3></legend>
+						<form method="post" action="/hlasovat" class="poll-{{poll.poll_type}}">
+                            {{ inputs(poll) }}
+                            <input type="hidden" name="category", value="{{poll_category_current}}"/>
+                        </form>
+                        {% if poll.user_voted and poll.show_contact_form %}
+                            <br>    
+                            <p> Pošlete nám Vaše údaje a zapojte se do slosování!<p>
+                            <form action="/poll_mail", method="post">
+                                <textarea name="text" placeholder="Vaše jméno, adresa, email"></textarea>
+                                <input type="hidden" name="category" value="{{poll_category_current}}">
+                                <button class="button" type="submit" name="poll_id" value="{{poll.id}}">Odeslat</button>
+                            </form>
+                        {% endif %}
+                    </fieldset>
+                {% endfor %}
+    			</div>
+
+        		<div class="col-md-4 text-center text-md-right pt-4 pt-md-0 pb-4 pb-md-0">
+                  {% include 'snippets/adv.jinja' %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

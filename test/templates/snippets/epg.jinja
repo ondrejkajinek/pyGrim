@@ -1,0 +1,23 @@
+{% macro m_epg(epg, now_playing, show_more=false) %}
+    <dl class="program row">
+    {% for show in epg %}
+        <dt class="program__time {% if now_playing.id == show.id %}is--active{% endif %} col-3">
+            <i class="fa fa-music" aria-hidden="true"></i>
+            <time>{{show.start_time | date_format('%-H:%M') }}</time>
+        </dt>
+        <dd class="program__desc col-9">
+            <h3>{{show.name}}
+                {% if now_playing.id == show.id %}
+                <span class="badge badge-danger">právě běží</span>
+                {% endif %}
+            </h3>
+            <p>{{show.description}}</p>
+        </dd>
+    {% endfor %}
+        {% if show_more %}
+        <dt class="program__time time--more col-12"><i class="fa fa-music" aria-hidden="true"></i> <a class="link link--arr" href="{{ 'program' | url_for }}">Další programy</a></dt>
+        {% else %}
+        <dt class="program__time time--more col-12"><i class="fa"><img class="program__off" src="/img/icons/favicon.png" alt="Šlágr TV"></i></dt>
+        {% endif %}
+    </dl>
+{% endmacro %}
