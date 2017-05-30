@@ -11,11 +11,18 @@ log = getLogger("pygrim.components.route")
 class RouteObject(object):
 
     REGEXP_TYPE = type(re_compile(r""))
-    TRAILING_SLASH_REGEXP = re_compile("/\??$")
+    TRAILING_SLASH_REGEXP = re_compile("/?\??\$?$")
 
     def __init__(self, pattern, *args, **kwargs):
         super(RouteObject, self).__init__(*args, **kwargs)
-        self._pattern = self._strip_trailing_slash(pattern)
+        self._pattern = self._fix_trailing_slash(pattern)
+
+    def _fix_trailing_slash(self, pattern):
+        return (
+            re_compile(self.TRAILING_SLASH_REGEXP.sub("/?$", pattern.pattern))
+            if self.is_regex(pattern)
+            else "%s/" % pattern.rstrip("/")
+        )
 
     def get_pattern(self):
         return (
@@ -26,13 +33,6 @@ class RouteObject(object):
 
     def is_regex(self, pattern=None):
         return type(pattern or self._pattern) == self.REGEXP_TYPE
-
-    def _strip_trailing_slash(self, pattern):
-        return (
-            re_compile(self.TRAILING_SLASH_REGEXP.sub("", pattern.pattern))
-            if self.is_regex(pattern)
-            else pattern.rstrip("/")
-        )
 
 
 class RouteGroup(RouteObject, list):
@@ -149,7 +149,7 @@ class Route(RouteObject):
         return method in self._methods
 
     def _uri_matches(self, context):
-        uri = context.get_request_uri() or "/"
+        uri = context.get_request_uri()
         log.debug("matching %r with  %r", self.get_pattern(), uri)
         if self.is_regex():
             matches = self._pattern.match(uri)
