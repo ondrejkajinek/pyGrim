@@ -88,7 +88,7 @@ def edit_version():
 def check_repo():
     version = get_version()
     cmd = """ssh debian.ats "aptly package search \\
-            \'{pkg_name}, Version ({operator}{version})\'" """
+            \'{pkg_name}, \$Version ({operator}{version})\'" """
     current = cmd.format(
         pkg_name=name, version=version, operator="="
     )
