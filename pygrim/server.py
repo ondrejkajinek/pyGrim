@@ -279,6 +279,7 @@ class Server(object):
                 except RoutePassed:
                     continue
             else:
+                # TODO: reset current route to None
                 raise RouteNotFound()
         except RouteNotFound:
             self._handle_not_found(context=context)
@@ -307,6 +308,7 @@ class Server(object):
         self._error_method = method
 
     def _process_exposed_method(self, method):
+        log.debug("Method %r exposed as route handler", method)
         self._methods[method._dispatch_name] = method
 
         for prefix in getattr(method, "_not_found", ()):

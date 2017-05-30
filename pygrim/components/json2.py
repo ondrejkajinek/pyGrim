@@ -51,10 +51,10 @@ def _dump_dict(source, nice, depth):
         ind += indent + indent_step
         trail = nl + indent + trail
 
-    ind += '"%s":%s'
+    ind += '%s:%s'
     items = (
         ind % (
-            key.encode("utf8") if isinstance(key, unicode) else str(key),
+            _dumps(key, nice=nice, depth=depth),
             _dumps(value, nice=nice, depth=depth + 1)
         )
         for key, value

@@ -126,9 +126,16 @@ class Context(object):
         return "%s://%s" % (scheme, self.get_request_host_with_port(scheme))
 
     def get_request_scheme(self):
+        return (
+            "https"
+            if self._force_https
+            else self._request.environment["wsgi.url_scheme"]
+        )
+        """
         if self._force_https:
             return "https"
         return self._request.environment["wsgi.url_scheme"]
+        """
 
     def get_response_body(self):
         return self._response.body
