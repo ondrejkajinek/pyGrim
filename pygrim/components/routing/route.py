@@ -43,7 +43,7 @@ class RouteGroup(RouteObject, list):
 class Route(RouteObject):
 
     URL_FORMAT_REGEXP = re_compile("%\(([^)]+)\)s")
-    URL_OPTIONAL_REGEXP = re_compile("([^%])\((.*?)\)\?")
+    URL_OPTIONAL_REGEXP = re_compile("([^%])\((/?)(.*?)\)\?")
     URL_PARAM_REGEXP = re_compile("\(\?P<([^>]+)>[^)]+\)")
 
     def __init__(self, methods, pattern, handle_name, name=None):
@@ -132,11 +132,13 @@ class Route(RouteObject):
         optional_names = set()
         for optional in self.URL_OPTIONAL_REGEXP.findall(readable):
             optional_names.update(
-                set(self.URL_FORMAT_REGEXP.findall(optional[1]))
+                set(self.URL_FORMAT_REGEXP.findall(optional[2]))
             )
 
-        readable = self.URL_OPTIONAL_REGEXP.sub(r"\1\2", readable)
-        readable = readable.rstrip("$")
+        readable = self.URL_OPTIONAL_REGEXP.sub(r"\1\2\3", readable)
+        log.debug("mcd %r", readable)
+
+        readable = self.TRAILING_SLASH_REGEXP.sub("", readable).lstrip("^")
         mandatory_names = set(param_names) - set(optional_names)
         if len(mandatory_names) + len(optional_names) < len(param_names):
             raise RuntimeError(
