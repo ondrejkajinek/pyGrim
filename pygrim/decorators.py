@@ -17,11 +17,24 @@ class BaseDecorator(object):
         self._args = args
         self._kwargs = kwargs
 
+    def pre_call(self, fun, args, kwargs):
+        pass
+
+    def post_call(self, fun, args, kwargs, ret):
+        return ret
+
+    def prepare_func(self, fun):
+        pass
+
     def __call__(self, func):
+        self.prepare_func(func)
 
         @wraps(func)
         def wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
+            args = list(args)
+            self.pre_call(func, args, kwargs)
+            ret = func(*args, **kwargs)
+            return self.post_call(func, args, kwargs, ret)
 
         return wrapper
 
@@ -48,13 +61,12 @@ class method(BaseDecorator):
         self._dispatch_name = kwargs.pop("dispatch_name", None)
         super(method, self).__init__(*args, **kwargs)
 
-    def __call__(self, func):
+    def prepare_func(self, func):
         func._session = self._session
         func._dispatch_name = self._dispatch_name or func.__name__
-
         self._expose(func)
 
-        return super(method, self).__call__(func)
+        super(method, self).prepare_func(func)
 
 
 class error_handler(method):
@@ -74,9 +86,9 @@ class error_handler(method):
         self.err_classes = args
     # enddef
 
-    def __call__(self, func):
+    def prepare_func(self, func):
         func._custom_error = self.err_classes
-        return super(error_handler, self).__call__(func)
+        super(error_handler, self).prepare_func(func)
 
 
 class error_method(method):
@@ -86,9 +98,9 @@ class error_method(method):
     Also exposes method, see method decorator.
     """
 
-    def __call__(self, func):
+    def prepare_func(self, func):
         func._error = True
-        return super(error_method, self).__call__(func)
+        super(error_method, self).prepare_func(func)
 
 
 class not_found_method(method):
@@ -102,9 +114,9 @@ class not_found_method(method):
         super(not_found_method, self).__init__(**kwargs)
         self._not_found_prefixes = args or ("",)
 
-    def __call__(self, func):
+    def prepare_func(self, func):
         func._not_found = self._not_found_prefixes
-        return super(not_found_method, self).__call__(func)
+        super(not_found_method, self).prepare_func(func)
 
 
 class template_display(BaseDecorator):
@@ -117,18 +129,12 @@ class template_display(BaseDecorator):
         self._template = template
         super(template_display, self).__init__(*args, **kwargs)
 
-    def __call__(self, func):
-
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            res = func(*args, **kwargs)
-            context = kwargs.get("context")
-            context.view_data.update(res.get("data") or {})
-            context.template = res.get("_template", self._template)
-            args[0].display(context)
-
-        # super not called - no need to double wrap
-        return wrapper
+    def post_call(self, fun, args, kwargs, res):
+        context = kwargs.get("context")
+        context.view_data.update(res.get("data") or {})
+        context.template = res.get("_template", self._template)
+        args[0].display(context)
+        return super(template_display, self).post_call(fun, args, kwargs, res)
 
 
 class template_method(template_display, method):
@@ -156,19 +162,12 @@ class uses_data(BaseDecorator):
         self._method = method
         super(uses_data, self).__init__()
 
-    def __call__(self, func):
-
-        @wraps(func)
-        def wrapper(*args, **kwargs):
-            server = args[0]
-            method = server._methods[self._method]
-            context = kwargs.get("context")
-            method_returned = method(context) or {}
-            context.view_data.update(method_returned.get("data", {}))
-            res = func(*args, **kwargs)
-            return res
-
-        # super not called - no need to double wrap
-        return wrapper
+    def pre_call(self, fun, args, kwargs):
+        server = args[0]
+        method = server._methods[self._method]
+        context = kwargs.get("context")
+        method_returned = method(context) or {}
+        context.view_data.update(method_returned.get("data", {}))
+        return super(uses_data, self).pre_call(fun, args, kwargs)
 
 # eof
