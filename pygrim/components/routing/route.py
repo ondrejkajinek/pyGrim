@@ -19,11 +19,7 @@ class RouteObject(object):
 
     def _fix_trailing_slash(self, pattern):
         return (
-            re_compile(
-                "^" + self.TRAILING_SLASH_REGEXP.sub(
-                    "/?$", pattern.pattern.lstrip("^")
-                )
-            )
+            re_compile(self.TRAILING_SLASH_REGEXP.sub("/?$", pattern.pattern))
             if self.is_regex(pattern)
             else "%s/" % pattern.rstrip("/")
         )
