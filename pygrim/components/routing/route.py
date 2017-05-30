@@ -11,7 +11,7 @@ log = getLogger("pygrim.components.route")
 class RouteObject(object):
 
     REGEXP_TYPE = type(re_compile(r""))
-    TRAILING_SLASH_REGEXP = re_compile("/?\??\$?$")
+    TRAILING_SLASH_REGEXP = re_compile("/\??\$?$|\$?$")
 
     def __init__(self, pattern, *args, **kwargs):
         super(RouteObject, self).__init__(*args, **kwargs)
@@ -19,7 +19,11 @@ class RouteObject(object):
 
     def _fix_trailing_slash(self, pattern):
         return (
-            re_compile(self.TRAILING_SLASH_REGEXP.sub("/?$", pattern.pattern))
+            re_compile(
+                "^" + self.TRAILING_SLASH_REGEXP.sub(
+                    "/?$", pattern.pattern.lstrip("^")
+                )
+            )
             if self.is_regex(pattern)
             else "%s/" % pattern.rstrip("/")
         )
