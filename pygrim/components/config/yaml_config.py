@@ -8,45 +8,6 @@ class YamlConfig(AbstractConfig):
 
     SEPARATOR = ":"
 
-    def get(self, key, *args, **kwargs):
-        try:
-            target = self.config
-            for part in key.split(self.SEPARATOR):
-                target = target[part]
-        except KeyError as exc:
-            try:
-                target = self._default_value(*args, **kwargs)
-            except:
-                raise exc
-
-        return target
-
-    def getfloat(self, key, *args, **kwargs):
-        value = self.get(key, *args, **kwargs)
-        if not isinstance(value, float):
-            try:
-                value = self._default_value(*args, **kwargs)
-            except:
-                raise TypeError("Wrong value for float key: %r" % (key,))
-
-        return value
-
-    def getint(self, key, *args, **kwargs):
-        value = self.get(key, *args, **kwargs)
-        if not isinstance(value, (int, long)):
-            try:
-                value = self._default_value(*args, **kwargs)
-            except:
-                raise TypeError("Wrong value for int key: %r" % (key,))
-
-        return value
-
-    def _default_value(self, *args, **kwargs):
-        try:
-            return kwargs.get("default", args[0])
-        except IndexError:
-            raise RuntimeError("No default value given")
-
     def _load_config(self, path):
         try:
             with open(path, "rb") as conf_in:
