@@ -1,0 +1,12 @@
+{% extends "@layout.jinja" %}
+
+{% block main %}
+
+    <div class="container">
+        {{context.get_request_uri()}}
+    </div>
+
+    <div class="container">
+        {{context.current_route._handle_name}}
+    </div>
+{% endblock %}
