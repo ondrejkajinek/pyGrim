@@ -8,8 +8,8 @@ from sys import argv, stderr, exit
 from collections import defaultdict
 
 
-name = "pygrim"
-desc = "lightweight python frontend framework"
+name = "pygrim-test"
+desc = "set of tests covering (un)common pygrim usage"
 FAIL = '\033[91m'
 ENDC = '\033[0m'
 

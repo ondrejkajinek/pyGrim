@@ -1,0 +1,5 @@
+{% for add in advertisment %}
+<a href={{add.target}}>
+    <img class="adv" alt="" src="{{add.attrs.url_prefix}}{{add.attrs.url_postfix}}">
+</a>
+{% endfor %}

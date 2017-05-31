@@ -15,7 +15,6 @@ ORIG_ARCHIVE=${PACKAGE_NAME}_${VERSION}.orig.tar.gz
 FULL_PKG_NAME=${PACKAGE_NAME}_${VERSION}_all.deb
 PACKAGES_REMOTE_DIR="/var/aptly/packages/"
 
-PY_VERSION=`python -c 'import sys; print(sys.version.split(" ",1)[0].rsplit(".",1)[0])'`
 
 all: deb
 
@@ -59,19 +58,34 @@ sdist:
 install:
 	python setup.py install
 
-linkItems:
+makeStructure:
 	( \
-		ln -sf `pwd`/pygrim /usr/local/lib/python${PY_VERSION}/dist-packages/pygrim  \
+    	mkdir -p /www/${PACKAGE_NAME}/run \
+        && mkdir -p /www/${PACKAGE_NAME}/log \
+        && mkdir -p /www/${PACKAGE_NAME}/bin \
+    )
+installPackages:
+	( \
+		apt-get install python-dev\
+	)
+
+linkItems: installPackages makeStructure
+	( \
+		ln -sf `pwd`/conf /www/${PACKAGE_NAME}/  \
+		&& ln -sf `pwd`/server /www/${PACKAGE_NAME}/  \
+		&& ln -sf `pwd`/templates /www/${PACKAGE_NAME}/  \
+        && ln -sf `pwd`/etc/init.d/* /etc/init.d/ \
+    )
+
+repairRights:
+	( \
+    	chown -R www-data:www-data /www/${PACKAGE_NAME} \
+        && chmod +x etc/init.d/* \
     )
 
 postinstall:
 	( \
     	bash `pwd`/debian/postinst \
-	)
+    )
 
-installPackages:
-	( \
-		apt-get install python-dev \
-	)
-
-link: linkItems installPackages postinstall
+link: linkItems repairRights postinstall

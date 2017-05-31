@@ -1,0 +1,149 @@
+{% extends "@layout.jinja" %}
+
+
+{% block main %}
+
+	<section class="content" role="main">
+		<div class="container">
+			{{ super() }} {# flash messages #}
+
+			<div class="row">
+				<div class="col-md-6 col-lg-7">
+					<h2>Dnes na programu</h2>
+				</div>
+
+				<div class="col-md-6 col-lg-5">
+					<h2>Šlágr doporučuje</h2>
+					<iframe class="iframe--resp" width="448" height="252" frameborder="0" src="https://www.youtube.com/embed/KJMSDfMZtbc"></iframe>
+				</div>
+			</div>
+		</div>
+	</section>
+
+
+
+	<section class="content section--wood">
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-5 text-center">
+					<img src="files/casopis_kveten.jpg" width="190px" alt="">
+				</div>
+				<div class="col-sm-7 text-center text-sm-left">
+					<h2 class="pb-3">Šlágr Revue</h2>
+					<p class="mb-4">Předplatné:</p>
+					<ul class="mb-4">
+						<li><strong class="pr-2">1 měsíc:</strong> 77,-&nbsp;Kč / 2,90&nbsp;EUR. <i>Členové Šlágr klubu</i> 55,-&nbsp;Kč / 2,-&nbsp;EUR</li>
+						<li><strong class="pr-2">12 měsíců:</strong>; 777,-&nbsp;Kč / 29,-&nbsp;EUR. <i>Členové Šlágr klubu</i> 555,-&nbsp;Kč / 21,-&nbsp;EUR</li>
+					</ul>
+					<p>Objednávejte: <i class="fa fa-phone pl-2 pr-1" aria-hidden="true"></i> <a class="nolink" href="tel:00420387992992">387&nbsp;992&nbsp;992</a> (CZ), <a class="nolink" href="tel:004200346601234">034&nbsp;660&nbsp;1234</a> (SK)</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+
+
+	<section class="content">
+		<div class="container">
+
+			<div class="row">
+				<div class="col-lg-7">
+					<h2 class="pb-2">Nejbližší koncerty</h2>
+
+
+					{#<p class="pt-3"><a class="link link--arr" href="koncerty.html">Další koncerty</a></p>#}
+
+				</div>
+
+
+				<div class="col-lg-5 pt-3 pt-md-5 pt-lg-0">
+					<p class="text-center">
+						<a href="http://www.kovotour.cz/leto/slovensko/myjava/slagr-dovolena-koncert-myjava-572017-dotovane-pobyty-50/?TermID=247303&amp;utm_source=slagrtv_web&amp;utm_medium=banner_slagr&amp;utm_campaign=myjava&amp;utm_content=myjava" target="_blank"><img class="adv" src="/files/adv/3.png" alt=""></a>
+					</p>
+
+					<h2>Jak funguje červený bod</h2>
+					<iframe class="iframe--resp" width="448" height="252" frameborder="0" src="https://www.youtube.com/embed/x87CbSEI24Y?ecver=2"></iframe>
+				</div>
+
+			</div>
+		</div>
+	</section>
+
+
+
+	<section class="content section--zlatyslagr">
+		<div class="container">
+			<div class="row">
+				<div class="col-sm-5 text-center text-sm-right">
+					<img src="files/hitparady.png" alt="">
+				</div>
+				<div class="col-sm-6 offset-sm-1 text-center text-sm-left">
+					<h2>Šlágr hitparády</h2>
+					<p>Hlasujte v anketách našich hitparád!</p>
+					<p><a class="button button--blue button--bigger" href="{{ 'hitparady' | url_for }}">Hlasovat</a></p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+
+
+	<section class="content">
+		<div class="container">
+			<div class="row">
+				<div class="col-md-8">
+
+					<h2>Šlágr klub</h2>
+					<div class="row">
+						<div class="col-sm-9 col-lg-7">
+							<p>Chcete být členy Šlágr rodiny? Přihlaste se do ní a získáte kartu Šlágr klubu, se kterou automaticky získáte již nyní slevy na CD, DVD, časopis a také slevy na Šlágr produkty.</p>
+							<p class="pt-2"><a href="" class="button button--blue">Stát se členem</a></p>
+						</div>
+						<div class="col-sm-3 col-lg-5">
+							<div class="slagr-karta hidden-xs-down"><img src="/files/slagr-karta.png" alt="Šlágr klub"></div>
+						</div>
+					</div>
+					<h3 class="pt-3 pt-sm-5 mb-3">Jak hradit příspěvky?</h3>
+					<div class="row">
+						<div class="col-lg-6">
+							<div class="box__highlight">
+								<h4 class="mb-3">České Šlágr karty &nbsp;<img class="flag" src="files/flags/cz-mini.png" alt="CZ"></h4>
+								<p class="mb-2"><strong>Číslo účtu:</strong> 2900516642/2010</p>
+								<p class="mb-0"><strong>Variabilní symbol:</strong> číslo zákaznické karty (prvních 10 číslic a začíná to takto: <em>5000xxxxxx</em>) bez 101 na konci.</p>
+							</div>
+						</div>
+						<div class="col-lg-6">
+							<div class="box__highlight">
+								<h4 class="mb-3">Slovenské Šlágr karty &nbsp;<img class="flag" src="files/flags/sk-mini.png" alt="SK"></h4>
+								<p class="mb-2"><strong>Číslo účtu:</strong> 2800516645/8330</p>
+								<p class="mb-0"><strong>Variabilní symbol:</strong> číslo zákaznické karty (prvních 10 číslic a začíná to takto: <em>5000xxxxxx</em>) bez 101 na konci.</p>
+							</div>
+						</div>
+					</div>
+
+					<br>
+
+					<h2 class="mt-4 pt-md-4">Zaslání darů</h2>
+					<div class="row mb-4 mb-md-0">
+						<div class="col-lg-6">
+							<h3 class="mb-3">CZK &nbsp;<img class="flag" src="files/flags/cz-mini.png" alt="CZ"></h3>
+							<p class="mb-2"><strong>Číslo účtu:</strong> 214577366/0300</p>
+							<p>Jako variabilní symbol použijte 9999 a do poznámky uveďte "DAR".</p>
+						</div>
+						<div class="col-lg-6">
+							<h3 class="mb-3">EUR &nbsp;<img class="flag" src="files/flags/sk-mini.png" alt="SK"></h3>
+							<p class="mb-2"><strong>Číslo účtu:</strong> 2800516645/8330 (IBAN: SK1883300000002800516645 BIC: FIOZSKBA)</p>
+							<p> Jako variabilní symbol použijte 9999 a do poznámky uveďte "DAR".</p>
+						</div>
+					</div>
+
+				</div>
+
+				<div class="col-md-4 text-center text-md-right pb-4 pb-md-0">
+					{% include 'snippets/adv.jinja' %}
+				</div>
+			</div>
+		</div>
+	</section>
+
+{% endblock %}
