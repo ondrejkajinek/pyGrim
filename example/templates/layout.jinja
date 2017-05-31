@@ -10,9 +10,12 @@
 
 <body>
 	<p>{{ text }}</p>
-	<a href="{{ base_url(request) }}">Home</a>
-	<a href="{{ url_for(request, "home") }}">Home 2</a>
-	<a href="{{ url_for(request, "home", {"jkxd": ""}) }}">Home dump</a>
+	{% if session_text is defined %}
+		<p>Session text: {{ session_text }}</p>
+	{% endif %}
+	<a href="{{ base_url(context) }}">Home</a>
+	<a href="{{ url_for("home") }}">Home 2</a>
+	<a href="{{ url_for("home", {"jkxd": ""}) }}">Home dump</a>
 </body>
 
 </html>

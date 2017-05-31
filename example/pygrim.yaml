@@ -28,3 +28,5 @@ jinja:
       enabled: false
    template_path: templates
 
+session:
+   type: file
