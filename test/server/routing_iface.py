@@ -6,7 +6,7 @@ from pygrim.decorators import method, template_method
 log = getLogger(__file__)
 
 
-class VoteIface(object):
+class RoutingIface(object):
 
     @template_method("polls.jinja", session=True)
     def polls_list(self, context, category_id=None, **kwargs):

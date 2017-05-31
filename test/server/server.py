@@ -4,7 +4,7 @@
 from pygrim.server import Server as WebServer
 from routes import Routes
 from first_iface import FirstIface
-from vote_iface import VoteIface
+from routing_iface import RoutingIface
 from uwsgidecorators import postfork as postfork_decorator
 
 import locale
@@ -17,7 +17,7 @@ inheritance = (
     Routes,
 
     FirstIface,
-    VoteIface,
+    RoutingIface,
 )
 
 
