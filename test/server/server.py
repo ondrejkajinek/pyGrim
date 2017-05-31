@@ -3,7 +3,6 @@
 
 from pygrim.server import Server as WebServer
 from routes import Routes
-from connector import Connector
 from first_iface import FirstIface
 from vote_iface import VoteIface
 from uwsgidecorators import postfork as postfork_decorator
@@ -16,7 +15,6 @@ locale.setlocale(locale.LC_ALL, "cs_CZ.UTF-8")
 inheritance = (
     WebServer,
     Routes,
-    Connector,
 
     FirstIface,
     VoteIface,

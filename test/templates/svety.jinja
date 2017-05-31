@@ -6,20 +6,11 @@
 {% block main %}
 
     <div class="container">
-        {{ super() }} {# flash messages #}
+        {{world}}
     </div>
 
     <div class="container">
-        {{value}}
+        {{time_range}}
     </div>
-
-    <div class="container">
-        {{uses_data}}
-    </div>
-
-    <div class="container">
-        {{css[1]}}
-    </div>
-
 
 {% endblock %}

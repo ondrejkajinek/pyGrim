@@ -6,20 +6,20 @@
 {% block main %}
 
     <div class="container">
-        {{ super() }} {# flash messages #}
+        {{'index' | url_for }}
     </div>
 
     <div class="container">
-        {{value}}
+        {{'hitparady' | url_for }}
     </div>
 
     <div class="container">
-        {{uses_data}}
+        {{'hitparady' | url_for(params={'category_id': 66} )}}
     </div>
 
     <div class="container">
-        {{css[1]}}
+        {{'svety' | url_for(params={'world': 'disco', 'time_range':42} )}}
     </div>
-
 
 {% endblock %}
+

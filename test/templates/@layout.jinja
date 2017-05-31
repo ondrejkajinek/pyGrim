@@ -1,63 +1,37 @@
 <!DOCTYPE html>
-{% set handle_name = context.current_route._handle_name %}
-{% from 'snippets/epg.jinja' import m_epg %}
 <html lang="cs">
 <head>
 	<meta charset="utf-8">
-	<meta name="robots" content="all, follow">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
-	<meta name="description" content="Jsme první televize, která hraje písničky, které máte rádi: lidovky, dechovky, harmoniky, trampské a osvědčené šlágry.">
-	<meta name="keywords" content="šlágr tv, televize, písničky, lidovky, dechovky, harmoniky, trampské, šlágry">
-
-	<title>{% if title %}{{ title }} &mdash; Šlágr TV{% else %}Šlágr TV &mdash; Československá lidová televize{% endif %}</title>
-
+	<title>{% if title %}{{ title }} pyGrim tests{% endif %}</title>
 	<link rel="icon" type="image/png" href="/favicon.png" sizes="16x16">
-	<link rel="stylesheet" media="all" href="/css/default.css">
-    <script src="/js/jquery.1.9.1.min.js"></script>
+    <style>
+        .container{
+            border: 1px solid black;
+            display:block;
+            min-height: 1em;
+            margin: 2px;
+        }
+    </style>
+
     {% for script in js_header_sync %}
         <script src="{{script}}"></script>
     {% endfor %}
     {% for script in js_header_async %}
         <script src="{{script}}" async defer></script>
     {% endfor %}
-    {# <script src="js/weather_teaser.js"></script>
-    <script src="js/poll.js"></script>#}
-    <script>
-          (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-          (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-          m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-          })(window,document,'script','https://www.google-analytics.com/analytics.js','ga');
-
-          ga('create', 'UA-97723708-1', 'auto');
-          ga('send', 'pageview');
-    </script> 
+    {% for style in css %}
+        <link rel="stylesheet" src="{{css}}">
+    {% endfor %}
 </head>
-<body {% if handle_name == 'index' %} onload="load_extern_teaser();{%endif %}">
-
-	{% include 'snippets/header.jinja' %}
+<body>
 
 	{% block main %}
     {% for flash in flashes %}
-      <div class="alert {{flash[0]}} alert-dismissible fade show" role="alert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Zavřít">
-          <span aria-hidden="true">&times;</span>
-        </button>
+      <div style="border:1px" class="alert {{flash[0]}}">
         {{flash[1]}}
       </div>
     {% endfor %}
   {% endblock %}
-
-	{% include 'snippets/footer.jinja' %}
-
-  {% include 'snippets/modal-stream.jinja' %}
-
-
-	<script src="/js/jquery.1.9.1.min.js"></script>
-	<script src="/js/tether.min.js"></script>
-	<script src="/js/bootstrap.min.js"></script>
-	<script src="/js/bxslider.min.js"></script>
-	<script src="/js/scripts.js"></script>
-	<!--[if lt IE 9]><script src="/js/html5.min.js"></script><![endif]-->
 
 </body>
 </html>
