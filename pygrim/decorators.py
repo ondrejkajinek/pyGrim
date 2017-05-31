@@ -77,6 +77,7 @@ class error_handler(method):
     """
 
     def __init__(self, *args, **kwargs):
+        self._error_status = kwargs.pop("status", 500)
         super(error_handler, self).__init__(**kwargs)
         for one in args:
             if not issubclass(one, BaseException):
@@ -84,7 +85,10 @@ class error_handler(method):
                     "%s must be subclass of Basexception" % (one,)
                 )
         self.err_classes = args
-    # enddef
+
+    def pre_call(self, fun, args, kwargs):
+        kwargs.get("context").set_response_status(self._error_status)
+        super(custom_error_handler, self).pre_call(fun, args, kwargs)
 
     def prepare_func(self, func):
         func._custom_error = self.err_classes
@@ -97,6 +101,10 @@ class error_method(method):
     Such method is used when error occurs during request handling.
     Also exposes method, see method decorator.
     """
+
+    def pre_call(self, fun, args, kwargs):
+        kwargs.get("context").set_response_status(500)
+        return super(error_method, self).pre_call(fun, args, kwargs)
 
     def prepare_func(self, func):
         func._error = True
@@ -113,6 +121,10 @@ class not_found_method(method):
     def __init__(self, *args, **kwargs):
         super(not_found_method, self).__init__(**kwargs)
         self._not_found_prefixes = args or ("",)
+
+    def pre_call(self, fun, args, kwargs):
+        kwargs.get("context").set_response_status(404)
+        return super(not_found_method, self).pre_call(fun, args, kwargs)
 
     def prepare_func(self, func):
         func._not_found = self._not_found_prefixes
