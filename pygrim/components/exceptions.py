@@ -1,5 +1,6 @@
 # coding: utf8
 
+from config import AbstractConfig
 from routing.router import AbstractRouter
 from session.session_storage import SessionStorage
 from view.abstract_view import AbstractView
@@ -19,6 +20,12 @@ class WrongComponentBase(BaseException):
 
     def _full_class_name(self, cls):
         return ".".join((cls.__module__, cls.__name__))
+
+
+class WrongConfigBase(WrongComponentBase):
+
+    def __init__(self, instance):
+        super(WrongConfigBase, self).__init__(instance, AbstractConfig)
 
 
 class WrongRouterBase(WrongComponentBase):
