@@ -1,5 +1,6 @@
 # coding: utf8
 
+from ..utils import ensure_string, fix_trailing_slash, is_regex
 from logging import getLogger
 from re import compile as re_compile
 from string import upper as string_upper
@@ -10,19 +11,9 @@ log = getLogger("pygrim.components.route")
 
 class RouteObject(object):
 
-    REGEXP_TYPE = type(re_compile(r""))
-    TRAILING_SLASH_REGEXP = re_compile("/\??\$?$|\$?$")
-
     def __init__(self, pattern, *args, **kwargs):
         super(RouteObject, self).__init__(*args, **kwargs)
-        self._pattern = self._fix_trailing_slash(pattern)
-
-    def _fix_trailing_slash(self, pattern):
-        return (
-            re_compile(self.TRAILING_SLASH_REGEXP.sub("/?$", pattern.pattern))
-            if self.is_regex(pattern)
-            else "%s/" % pattern.rstrip("/")
-        )
+        self._pattern = fix_trailing_slash(pattern)
 
     def get_pattern(self):
         return (
@@ -31,8 +22,8 @@ class RouteObject(object):
             else self._pattern
         )
 
-    def is_regex(self, pattern=None):
-        return type(pattern or self._pattern) == self.REGEXP_TYPE
+    def is_regex(self):
+        return is_regex(self._pattern)
 
 
 class RouteGroup(RouteObject, list):
@@ -90,14 +81,6 @@ class Route(RouteObject):
         self._pattern = pattern
 
     def url_for(self, params):
-
-        def ensure_string(text):
-            return (
-                text.encode("utf8")
-                if isinstance(text, unicode)
-                else str(text)
-            )
-
         if self.is_regex():
             readable, param_names, optional_names = self._pattern_to_readable()
             for name in optional_names:

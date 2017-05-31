@@ -1,7 +1,7 @@
 # coding: utf8
 
 from .abstract_view import AbstractView
-from ..json2 import dumps as json_dumps
+from ..utils.json2 import dumps as json_dumps
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from os import getcwd, path
 

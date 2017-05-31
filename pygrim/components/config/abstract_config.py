@@ -1,6 +1,6 @@
 # coding: utf8
 
-from collections import Mapping
+from ..utils.functions import deep_update
 from copy import deepcopy
 
 DEFAULT_CONFIG = {
@@ -40,19 +40,9 @@ class AbstractConfig(object):
     SEPARATOR = None
 
     def __init__(self, path):
-        self.config = self._deep_update(
+        self.config = deep_update(
             deepcopy(DEFAULT_CONFIG), self._load_config(path)
         )
-
-    def _deep_update(self, original, override):
-        for key, value in override.iteritems():
-            if isinstance(value, Mapping):
-                new_value = self._deep_update(original.get(key, {}), value)
-                original[key] = new_value
-            else:
-                original[key] = override[key]
-
-        return original
 
     def _load_config(self, path):
         raise NotImplementedError()

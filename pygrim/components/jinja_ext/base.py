@@ -1,6 +1,6 @@
 # coding: utf8
 
-from ..json2 import dumps as json_dumps
+from ..utils.json2 import dumps as json_dumps
 from datetime import date, datetime
 from dateutil.parser import parse as parse_dt
 from jinja2.ext import Extension
