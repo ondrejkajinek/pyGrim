@@ -32,6 +32,20 @@ except ImportError:
 log = getLogger("pygrim.server")
 
 
+def register_view_class(name, cls):
+    if name in Server.KNOWN_VIEW_CLASSES:
+        raise RuntimeError("")
+
+    Server.KNOWN_VIEW_CLASSES[name] = cls
+
+
+def register_session_handler(name, cls):
+    if name in Server.KNOWN_SESSION_HANDLERS:
+        raise RuntimeError("")
+
+    Server.KNOWN_SESSION_HANDLERS[name] = cls
+
+
 class ResponseWrap(object):
     def __init__(self, start_response):
         self._start_response = start_response

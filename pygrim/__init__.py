@@ -6,7 +6,8 @@ from . import decorators, server
 from .components.routing import Route, RouteGroup
 from .components import session
 from .decorators import (
-    error_method, method, not_found_method, template_display, template_method,
-    uses_data, error_handler
+    error_handler, error_method, method, not_found_method,
+    template_display, template_method, uses_data, error_handler
 )
+from .server import register_session_handler, register_view_class
 from .server import Server

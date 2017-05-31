@@ -1,44 +1,50 @@
 # coding: utf8
 
 from re import compile as re_compile
-from pyGrim import Route, RouteGroup
+from pygrim import Route, RouteGroup
 
 
 class Routes(object):
 
     def _route_register_func(self, router):
-        router.map(Route(("GET",), "/", "index", "home"))
-        router.map(Route(("GET",), "/test", "test_cookie"))
-        router.map(Route(("GET",), "/test2", "test_cookie"))
-        router.map(Route(("GET",), "/internal_server_error", "ise"))
+        # string routes
+        router.map(Route(("GET",), "/", "home", "home"))
+        router.map(Route(("GET",), "/session", "session_text"))
+        router.map(Route(("GET",), "/cookie_show", "cookie_show"))
+        router.map(Route(("GET",), "/cookie_set", "cookie_set"))
+        router.map(
+            Route(("GET",), "/template_display", "use_template_display")
+        )
+        router.map(Route(("GET",), "/template_method", "use_template_method"))
+        router.map(Route(("GET",), "/type_error", "type_error"))
+        router.map(Route(("GET",), "/runtime_error", "runtime_error"))
+
+        # regexp routes
         router.map(Route(
             ("GET",),
-            re_compile(r"/tpl_test/(?P<template>[^/]*)/"),
-            "template_test"
+            re_compile(r"/template/(?P<template>[^/]+)"),
+            "template_show"
         ))
+
+        # route groups
         router.map(RouteGroup(
-            "/konfigurator",
-            [
-                Route(
-                    ("GET",),
-                    re_compile("/(?P<world>[a-z-_]+)"),
-                    "time_listing"
-                ),
+            "/group",
+            (
+                Route(("GET",), "/test", "group_test"),
                 RouteGroup(
-                    "/asdf",
-                    [
+                    "inner_group",
+                    (
                         Route(
                             ("GET",),
-                            re_compile("/(?P<world>[a-z-_]+)"),
-                            "time_listing"
+                            re_compile(r"/test/(?P<param>[0-9]+)"),
+                            "int_inner_group_test"
                         ),
-                    ]
+                        Route(
+                            ("GET",),
+                            re_compile(r"/test(/(?P<param>[^/]+))?"),
+                            "inner_group_test"
+                        ),
+                    )
                 )
-            ]
-        ))
-        router.map(RouteGroup(
-            re_compile("/regroup/(?P<group>[^/]+)"),
-            (
-                Route(("GET",), "/print", "test_re_group"),
             )
         ))
