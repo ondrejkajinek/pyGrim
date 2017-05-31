@@ -1,8 +1,8 @@
 # coding: utf8
 
-from .components.config import ConfigObject
+from .components.config import AbstractConfig, YamlConfig
 from .components.exceptions import (
-    WrongRouterBase, WrongSessionHandlerBase, WrongViewBase
+    WrongConfigBase, WrongRouterBase, WrongSessionHandlerBase, WrongViewBase
 )
 from .components.log import initialize_loggers
 from .components.routing import AbstractRouter, Router
@@ -60,9 +60,9 @@ class ResponseWrap(object):
 
 class Server(object):
 
-    KNOWN_CONFIG_FORMATS = (
-        "yaml", "ini"
-    )
+    KNOWN_CONFIG_FORMATS = {
+        "yaml": YamlConfig
+    }
 
     KNOWN_SESSION_HANDLERS = {
         "file": FileSessionStorage,
@@ -193,6 +193,13 @@ class Server(object):
             else:
                 route.assign_method(method)
 
+    def _find_config_class(self):
+        for key in self.KNOWN_CONFIG_FORMATS:
+            if key in uwsgi_opt:
+                return uwsgi_opt[key], self.KNOWN_CONFIG_FORMATS[key]
+        else:
+            raise RuntimeError("No known config format used to start uwsgi!")
+
     def _find_router_class(self):
         return Router
 
@@ -213,13 +220,6 @@ class Server(object):
             raise RuntimeError("Unknown view class: %r.", view_class)
 
         return view_class
-
-    def _get_config_path(self):
-        for key in self.KNOWN_CONFIG_FORMATS:
-            if key in uwsgi_opt:
-                return uwsgi_opt[key]
-        else:
-            raise RuntimeError("No known config format used to start uwsgi!")
 
     def _handle_by_route(self, route, context):
         if route.requires_session():
@@ -301,12 +301,20 @@ class Server(object):
             self._handle_error(context=context, exc=exc_info()[1])
 
     def _initialize_basic_components(self):
-        self.config = ConfigObject(self._get_config_path())
+        self._load_config()
         self._register_logger(self.config)
         self._register_router()
         self._register_view()
         self._register_session_handler()
         log.debug("Basic components initialized.")
+
+    def _load_config(self):
+        config_path, config_class = self._find_config_class()
+        config = config_class(config_path)
+        if not isinstance(config, AbstractConfig):
+            raise WrongConfigBase(config)
+
+        self.config = config
 
     def _process_custom_error_handler(self, method, err_cls):
         if err_cls in self._custom_error_handlers:
