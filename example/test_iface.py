@@ -143,7 +143,6 @@ class Test(object):
             )
         })
         context.template = "layout.jinja"
-        context.set_response_status(404)
         self.view.display(context)
 
     @not_found_method()
@@ -155,7 +154,6 @@ class Test(object):
             )
         })
         context.template = "layout.jinja"
-        context.set_response_status(404)
         self.view.display(context)
 
     @error_handler(TypeError)
@@ -164,7 +162,7 @@ class Test(object):
             "text": u"500: This method is used when TypeError is raised."
         })
         context.template = "layout.jinja"
-        context.set_response_status(500)
+        context.set_response_status(501)
         self.view.display(context)
 
     @error_method()
@@ -176,5 +174,4 @@ class Test(object):
             )
         })
         context.template = "layout.jinja"
-        context.set_response_status(500)
         self.view.display(context)
