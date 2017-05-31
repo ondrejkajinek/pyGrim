@@ -28,6 +28,18 @@ class Routes(object):
             "template_method_decorator"
         ))
 
+        # decorator uses_data
+        router.map(Route(
+            ("GET",),
+            "/uses_data_decorator",
+            "uses_data_decorator"
+        ))
+        router.map(Route(
+            ("GET",),
+            "/uses_data_css",
+            "uses_data_css"
+        ))
+
         # 404
         # /404 vrati http status 404
 
@@ -50,6 +62,13 @@ class Routes(object):
             "svety"
             ))
 
+        router.map(Route(
+            ("GET",),
+            re.compile("/order/(?P<id>[0-9]+)(\.pdf)?"),
+            "order",
+            "order"
+        ))
+
         # redirectovani
         router.map(Route(("GET",), "redirect_url", "redirect_url"))
         router.map(Route(
@@ -68,7 +87,3 @@ class Routes(object):
             "context",
             "context"
         ))
-
-
-
-

@@ -29,6 +29,15 @@ class RoutingIface(object):
             }
         }
 
+    @template_method('svety.jinja', session=True)
+    def order(self, context, id=None):
+        "test volitelneho suffixu na route "
+        return {
+            "data": {
+                "world": id,
+            }
+        }
+
     @template_method('static_page.jinja', session=True)
     def static_page(self, context):
         return {"data": {}}

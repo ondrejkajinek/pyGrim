@@ -24,6 +24,16 @@ class FirstIface(object):
             },
         }
 
+    @template_method('index.jinja')
+    @uses_data('header')
+    def uses_data_decorator(self, context):
+        return {"data": {}}
+
+    @template_method('index.jinja')
+    @uses_data('css_inject')
+    def uses_data_css(self, context):
+        return {"data": {}}
+
     @method(session=True)
     def flash(self, context, *args, **kwargs):
         """ test zda flash prezije redirect """
@@ -62,7 +72,7 @@ class FirstIface(object):
             "data": {},
         }
 
-    @template_method('index.jinja')
+    @template_method('static_page.jinja')
     def template_method_decorator(self, context):
         "test ze decorator @template_method vyexponuje metodu (vrati 200)"
         return {
@@ -73,6 +83,6 @@ class FirstIface(object):
     def not_found(self, context, *args, **kwargs):
         log.debug("Not found...")
         context.status = 404
-        context.template = "err/not_found.jinja"
+        context.template = "404.jinja"
         self.display(context)
 
