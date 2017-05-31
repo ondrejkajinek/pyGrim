@@ -3,11 +3,10 @@
 {% block main %}
 
     <div class="container">
-        {{world}}
+        {{context.get_request_uri()}}
     </div>
 
     <div class="container">
-        {{time_range}}
+        {{context.current_route._handle_name}}
     </div>
-
 {% endblock %}
