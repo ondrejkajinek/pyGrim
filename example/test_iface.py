@@ -159,7 +159,10 @@ class Test(object):
     @error_handler(TypeError)
     def type_error_handle(self, context, exc):
         context.view_data.update({
-            "text": u"500: This method is used when TypeError is raised."
+            "text": (
+                u"501: This method is used when TypeError is raised. "
+                "This handle sets http status to 501"
+            )
         })
         context.template = "layout.jinja"
         context.set_response_status(501)
