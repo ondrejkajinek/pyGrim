@@ -88,7 +88,7 @@ class error_handler(method):
 
     def pre_call(self, fun, args, kwargs):
         kwargs.get("context").set_response_status(self._error_status)
-        super(custom_error_handler, self).pre_call(fun, args, kwargs)
+        super(error_handler, self).pre_call(fun, args, kwargs)
 
     def prepare_func(self, func):
         func._custom_error = self.err_classes
