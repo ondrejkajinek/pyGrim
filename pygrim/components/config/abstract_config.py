@@ -2,6 +2,8 @@
 
 from ..utils.functions import deep_update
 from copy import deepcopy
+from logging import getLogger
+log = getLogger(__name__)
 
 
 class NoDefaultValue(Exception):
@@ -62,25 +64,20 @@ class AbstractConfig(object):
 
         return target
 
-    def getfloat(self, key, *args, **kwargs):
+    def _get_typed(self, construct, key, *args, **kwargs):
         value = self.get(key, *args, **kwargs)
-        if not isinstance(value, float):
-            try:
-                value = self._default_value(*args, **kwargs)
-            except NoDefaultValue:
-                raise TypeError("Wrong value for float key: %r" % (key,))
-
+        try:
+            value = construct(value)
+        except ValueError:
+            raise TypeError(
+                "Wrong value %r for %r key: %r" % (value, construct, key))
         return value
+
+    def getfloat(self, key, *args, **kwargs):
+        return self._get_typed(float, key, *args, **kwargs)
 
     def getint(self, key, *args, **kwargs):
-        value = self.get(key, *args, **kwargs)
-        if not isinstance(value, (int, long)):
-            try:
-                value = self._default_value(*args, **kwargs)
-            except NoDefaultValue:
-                raise TypeError("Wrong value for int key: %r" % (key,))
-
-        return value
+        return self._get_typed(int, key, *args, **kwargs)
 
     def _default_value(self, *args, **kwargs):
         """

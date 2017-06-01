@@ -156,6 +156,7 @@ def create_tag():
     call_cmd('git commit -m "version {tag}"'.format(tag=tag))
     call_cmd('git tag "{tag}"'.format(tag=tag))
     call_cmd("git push --follow-tags")
+    call_cmd("git push --tags")
     print "tag done"
 
 
