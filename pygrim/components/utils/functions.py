@@ -36,3 +36,11 @@ def fix_trailing_slash(pattern):
 
 def is_regex(pattern):
     return type(pattern) == REGEXP_TYPE
+
+
+def remove_trailing_slah(pattern):
+    return (
+        re_compile(TRAILING_SLASH_REGEXP.sub("", pattern.pattern))
+        if is_regex(pattern)
+        else TRAILING_SLASH_REGEXP.sub("", pattern)
+    )

@@ -1,6 +1,8 @@
 # coding: utf8
 
-from ..utils import ensure_string, fix_trailing_slash, is_regex
+from ..utils import (
+    ensure_string, fix_trailing_slash, is_regex, remove_trailing_slah
+)
 from logging import getLogger
 from re import compile as re_compile
 from string import upper as string_upper
@@ -119,7 +121,7 @@ class Route(RouteObject):
             )
 
         readable = self.URL_OPTIONAL_REGEXP.sub(r"\1\2\3", readable)
-        readable = self.TRAILING_SLASH_REGEXP.sub("", readable).lstrip("^")
+        readable = remove_trailing_slah(readable).lstrip("^")
         mandatory_names = set(param_names) - set(optional_names)
         if len(mandatory_names) + len(optional_names) < len(param_names):
             raise RuntimeError(
