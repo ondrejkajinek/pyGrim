@@ -2,6 +2,8 @@
 
 from ..utils.functions import deep_update
 from copy import deepcopy
+from logging import getLogger
+log = getLogger(__name__)
 
 
 class NoDefaultValue(Exception):
@@ -74,11 +76,17 @@ class AbstractConfig(object):
 
     def getint(self, key, *args, **kwargs):
         value = self.get(key, *args, **kwargs)
-        if not isinstance(value, (int, long)):
-            try:
-                value = self._default_value(*args, **kwargs)
-            except NoDefaultValue:
-                raise TypeError("Wrong value for int key: %r" % (key,))
+        try:
+            value = int(value)
+        except:
+            raise TypeError("Wrong value for int key: %r" % (key,))
+
+        # I do niot understand a purpose of this code
+        # if not isinstance(value, (int, long)):
+            # try:
+                # value = self._default_value(*args, **kwargs)
+            # except NoDefaultValue:
+                # raise TypeError("Wrong value for int key: %r" % (key,))
 
         return value
 
