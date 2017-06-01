@@ -3,6 +3,10 @@
 from ..utils.functions import deep_update
 from copy import deepcopy
 
+
+class NoDefaultValue(Exception):
+    pass
+
 DEFAULT_CONFIG = {
     "pygrim": {
         "debug": True
@@ -53,7 +57,7 @@ class AbstractConfig(object):
         except KeyError as exc:
             try:
                 target = self._default_value(*args, **kwargs)
-            except:
+            except NoDefaultValue:
                 raise exc
 
         return target
@@ -63,7 +67,7 @@ class AbstractConfig(object):
         if not isinstance(value, float):
             try:
                 value = self._default_value(*args, **kwargs)
-            except:
+            except NoDefaultValue:
                 raise TypeError("Wrong value for float key: %r" % (key,))
 
         return value
@@ -73,16 +77,26 @@ class AbstractConfig(object):
         if not isinstance(value, (int, long)):
             try:
                 value = self._default_value(*args, **kwargs)
-            except:
+            except NoDefaultValue:
                 raise TypeError("Wrong value for int key: %r" % (key,))
 
         return value
 
     def _default_value(self, *args, **kwargs):
+        """
+        there must be this construction because this raises IndexError
+            everytime because args[0] is executed before kwargs.get
         try:
             return kwargs.get("default", args[0])
         except IndexError:
             raise RuntimeError("No default value given")
+        """
+
+        if args:
+            return args[0]
+        if "default" in kwargs:
+            return kwargs["default"]
+        raise NoDefaultValue()
 
     def _load_config(self, path):
         raise NotImplementedError()
