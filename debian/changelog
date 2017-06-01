@@ -1,3 +1,18 @@
+pygrim (0.1.21) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * Tag pushing fixed in setup.py
+  * Unneeded import removed from setup.py
+  * Moved path to log file in example
+  * Added url_for with regexp route to example
+  * Fixed an error with stripping trailing slash in url_for
+  * fix after regex moved
+  * abstract config - get{int,float} fixed
+  * dirty fix of config-get int
+  * Changed message in example @error_handler
+
+ -- Václav Pokluda <root@darky>  Thu, 01 Jun 2017 10:54:45 +0200
+
 pygrim (0.1.20) testing; urgency=medium
 
   * COMMIT MESSASGES
