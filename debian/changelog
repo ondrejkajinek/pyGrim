@@ -1,3 +1,39 @@
+pygrim (0.1.19) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * prevent import collision
+  * fixed _default_value behavior
+  * YamlConfig now prefers BaseLoader to Loader (expands only Python
+    types); YamlConfig uses modified BaseLoader so it can handle
+    configuration with multiple keys at once -- they turn the value into
+    list
+  * Logging from YamlConfig now uses uwsgi logger, when available
+  * Common config methods moved to AbstractConfig
+  * Common functions moved to components/utils; json2 moved there too
+  * pridani testu
+  * Removed unnecessary set_response_status from example
+  * Not-found and error states decorators now set http statuses in their
+    pre_call stage: not found uses 404, error_method (used when no
+    error_handler handles raised exception) uses 500, error_handler can
+    be configured with status kwargs, or defaults to 500 when kwarg is
+    not given. Setting http status in decorated method rewrites status
+    from decorator
+  * Created AbstractConfig, changed some internal behaviour about
+    configuration loading; in the future, pyGrim could use another type
+    of config format other than yaml
+  * cleanup
+  * Methods for registering new types for view and session_storage
+    components added
+  * pid file removed from example
+  * Example improved, contains examples for decorators and how to
+    properly set response status, body
+  * cisteni v testu
+  * pridany testovaci page
+  * init testovaci sajta
+  * lepsi porovnavani verzi v baleni
+
+ -- Václav Pokluda <root@darky>  Thu, 01 Jun 2017 09:32:34 +0200
+
 pygrim (0.1.18) testing; urgency=low
 
   * COMMIT MESSASGES
