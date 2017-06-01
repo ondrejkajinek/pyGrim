@@ -64,31 +64,20 @@ class AbstractConfig(object):
 
         return target
 
-    def getfloat(self, key, *args, **kwargs):
-        value = self.get(key, *args, **kwargs)
-        if not isinstance(value, float):
-            try:
-                value = self._default_value(*args, **kwargs)
-            except NoDefaultValue:
-                raise TypeError("Wrong value for float key: %r" % (key,))
-
-        return value
-
-    def getint(self, key, *args, **kwargs):
+    def _get_typed(self, construct, key, *args, **kwargs):
         value = self.get(key, *args, **kwargs)
         try:
-            value = int(value)
-        except:
-            raise TypeError("Wrong value for int key: %r" % (key,))
-
-        # I do niot understand a purpose of this code
-        # if not isinstance(value, (int, long)):
-            # try:
-                # value = self._default_value(*args, **kwargs)
-            # except NoDefaultValue:
-                # raise TypeError("Wrong value for int key: %r" % (key,))
-
+            value = construct(value)
+        except ValueError:
+            raise TypeError(
+                "Wrong value %r for %r key: %r" % (value, construct, key))
         return value
+
+    def getfloat(self, key, *args, **kwargs):
+        return self._get_typed(float, key, *args, **kwargs)
+
+    def getint(self, key, *args, **kwargs):
+        return self._get_typed(int, key, *args, **kwargs)
 
     def _default_value(self, *args, **kwargs):
         """
