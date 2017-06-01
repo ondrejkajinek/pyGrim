@@ -64,15 +64,6 @@ class AbstractConfig(object):
 
         return target
 
-    def _get_typed(self, construct, key, *args, **kwargs):
-        value = self.get(key, *args, **kwargs)
-        try:
-            value = construct(value)
-        except ValueError:
-            raise TypeError(
-                "Wrong value %r for %r key: %r" % (value, construct, key))
-        return value
-
     def getfloat(self, key, *args, **kwargs):
         return self._get_typed(float, key, *args, **kwargs)
 
@@ -94,6 +85,15 @@ class AbstractConfig(object):
         if "default" in kwargs:
             return kwargs["default"]
         raise NoDefaultValue()
+
+    def _get_typed(self, construct, key, *args, **kwargs):
+        value = self.get(key, *args, **kwargs)
+        try:
+            return construct(value)
+        except ValueError:
+            raise TypeError(
+                "Wrong value %r for %r key: %r" % (value, construct, key)
+            )
 
     def _load_config(self, path):
         raise NotImplementedError()
