@@ -5,7 +5,6 @@ from setuptools import setup, find_packages
 import subprocess
 import os
 from sys import argv, stderr, exit
-from collections import defaultdict
 
 
 name = "pygrim"
