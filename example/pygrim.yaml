@@ -1,8 +1,8 @@
 uwsgi:
-   daemonize: /home/ondrak/public_html/pygrim_test/pygrim.log
+   daemonize: /tmp/pygrim_test.log
    http-socket: :7846
    chdir: /home/ondrak/public_html/pygrim_test/
-   logto: /home/ondrak/public_html/pygrim_test/pygrim.log
+   logto: /tmp/pygrim_test.log
    master: true
    module: server:application
    pidfile: /home/ondrak/public_html/pygrim_test/pygrim.pid
@@ -14,7 +14,7 @@ uwsgi:
    touch-reload: /home/ondrak/public_html/pygrim_test/pygrim.yaml
 
 logging:
-   file: /home/ondrak/public_html/pygrim_test/pygrim.log
+   file: /tmp/pygrim_test.log
    level: DEBUG
    loggers:
 
