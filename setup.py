@@ -154,8 +154,9 @@ def create_tag():
     call_cmd("git add debian/version debian/changelog")
     call_cmd('git commit -m "version {tag}"'.format(tag=tag))
     call_cmd('git tag "{tag}"'.format(tag=tag))
-    call_cmd("git push --follow-tags")
-    call_cmd("git push --tags")
+    # TODO: when we annotate tags, use --follow-tags prior to push origin <tag>
+    # call_cmd("git push --follow-tags")
+    call_cmd("git push origin {tag}".format(tag=tag))
     print "tag done"
 
 
