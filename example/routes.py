@@ -23,6 +23,7 @@ class Routes(object):
         router.map(Route(
             ("GET",),
             re_compile(r"/template/(?P<template>[^/]+)"),
+            "template_show",
             "template_show"
         ))
 
