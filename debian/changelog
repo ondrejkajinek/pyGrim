@@ -1,3 +1,11 @@
+pygrim (0.1.20) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * bugfix decorators call super
+  * small fix in pushing tags to upstream
+
+ -- Václav Pokluda <root@darky>  Thu, 01 Jun 2017 09:52:34 +0200
+
 pygrim (0.1.19) testing; urgency=medium
 
   * COMMIT MESSASGES
