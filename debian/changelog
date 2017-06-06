@@ -1,3 +1,11 @@
+pygrim (0.1.22) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * default headers from config, fix cast headers to str
+  * bool getter to abstract config
+
+ -- Václav Pokluda <root@darky>  Tue, 06 Jun 2017 11:07:27 +0200
+
 pygrim (0.1.21) testing; urgency=medium
 
   * COMMIT MESSASGES
