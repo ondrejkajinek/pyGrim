@@ -80,10 +80,10 @@ class AbstractConfig(object):
             raise RuntimeError("No default value given")
         """
 
-        if args:
-            return args[0]
         if "default" in kwargs:
             return kwargs["default"]
+        if args:
+            return args[0]
         raise NoDefaultValue()
 
     def _get_typed(self, construct, key, *args, **kwargs):
