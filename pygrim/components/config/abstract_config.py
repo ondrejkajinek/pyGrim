@@ -41,6 +41,19 @@ DEFAULT_CONFIG = {
 }
 
 
+def bool_cast(a):
+    if a is True or a is False:
+        return a
+    if a is None:
+        return False
+    if isinstance(a, basestring):
+        if a.isdigit():
+            a = int(a)
+        else:
+            return a.lower() == "true"
+    return bool(a)
+
+
 class AbstractConfig(object):
 
     SEPARATOR = None
@@ -78,6 +91,11 @@ class AbstractConfig(object):
 
     def getint(self, key, *args, **kwargs):
         return self._get_typed(int, key, *args, **kwargs)
+
+    def getbool(self, key, *args, **kwargs):
+        return self._get_typed(bool_cast, key, *args, **kwargs)
+
+    getboolean = getbool
 
     def _default_value(self, *args, **kwargs):
         """
