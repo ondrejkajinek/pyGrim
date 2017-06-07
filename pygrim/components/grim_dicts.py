@@ -5,12 +5,24 @@ from logging import getLogger
 log = getLogger("pygrim.http.grim_dicts")
 
 
+class AttributeDict(dict):
+
+    def __init__(self, *args, **kwargs):
+        super(AttributeDict, self).__init__(*args, **kwargs)
+
+    def __getattr__(self, key):
+        try:
+            return self.__getitem__(key)
+        except KeyError as exc:
+            raise AttributeError(exc)
+
+
 class ImmutableDict(dict):
 
     def __hash__(self):
         return id(self)
 
-    def _immutable(self, *args, **kws):
+    def _immutable(self, *args, **kwarsg):
         raise TypeError("object is immutable")
 
     __setitem__ = _immutable

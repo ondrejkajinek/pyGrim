@@ -1,6 +1,6 @@
 # coding: utf8
 
-from .grim_dicts import ImmutableDict
+from ..components.grim_dicts import ImmutableDict
 from .request import Request
 from .response import Response
 from logging import getLogger

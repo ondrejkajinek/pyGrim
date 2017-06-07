@@ -1,6 +1,6 @@
 # coding: utf8
 
-from .grim_dicts import ImmutableDict, NormalizedImmutableDict
+from ..components.grim_dicts import ImmutableDict, NormalizedImmutableDict
 from logging import getLogger
 from re import compile as re_compile, IGNORECASE as re_IGNORECASE
 from string import strip as string_strip
