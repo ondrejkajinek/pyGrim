@@ -177,4 +177,4 @@ class Test(object):
             )
         })
         context.template = "layout.jinja"
-        self.view.display(context)
+        context.set_view(True)
