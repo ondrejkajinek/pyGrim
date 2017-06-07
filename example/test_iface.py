@@ -18,7 +18,7 @@ class Test(object):
             "text": u"Hello, this is the most simple case."
         })
         context.template = "layout.jinja"
-        self.view.display(context)
+        context.set_view(True)
 
     @method(
         session=True
@@ -34,7 +34,7 @@ class Test(object):
             "session_text": context.session.get("text")
         })
         context.template = "layout.jinja"
-        self.view.display(context)
+        context.set_view(True)
 
     @template_method("layout.jinja")
     def cookie_show(self, context):
@@ -143,7 +143,7 @@ class Test(object):
             )
         })
         context.template = "layout.jinja"
-        self.view.display(context)
+        context.set_view(True)
 
     @not_found_method()
     def not_found(self, context):
@@ -154,7 +154,7 @@ class Test(object):
             )
         })
         context.template = "layout.jinja"
-        self.view.display(context)
+        context.set_view(True)
 
     @error_handler(TypeError)
     def type_error_handle(self, context, exc):
@@ -166,7 +166,7 @@ class Test(object):
         })
         context.template = "layout.jinja"
         context.set_response_status(501)
-        self.view.display(context)
+        context.set_view(True)
 
     @error_method()
     def ise_handle(self, context, exc):

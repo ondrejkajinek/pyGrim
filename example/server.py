@@ -20,8 +20,10 @@ register_session_handler("myhandler", MySessionClass)
 
 inheritance = (
     WebServer,
-    Test,
     Routes
+)
+controllers = (
+    Test,
 )
 
 
@@ -50,6 +52,8 @@ Server = type("Server", inheritance, {
 #   server is filename and application is method (uwsgi will do __call__ on
 #   this object on every request)
 application = Server()
+for controller_class in controllers:
+    application.register_controller(controller_class())
 
 
 @postfork_decorator
