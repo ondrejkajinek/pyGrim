@@ -42,11 +42,13 @@ pkg: deb
 
 debtest: deb
 	scp build/${FULL_PKG_NAME} debian.ats:${PACKAGES_REMOTE_DIR} && \
-		ssh aptly@debian.ats bash pkg-to-testing ${PACKAGES_REMOTE_DIR}${FULL_PKG_NAME} jessie
+		ssh aptly@debian.ats bash pkg-to-testing ${PACKAGES_REMOTE_DIR}${FULL_PKG_NAME} jessie && \
+		git push
 
 debprod: deb
 	scp build/${FULL_PKG_NAME} debian.ats:${PACKAGES_REMOTE_DIR} && \
-		ssh aptly@debian.ats bash pkg-to-stable ${PACKAGES_REMOTE_DIR}${FULL_PKG_NAME} jessie
+		ssh aptly@debian.ats bash pkg-to-stable ${PACKAGES_REMOTE_DIR}${FULL_PKG_NAME} jessie && \
+		git push
 
 clean:
 	rm -rf dist
