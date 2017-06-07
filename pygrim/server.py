@@ -100,17 +100,19 @@ class Server(object):
                 context.get_response_status_code(),
                 context.get_response_headers()
             )
-            body = (
-                None
-                if context.is_request_head()
-                else context.get_response_body()
-            )
+
+            # to keep errors and other cases iteration should stay where it is
+            body = context.get_response_body()
             if context.generates_response():
+                do_yield = not context.is_request_head()
                 for part in body():
-                    yield part
+                    if do_yield:
+                        yield part
+            elif context.is_request_head():
+                log.debug("HEAD - not returning body")
             else:
                 yield body
-
+            # endif
         return
 
     def display(self, *args, **kwargs):
