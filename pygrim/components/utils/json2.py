@@ -127,7 +127,8 @@ def _dumps(obj, nice=None, depth=0):
         output.write(_dump_number(obj))
     elif isinstance(obj, dict):
         output.write(_dump_dict(obj, nice, depth))
-    elif isinstance(obj, (list, tuple, set, GeneratorType, Iterable)):
+    # must be after str and unicode, since these are also iterable
+    elif isinstance(obj, (GeneratorType, Iterable)):
         output.write(_dump_iterable(obj, nice, depth))
     elif isinstance(obj, UUID):
         output.write(_dump_uuid(obj))
