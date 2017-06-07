@@ -294,7 +294,6 @@ class Server(object):
                 except RoutePassed:
                     continue
             else:
-                # TODO: reset current route to None
                 raise RouteNotFound()
         except RouteNotFound:
             self._handle_not_found(context=context)
