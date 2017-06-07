@@ -75,11 +75,10 @@ class Server(object):
     }
 
     def __init__(self):
-        self._initialize_basic_components()
-        self._methods = {}
         # temporary
-        # self._not_found_methods will be changed to tuple
-        # during postfork-time method _collect_exposed_methods
+        # several containers will be turned into tuples at postfork time
+        self._initialize_basic_components()
+        self._controllers = {}
         self._not_found_methods = {}
         self._error_method = self._default_error_method
         self._custom_error_handlers = {}
@@ -106,11 +105,20 @@ class Server(object):
             else:
                 yield body
 
-        return
+    def do_postfork(self):
+        """
+        This method needs to be called in uwsgi postfork
+        """
+        self._finalize_not_found_handlers()
+        if hasattr(self, "_route_register_func"):
+            self._route_register_func(self.router)
+            self._finalize_routes()
+            log.debug("Routes loaded")
+        else:
+            log.warning("There is no function to register routes!")
 
-    def display(self, *args, **kwargs):
-        self.view.display(*args, **kwargs)
-        raise DispatchFinished()
+        if hasattr(self, "postfork"):
+            self.postfork()
 
     def redirect(self, context, **kwargs):
         if "url" in kwargs:
@@ -129,37 +137,12 @@ class Server(object):
         context.redirect(url, **kwargs)
         raise DispatchFinished()
 
-    def do_postfork(self):
-        """
-        This method needs to be called in uwsgi postfork
-        """
-        self._collect_exposed_methods()
-        if hasattr(self, "_route_register_func"):
-            self._route_register_func(self.router)
-            self._finalize_routes()
-            log.debug("Routes loaded")
-        else:
-            log.warning("There is no function to register routes!")
+    def register_controller(self, controller):
+        if controller.__class__.__name__ in self._controllers:
+            raise DuplicateContoller(controller)
 
-        if hasattr(self, "postfork"):
-            self.postfork()
-
-    def render(self, *args, **kwargs):
-        log.warning(
-            "STOP CALLING AWFUL %r, CALL %r INSTEAD!",
-            "server.render", "server.display"
-        )
-        return self.display(*args, **kwargs)
-
-    def _collect_exposed_methods(self):
-        for unused_, member in getmembers(self, predicate=ismethod):
-            if getattr(member, "_exposed", False) is True:
-                self._process_exposed_method(member)
-
-        if "" not in self._not_found_methods:
-            self._not_found_methods[""] = self._default_not_found_method
-
-        self._finalize_not_found_handlers()
+        self._process_decorated_methods(controller)
+        self._controllers[controller.__class__.__name__] = controller
 
     def _default_error_method(self, context, exc):
         log.exception(exc.message)
@@ -184,14 +167,24 @@ class Server(object):
     def _finalize_routes(self):
         for route in self.router.get_routes():
             try:
-                method = self._methods[route.get_handle_name()]
+                controller = self._controllers[route.get_controller_name()]
             except KeyError:
+                raise UnknownController(route.get_controller_name())
+
+            try:
+                # raises if method does not exist
+                method = getattr(controller, route.get_handle_name())
+                # raises if method is not exposed
+                if method._exposed is True:
+                    route.assign_method(method)
+            except AttributeError:
                 raise MissingRouteHandle(
-                    route._handle_name,
+                    controller,
+                    route.get_handle_name(),
                     route.get_name() or route.get_pattern()
                 )
-            else:
-                route.assign_method(method)
+
+        self._controllers = tuple(self._controllers.itervalues())
 
     def _find_config_class(self):
         for key in self.KNOWN_CONFIG_FORMATS:
@@ -233,6 +226,8 @@ class Server(object):
             raise
 
         log.debug("Dispatch succeded on: %r.", context.current_route)
+        # when exception is raised, we're not sure if session is valid,
+        # so we only store it when no exception was raised
         if context.session_loaded():
             context.save_session(self.session_handler)
 
@@ -240,13 +235,12 @@ class Server(object):
         log.exception(
             "Error while dispatching to: %r.",
             (
-                context.current_route._handle_name
+                context.current_route.full_handle_name()
                 if context.current_route
                 else "<no route>"
             )
         )
         try:
-
             for one in getmro(exc.__class__):
                 log.debug("Looking up error handler for %r.", one)
                 if one in self._custom_error_handlers:
@@ -269,20 +263,16 @@ class Server(object):
             raise
 
     def _handle_not_found(self, context):
-        log.debug(
-            "No route found to handle request %r.",
-            context.get_request_uri()
-        )
+        request_uri = context.get_request_uri()
+        log.debug("No route found to handle request %r.", request_uri)
         try:
-            request_uri = context.get_request_uri()
             for prefix, handle in self._not_found_methods:
                 if request_uri.startswith(prefix):
                     handle(context=context)
+                    log.debug("RouteNotFound exception successfully handled.")
                     break
         except DispatchFinished:
             pass
-
-        log.debug("RouteNotFound exception successfully handled.")
 
     def _handle_request(self, context):
         try:
@@ -299,6 +289,9 @@ class Server(object):
             self._handle_not_found(context=context)
         except:
             self._handle_error(context=context, exc=exc_info()[1])
+
+        if context.get_view():
+            self.view.display(context)
 
     def _initialize_basic_components(self):
         self._load_config()
@@ -325,22 +318,27 @@ class Server(object):
         log.debug("Registered %r to handle %r.", method, err_cls)
         self._custom_error_handlers[err_cls] = method
 
+    def _process_decorated_methods(self, controller):
+        """
+        Does not process exposed methods,
+        those are processed when routes are finalized.
+        """
+        for unused_, member in getmembers(controller, predicate=ismethod):
+            if getattr(member, "_error", False) is True:
+                self._process_error_handler(member)
+
+            for prefix in getattr(member, "_not_found", ()):
+                self._process_not_found_method(member, prefix)
+
+            for err_cls in getattr(member, "_custom_error", ()):
+                self._process_custom_error_handler(member, err_cls)
+
+        if "" not in self._not_found_methods:
+            self._not_found_methods[""] = self._default_not_found_method
+
     def _process_error_handler(self, method):
         log.debug("Method %r registered as default exception handler", method)
         self._error_method = method
-
-    def _process_exposed_method(self, method):
-        log.debug("Method %r exposed as route handler", method)
-        self._methods[method._dispatch_name] = method
-
-        for prefix in getattr(method, "_not_found", ()):
-            self._process_not_found_method(method, prefix)
-
-        if getattr(method, "_error", False) is True:
-            self._process_error_handler(method)
-
-        for err_cls in getattr(method, "_custom_error", ()):
-            self._process_custom_error_handler(method, err_cls)
 
     def _process_not_found_method(self, method, prefix):
         if prefix in self._not_found_methods:

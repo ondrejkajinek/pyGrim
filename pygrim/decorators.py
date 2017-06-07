@@ -146,7 +146,7 @@ class template_display(BaseDecorator):
         context = kwargs.get("context")
         context.view_data.update(res.get("data") or {})
         context.template = res.get("_template", self._template)
-        args[0].display(context)
+        context.set_view(True)
         return super(template_display, self).post_call(fun, args, kwargs, res)
 
 

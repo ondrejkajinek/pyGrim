@@ -44,7 +44,18 @@ class Route(RouteObject):
         # temporary
         # pyGrim will assign requested method on its postfork event
         self._handle = None
-        self._handle_name = handle_name
+        try:
+            controller_name, handle_name = handle_name.split(":", 1)
+        except RuntimeError:
+            log.error(
+                "Invalid handle %r, use format Controller:Method!",
+                handle_name
+            )
+            raise
+        else:
+            self._controller_name = controller_name
+            self._handle_name = handle_name
+
         self._methods = tuple(map(
             string_upper,
             (
@@ -63,6 +74,12 @@ class Route(RouteObject):
             context=context,
             **context.pop_route_params()
         )
+
+    def full_handle_name(self):
+        return "%s:%s" % (self.get_controller_name(), self.get_handle_name())
+
+    def get_controller_name(self):
+        return self._controller_name
 
     def get_handle_name(self):
         return self._handle_name

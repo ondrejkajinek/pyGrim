@@ -6,7 +6,31 @@ from session.session_storage import SessionStorage
 from view.abstract_view import AbstractView
 
 
-class WrongComponentBase(BaseException):
+class ComponentException(BaseException):
+
+    def _full_class_name(self, cls):
+        return ".".join((cls.__module__, cls.__name__))
+
+
+class DuplicateContoller(ComponentException):
+
+    def __init__(self, controller):
+        super(DuplicateContoller, self).__init__(
+            "Another instance of %r is already registered as controller" % (
+                self._full_class_name(controller.__class__)
+            )
+        )
+
+
+class UnknownController(ComponentException):
+
+    def __init__(self, controller):
+        super(UnknownController, self).__init__(
+            "Requested controller %r was not registered" % controller
+        )
+
+
+class WrongComponentBase(ComponentException):
 
     _template = "%r has to be derived from %r."
 
@@ -17,9 +41,6 @@ class WrongComponentBase(BaseException):
                 self._full_class_name(required_parent)
             )
         )
-
-    def _full_class_name(self, cls):
-        return ".".join((cls.__module__, cls.__name__))
 
 
 class WrongConfigBase(WrongComponentBase):

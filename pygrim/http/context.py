@@ -29,6 +29,7 @@ class Context(object):
         self._response = Response()
         self._route_params = None
         self._session_loaded = False
+        self._view = False
 
         self.set_route_params()
 
@@ -148,6 +149,9 @@ class Context(object):
             self._response.status, http_responses[self._response.status]
         )
 
+    def get_view(self):
+        return self._view
+
     def is_request_get(self):
         return self._request.environment["request_method"] == "GET"
 
@@ -193,3 +197,6 @@ class Context(object):
 
     def set_route_params(self, params=None):
         self._route_params = ImmutableDict(params or {})
+
+    def set_view(self, view):
+        self._view = view

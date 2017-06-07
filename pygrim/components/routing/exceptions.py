@@ -17,9 +17,11 @@ Can be used by user to stop anything after. It means:
 
 class MissingRouteHandle(BaseRoutingException):
 
-    def __init__(self, handle, route):
+    def __init__(self, controller, handle, route):
         super(MissingRouteHandle, self).__init__(
-            "Server has no method %r to handle route %r." % (handle, route)
+            "Controller %r has no method %r to handle route %r." % (
+                controller, handle, route
+            )
         )
 
 
