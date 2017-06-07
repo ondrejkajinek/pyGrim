@@ -4,6 +4,7 @@
 from pygrim import Server as WebServer
 from routes import Routes
 from test_iface import Test
+from second_controller import Second
 from uwsgidecorators import postfork as postfork_decorator
 # from pygrim.components.session import FileSessionStorage
 
@@ -24,6 +25,7 @@ inheritance = (
 )
 controllers = (
     Test,
+    Second
 )
 
 

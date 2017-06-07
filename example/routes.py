@@ -9,6 +9,7 @@ class Routes(object):
     def _route_register_func(self, router):
         # string routes
         router.map(Route(("GET",), "/", "Test:home", "home"))
+        router.map(Route(("GET",), "/second", "Second:home", "second_home"))
         router.map(Route(("GET",), "/session", "Test:session_text"))
         router.map(Route(("GET",), "/cookie_show", "Test:cookie_show"))
         router.map(Route(("GET",), "/cookie_set", "Test:cookie_set"))
