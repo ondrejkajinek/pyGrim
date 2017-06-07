@@ -51,6 +51,7 @@ class ResponseWrap(object):
         self._start_response = start_response
 
     def __call__(self, status, headers):
+        log.debug("starting response with:%r:%r", status, headers)
         self._start_response(status, headers)
         self._start_response = self.noop
 

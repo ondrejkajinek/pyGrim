@@ -11,14 +11,15 @@ class SessionStorage(object):
     def __init__(self, config):
         self._config = config
         self._cookie = {
-            k: self._config.get("session:cookie:" + k, default)
-            for k, default in (
-                ("name", "SESS_ID"),
-                ("lifetime", 3600),
-                ("domain", None),
-                ("path", "/"),
-                ("http_only", False),
-                ("secure", False)
+            str(k): getattr(self._config, "get" + t)(
+                "session:cookie:" + k, default)
+            for k, default, t in (
+                ("name", "SESS_ID", ""),
+                ("lifetime", 3600, "int"),
+                ("domain", "", ""),
+                ("path", "/", ""),
+                ("http_only", False, "bool"),
+                ("secure", False, "bool")
             )
         }
         log.debug("Session cookie template:%r", self._cookie)

@@ -17,8 +17,9 @@ class Context(object):
 
     def __init__(self, environment, config):
         self.config = config
-        self._suppress_port = config.get("context:suppress_port", False)
-        self._force_https = config.get("context:force_https", False)
+        self._suppress_port = config.getbool("context:suppress_port", False)
+        self._force_https = config.getbool("context:force_https", False)
+        self._default_headers = config.get("context:default_headers", None)
 
         self.current_route = None
         self.session = None
@@ -27,6 +28,8 @@ class Context(object):
 
         self._request = Request(environment)
         self._response = Response()
+        if self._default_headers:
+            self.add_response_headers(self._default_headers)
         self._route_params = None
         self._session_loaded = False
 
@@ -64,7 +67,10 @@ class Context(object):
         extra.update(set(args))
 
     def add_response_headers(self, headers):
-        self._response.headers.update(headers)
+        self._response.headers.update(
+            (str(k), str(v))
+            for k, v in headers.items()
+        )
 
     def delete_cookie(
         self, name, domain=None, path=None, http_only=None, secure=None

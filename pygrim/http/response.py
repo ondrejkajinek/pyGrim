@@ -91,7 +91,7 @@ class Response(object):
             in self.COOKIE_PARTS
         )
         cookie_params = "; ".join(filter(None, params))
-        return "%s=%s%s" % (
+        return str("%s=%s%s" % (
             url_quoteplus(name),
             url_quoteplus(str(cookie["value"])),
             (
@@ -99,7 +99,7 @@ class Response(object):
                 if cookie_params
                 else ""
             )
-        )
+        ))
 
     def _serialized_cookies(self):
         for name, cookie in self.cookies.iteritems():
