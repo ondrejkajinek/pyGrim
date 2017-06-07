@@ -123,23 +123,6 @@ class Server(object):
         if hasattr(self, "postfork"):
             self.postfork()
 
-    def redirect(self, context, **kwargs):
-        if "url" in kwargs:
-            url = kwargs.pop("url")
-        elif "route_name" in kwargs:
-            url = "".join((
-                context.get_request_url(),
-                self.router.url_for(
-                    kwargs.pop("route_name"),
-                    kwargs.pop("params", None) or {}
-                )
-            ))
-        else:
-            raise RuntimeError("Redirect needs 'url' or 'route_name' param.")
-
-        context.redirect(url, **kwargs)
-        raise DispatchFinished()
-
     def register_controller(self, controller):
         if controller.__class__.__name__ in self._controllers:
             raise DuplicateContoller(controller)
