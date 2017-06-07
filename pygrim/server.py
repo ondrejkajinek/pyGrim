@@ -5,6 +5,7 @@ from .components.exceptions import (
     DuplicateContoller, UnknownController,
     WrongConfigBase, WrongRouterBase, WrongSessionHandlerBase, WrongViewBase
 )
+from .components.grim_dicts import AttributeDict
 from .components.log import initialize_loggers
 from .components.routing import AbstractRouter, Router
 from .components.routing import (
@@ -79,7 +80,7 @@ class Server(object):
         # temporary
         # several containers will be turned into tuples at postfork time
         self._initialize_basic_components()
-        self._controllers = {}
+        self._controllers = AttributeDict()
         self._not_found_methods = {}
         self._error_method = self._default_error_method
         self._custom_error_handlers = {}
@@ -142,6 +143,7 @@ class Server(object):
         if controller.__class__.__name__ in self._controllers:
             raise DuplicateContoller(controller)
 
+        controller._controllers = self._controllers
         self._process_decorated_methods(controller)
         self._controllers[controller.__class__.__name__] = controller
 
