@@ -1,7 +1,8 @@
 # coding: utf8
 
 from ..utils import (
-    ensure_string, fix_trailing_slash, is_regex, remove_trailing_slah
+    ensure_string, ensure_tuple, fix_trailing_slash, is_regex,
+    remove_trailing_slah
 )
 from logging import getLogger
 from re import compile as re_compile
@@ -56,14 +57,7 @@ class Route(RouteObject):
             self._controller_name = controller_name
             self._handle_name = handle_name
 
-        self._methods = tuple(map(
-            string_upper,
-            (
-                (methods,)
-                if isinstance(methods, basestring)
-                else tuple(methods)
-            )
-        ))
+        self._methods = tuple(map(string_upper, ensure_tuple(methods)))
         self._name = name
 
     def assign_method(self, method):

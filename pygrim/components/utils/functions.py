@@ -26,6 +26,13 @@ def ensure_string(text):
     )
 
 
+def ensure_tuple(variable):
+    if not isinstance(variable, tuple):
+        variable = (variable, )
+
+    return variable
+
+
 def fix_trailing_slash(pattern):
     return (
         re_compile(TRAILING_SLASH_REGEXP.sub("/?$", pattern.pattern))

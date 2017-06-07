@@ -16,6 +16,7 @@ from .components.session import (
     DummySession, FileSessionStorage, RedisSessionStorage,
     RedisSentinelSessionStorage, SessionStorage
 )
+from .components.utils import ensure_tuple
 from .components.view import AbstractView, DummyView, JinjaView
 from .http import Context
 
@@ -402,10 +403,7 @@ class Server(object):
     def _static_file_mtime(self, static_file):
 
         def get_static_file_abs_path(static_file):
-            static_map = self.config.get("uwsgi:static-map", ())
-            if isinstance(static_map, basestring):
-                static_map = (static_map, )
-
+            static_map = ensure_tuple(self.config.get("uwsgi:static-map", ()))
             for mapping in static_map:
                 prefix, mapped_dir = map(string_strip, mapping.split("="))
                 if static_file.startswith(prefix):
