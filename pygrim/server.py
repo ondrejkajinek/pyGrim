@@ -100,7 +100,11 @@ class Server(object):
                 context.get_response_status_code(),
                 context.get_response_headers()
             )
-            body = context.get_response_body()
+            body = (
+                None
+                if context.is_request_head()
+                else context.get_response_body()
+            )
             if context.generates_response():
                 for part in body():
                     yield part
