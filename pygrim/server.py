@@ -2,7 +2,7 @@
 
 from .components.config import AbstractConfig, YamlConfig
 from .components.exceptions import (
-    DuplicateContoller, UnknownController,
+    ControllerAttributeCollision, DuplicateContoller, UnknownController,
     WrongConfigBase, WrongRouterBase, WrongSessionHandlerBase, WrongViewBase
 )
 from .components.grim_dicts import AttributeDict
@@ -143,7 +143,8 @@ class Server(object):
         if controller.__class__.__name__ in self._controllers:
             raise DuplicateContoller(controller)
 
-        controller._controllers = self._controllers
+        self._enhance_controller(controller, self._controllers, "_controllers")
+        self._enhance_controller(controller, self.router, "_router")
         self._process_decorated_methods(controller)
         self._controllers[controller.__class__.__name__] = controller
 
@@ -155,6 +156,12 @@ class Server(object):
     def _default_not_found_method(self, context):
         context.set_response_body("Not found")
         context.set_response_status(404)
+
+    def _enhance_controller(self, controller, attribute, attr_name):
+        if hasattr(controller, attr_name):
+            raise ControllerAttributeCollision(controller, attr_name)
+
+        setattr(controller, attr_name, attribute)
 
     def _finalize_not_found_handlers(self):
         self._not_found_methods = tuple(

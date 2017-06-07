@@ -12,6 +12,16 @@ class ComponentException(BaseException):
         return ".".join((cls.__module__, cls.__name__))
 
 
+class ControllerAttributeCollision(ComponentException):
+
+    def __init__(self, controller, attr_name):
+        super(ControllerAttributeCollision, self).__init__(
+            "Controller %r already has attribute %r" % (
+                self._full_class_name(controller.__class__), attr_name
+            )
+        )
+
+
 class DuplicateContoller(ComponentException):
 
     def __init__(self, controller):
