@@ -2,7 +2,7 @@
 
 
 from logging import getLogger
-from pygrim import method
+from pygrim import method, template_method
 
 log = getLogger(__file__)
 
@@ -17,3 +17,20 @@ class Second(object):
         context.view_data.update({
             "text": u"Hello, this controller calls other controller's method."
         })
+
+    @method()
+    def redirect(self, context):
+        context.redirect(self._router.url_for(
+            "message",
+            {
+                "message": "This method redirects to another URL."
+            }
+        ))
+
+    @template_method("layout.jinja")
+    def message(self, context, message):
+        return {
+            "data": {
+                "text": "Message: %s" % message
+            }
+        }

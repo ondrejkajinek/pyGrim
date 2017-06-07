@@ -32,6 +32,12 @@ class Routes(object):
             "Test:template_show",
             "template_show"
         ))
+        router.map(Route(
+            "GET",
+            re_compile(r"/message/(?P<message>[^/]+)"),
+            "Second:message",
+            "message"
+        ))
 
         # route groups
         router.map(RouteGroup(
