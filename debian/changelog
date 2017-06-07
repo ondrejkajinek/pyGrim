@@ -1,3 +1,19 @@
+pygrim (0.1.23) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * fich chování HEAD metody
+  * Implemented HEAD requests -- they are internally changed to GETs,
+    when response body should be sent, None is sent for original HEAD
+    requests
+  * After iteration over matching routes is finished,
+    context.current_route is set to None
+  * Fixed a typo, added some text to error_handler doc string
+  * When reading value from config, keyworded default arg is used prior
+    to position default value
+  * formatting changed in AbstractConfig
+
+ -- Václav Pokluda <root@darky>  Wed, 07 Jun 2017 14:11:31 +0200
+
 pygrim (0.1.22) testing; urgency=medium
 
   * COMMIT MESSASGES
