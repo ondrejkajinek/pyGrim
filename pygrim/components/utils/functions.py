@@ -19,10 +19,11 @@ def deep_update(original, override):
 
 
 def ensure_bool(a):
-    if a is None:
-        res = False
-    elif isinstance(a, bool):
+    # Václav Pokluda: is ~25% quicker than isinstance(a, bool)
+    if a is True or a is False:
         res = a
+    elif a is None:
+        res = False
     elif isinstance(basestring):
         res = (
             int(a)
