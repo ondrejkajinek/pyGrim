@@ -3,6 +3,7 @@
 from .session import Session
 from .session_storage import SessionStorage
 from ..connectors import connect_redis, connect_redis_sentinel
+from ..decorators import c_locale
 from .session_exceptions import (
     # SessionInitializeError,
     SessionSaveError, SessionLoadError
@@ -22,10 +23,12 @@ class RedisSessionStorageBase(SessionStorage):
         super(RedisSessionStorageBase, self).__init__(config)
         self.redis = None
 
+    @c_locale
     def delete(self, session):
         self.redis.delete(session.get_id())
         return True
 
+    @c_locale
     def load(self, request):
         session_id, session_new = self._get_id(request)
         try:
@@ -40,6 +43,7 @@ class RedisSessionStorageBase(SessionStorage):
         else:
             return Session(session_id, session, session_new)
 
+    @c_locale
     def save(self, session):
         try:
             ret = self.redis.setex(
