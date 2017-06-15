@@ -22,6 +22,7 @@ from .http import Context
 
 from inspect import getmembers, ismethod, getmro
 from jinja2 import escape, Markup
+from locale import LC_ALL, setlocale
 from logging import getLogger
 from os import path
 from string import strip as string_strip
@@ -81,6 +82,7 @@ class Server(object):
     def __init__(self):
         self._initialize_basic_components()
         self._controllers = AttributeDict()
+        self._setup_env()
         # temporary
         # _not_found_methods will be turned into tuples at postfork time
         self._not_found_methods = {}
@@ -383,6 +385,12 @@ class Server(object):
             raise WrongViewBase(view)
 
         self.view = view
+
+    def _setup_env(self):
+        locale = self.config.get("pygrim:locale", None)
+        if locale:
+            log.debug("Setting locale 'LC_ALL' to %r", locale)
+            setlocale(LC_ALL, str(locale))
 
     def _static_file_mtime(self, static_file):
 
