@@ -18,6 +18,21 @@ def deep_update(original, override):
     return original
 
 
+def ensure_bool(a):
+    if a is None:
+        res = False
+    elif isinstance(a, bool):
+        res = a
+    elif isinstance(basestring):
+        res = (
+            int(a)
+            if a.isdigit()
+            else a.lower() == "true"
+        )
+
+    return bool(res)
+
+
 def ensure_string(text):
     return (
         text.encode("utf8")

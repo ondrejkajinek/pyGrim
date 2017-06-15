@@ -1,6 +1,6 @@
 # coding: utf8
 
-from ..utils.functions import deep_update
+from ..utils.functions import deep_update, ensure_bool
 from copy import deepcopy
 from logging import getLogger
 log = getLogger(__name__)
@@ -41,19 +41,6 @@ DEFAULT_CONFIG = {
 }
 
 
-def bool_cast(a):
-    if a is True or a is False:
-        return a
-    if a is None:
-        return False
-    if isinstance(a, basestring):
-        if a.isdigit():
-            a = int(a)
-        else:
-            return a.lower() == "true"
-    return bool(a)
-
-
 class AbstractConfig(object):
 
     SEPARATOR = None
@@ -84,7 +71,7 @@ class AbstractConfig(object):
         return self._get_typed(int, key, *args, **kwargs)
 
     def getbool(self, key, *args, **kwargs):
-        return self._get_typed(bool_cast, key, *args, **kwargs)
+        return self._get_typed(ensure_bool, key, *args, **kwargs)
 
     getboolean = getbool
 
