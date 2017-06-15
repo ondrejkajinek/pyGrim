@@ -2,8 +2,6 @@
 
 from ..utils.functions import deep_update, ensure_bool
 from copy import deepcopy
-from logging import getLogger
-log = getLogger(__name__)
 
 
 class NoDefaultValue(Exception):

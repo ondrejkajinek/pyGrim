@@ -3,9 +3,6 @@
 from functools import wraps
 from locale import LC_ALL, getlocale, setlocale
 
-from logging import getLogger
-log = getLogger(__name__)
-
 
 def c_locale(func):
 
