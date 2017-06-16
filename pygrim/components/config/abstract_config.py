@@ -1,5 +1,6 @@
 # coding: utf8
 
+from .default import DEFAULT_CONFIG
 from ..utils.functions import deep_update
 from copy import deepcopy
 from logging import getLogger
@@ -8,37 +9,6 @@ log = getLogger(__name__)
 
 class NoDefaultValue(Exception):
     pass
-
-DEFAULT_CONFIG = {
-    "pygrim": {
-        "debug": True
-    },
-    "jinja": {
-        "debug": True,
-        "dump_switch": "jkxd",
-        "environment": {
-            "autoescape": ("jinja",)
-        },
-        "extensions": [],
-        "suppress_none": True,
-        "template_path": "templates"
-    },
-    "logging": {
-        "file": "/tmp/pygrim.log",
-        "level": "DEBUG"
-    },
-    "session": {
-        "enabled": True,
-        "type": "file",
-        "args": {
-            "session_dir": "/tmp/pygrim_session/"
-        }
-    },
-    "view": {
-        "enabled": True,
-        "type": "jinja"
-    }
-}
 
 
 class AbstractConfig(object):
