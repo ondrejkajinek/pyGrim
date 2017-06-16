@@ -18,6 +18,22 @@ def deep_update(original, override):
     return original
 
 
+def ensure_bool(a):
+    # Václav Pokluda: is ~25% quicker than isinstance(a, bool)
+    if a is True or a is False:
+        res = a
+    elif a is None:
+        res = False
+    elif isinstance(a, basestring):
+        res = (
+            int(a)
+            if a.isdigit()
+            else a.lower().strip() == "true"
+        )
+
+    return bool(res)
+
+
 def ensure_string(text):
     return (
         text.encode("utf8")
@@ -27,10 +43,14 @@ def ensure_string(text):
 
 
 def ensure_tuple(variable):
-    if not isinstance(variable, tuple):
-        variable = (variable, )
+    if isinstance(variable, tuple):
+        res = variable
+    elif isinstance(variable, (list, set, buffer, xrange)):
+        res = tuple(variable)
+    else:
+        res = (variable,)
 
-    return variable
+    return res
 
 
 def fix_trailing_slash(pattern):

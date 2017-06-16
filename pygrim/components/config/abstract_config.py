@@ -1,7 +1,7 @@
 # coding: utf8
 
 from .default import DEFAULT_CONFIG
-from ..utils.functions import deep_update
+from ..utils.functions import deep_update, ensure_bool, ensure_tuple
 from copy import deepcopy
 from logging import getLogger
 log = getLogger(__name__)
@@ -9,19 +9,6 @@ log = getLogger(__name__)
 
 class NoDefaultValue(Exception):
     pass
-
-
-def bool_cast(a):
-    if a is True or a is False:
-        return a
-    if a is None:
-        return False
-    if isinstance(a, basestring):
-        if a.isdigit():
-            a = int(a)
-        else:
-            return a.lower() == "true"
-    return bool(a)
 
 
 class AbstractConfig(object):
@@ -47,16 +34,19 @@ class AbstractConfig(object):
 
         return target
 
+    def getbool(self, key, *args, **kwargs):
+        return self._get_typed(ensure_bool, key, *args, **kwargs)
+
+    getboolean = getbool
+
     def getfloat(self, key, *args, **kwargs):
         return self._get_typed(float, key, *args, **kwargs)
 
     def getint(self, key, *args, **kwargs):
         return self._get_typed(int, key, *args, **kwargs)
 
-    def getbool(self, key, *args, **kwargs):
-        return self._get_typed(bool_cast, key, *args, **kwargs)
-
-    getboolean = getbool
+    def gettuple(self, key, *args, **kwargs):
+        return self._get_typed(ensure_tuple, key, *args, **kwargs)
 
     def _default_value(self, *args, **kwargs):
         """
