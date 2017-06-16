@@ -30,3 +30,7 @@ jinja:
 
 session:
    type: file
+
+view:
+   types:
+      - jinja

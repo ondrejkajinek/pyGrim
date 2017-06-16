@@ -18,7 +18,7 @@ class Test(object):
             "text": u"Hello, this is the most simple case."
         })
         context.template = "layout.jinja"
-        context.set_view(True)
+        context.set_view("jinja")
 
     @method(
         session=True
@@ -34,9 +34,9 @@ class Test(object):
             "session_text": context.session.get("text")
         })
         context.template = "layout.jinja"
-        context.set_view(True)
+        context.set_view("jinja")
 
-    @template_method("layout.jinja")
+    @template_method("layout.jinja", "jinja")
     def cookie_show(self, context):
         return {
             "data": {
@@ -44,7 +44,7 @@ class Test(object):
             }
         }
 
-    @template_method("layout.jinja")
+    @template_method("layout.jinja", "jinja")
     def cookie_set(self, context):
         cur_time = int(time())
         context.add_cookie(name="test", value=cur_time, lifetime=3600)
@@ -60,7 +60,7 @@ class Test(object):
         }
 
     @method()
-    @template_display("layout.jinja")
+    @template_display("layout.jinja", "jinja")
     def use_template_display(self, context):
         return {
             "data": {
@@ -71,7 +71,7 @@ class Test(object):
             }
         }
 
-    @template_method("nonexisting.jinja", session=True)
+    @template_method("nonexisting.jinja", "jinja", session=True)
     def use_template_method(self, context):
         return {
             "data": {
@@ -86,7 +86,7 @@ class Test(object):
             "_template": "layout.jinja"
         }
 
-    @template_method("layout.jinja")
+    @template_method("layout.jinja", "jinja")
     def template_show(self, context, template):
         return {
             "data": {
@@ -102,7 +102,7 @@ class Test(object):
     def runtime_error(self, context):
         raise RuntimeError("This method raises 'RuntimeError'")
 
-    @template_method("layout.jinja")
+    @template_method("layout.jinja", "jinja")
     def group_test(self, context):
         return {
             "data": {
@@ -110,7 +110,7 @@ class Test(object):
             }
         }
 
-    @template_method("layout.jinja")
+    @template_method("layout.jinja", "jinja")
     def int_inner_group_test(self, context, param):
         return {
             "data": {
@@ -122,7 +122,7 @@ class Test(object):
             }
         }
 
-    @template_method("layout.jinja")
+    @template_method("layout.jinja", "jinja")
     def inner_group_test(self, context, param=None):
         return {
             "data": {
@@ -143,7 +143,7 @@ class Test(object):
             )
         })
         context.template = "layout.jinja"
-        context.set_view(True)
+        context.set_view("jinja")
 
     @not_found_handler()
     def not_found(self, context):
@@ -154,7 +154,7 @@ class Test(object):
             )
         })
         context.template = "layout.jinja"
-        context.set_view(True)
+        context.set_view("jinja")
 
     @custom_error_handler(TypeError)
     def type_error_handle(self, context, exc):
@@ -166,7 +166,7 @@ class Test(object):
         })
         context.template = "layout.jinja"
         context.set_response_status(501)
-        context.set_view(True)
+        context.set_view("jinja")
 
     @error_handler()
     def ise_handle(self, context, exc):
@@ -177,4 +177,4 @@ class Test(object):
             )
         })
         context.template = "layout.jinja"
-        context.set_view(True)
+        context.set_view("jinja")

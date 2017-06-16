@@ -27,7 +27,7 @@ class Second(object):
             }
         ))
 
-    @template_method("layout.jinja")
+    @template_method("layout.jinja", "jinja")
     def message(self, context, message):
         return {
             "data": {
