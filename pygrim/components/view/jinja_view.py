@@ -84,7 +84,9 @@ class JinjaView(AbstractView):
         })
         if context.template == self._dump_switch:
             context.set_response_content_type("application/json")
-            result = json_dumps(context.view_data)
+            dump_data = context.view_data.copy()  # shallow copy
+            dump_data["session"] = context.session
+            result = json_dumps(dump_data)
         else:
             template = self._env.get_template(context.template)
             context.view_data.update({
