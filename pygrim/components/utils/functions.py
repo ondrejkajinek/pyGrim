@@ -24,11 +24,11 @@ def ensure_bool(a):
         res = a
     elif a is None:
         res = False
-    elif isinstance(basestring):
+    elif isinstance(a, basestring):
         res = (
             int(a)
             if a.isdigit()
-            else a.lower() == "true"
+            else a.lower().strip() == "true"
         )
 
     return bool(res)
