@@ -17,7 +17,7 @@ from .components.session import (
     RedisSentinelSessionStorage, SessionStorage
 )
 from .components.utils import ensure_tuple
-from .components.view import AbstractView, DummyView, JinjaView
+from .components.view import AbstractView, DummyView, JinjaView, RawView
 from .http import Context
 
 from inspect import getmembers, ismethod, getmro
@@ -74,7 +74,8 @@ class Server(object):
     }
 
     KNOWN_VIEW_CLASSES = {
-        "jinja": JinjaView
+        "jinja": JinjaView,
+        "raw": RawView
     }
 
     def __init__(self):
