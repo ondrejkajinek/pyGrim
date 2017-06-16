@@ -136,7 +136,7 @@ class Request(object):
         return ImmutableDict(parsed)
 
     def _save_environment(self, env):
-        method = evn.pop("REQUEST_METHOD").upper()
+        method = env.pop("REQUEST_METHOD").upper()
         if method == "HEAD":
             env["original_request_method"] = method
             method = "GET"
