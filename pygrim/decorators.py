@@ -69,17 +69,17 @@ class method(BaseDecorator):
         super(method, self).prepare_func(func)
 
 
-class error_handler(method):
+class custom_error_handler(BaseDecorator):
     """
     Marks method as an error handler for specific exception.
-    Can only catch exceptions derived from BaseExcepition.
+    Can only catch exceptions derived from BaseException.
     Such method is used when error occurs during request handling.
     Also exposes method, see method decorator.
     """
 
     def __init__(self, *args, **kwargs):
         self._error_status = kwargs.pop("status", 500)
-        super(error_handler, self).__init__(**kwargs)
+        super(custom_error_handler, self).__init__(**kwargs)
         for one in args:
             if not issubclass(one, BaseException):
                 raise RuntimeError(
@@ -89,30 +89,31 @@ class error_handler(method):
 
     def pre_call(self, fun, args, kwargs):
         kwargs.get("context").set_response_status(self._error_status)
-        super(error_handler, self).pre_call(fun, args, kwargs)
+        super(custom_error_handler, self).pre_call(fun, args, kwargs)
 
     def prepare_func(self, func):
         func._custom_error = self.err_classes
-        super(error_handler, self).prepare_func(func)
+        super(custom_error_handler, self).prepare_func(func)
 
 
-class error_method(method):
+class error_handler(BaseDecorator):
     """
     Marks method as an error handler.
+    It is called when exception is not handled by any custom_error_handler.
     Such method is used when error occurs during request handling.
     Also exposes method, see method decorator.
     """
 
     def pre_call(self, fun, args, kwargs):
         kwargs.get("context").set_response_status(500)
-        return super(error_method, self).pre_call(fun, args, kwargs)
+        return super(error_handler, self).pre_call(fun, args, kwargs)
 
     def prepare_func(self, func):
         func._error = True
-        super(error_method, self).prepare_func(func)
+        super(error_handler, self).prepare_func(func)
 
 
-class not_found_method(method):
+class not_found_handler(BaseDecorator):
     """
     Marks method as not-found handler.
     Such method is called when no route matches requested url.
@@ -120,16 +121,16 @@ class not_found_method(method):
     """
 
     def __init__(self, *args, **kwargs):
-        super(not_found_method, self).__init__(**kwargs)
+        super(not_found_handler, self).__init__(**kwargs)
         self._not_found_prefixes = args or ("",)
 
     def pre_call(self, fun, args, kwargs):
         kwargs.get("context").set_response_status(404)
-        return super(not_found_method, self).pre_call(fun, args, kwargs)
+        return super(not_found_handler, self).pre_call(fun, args, kwargs)
 
     def prepare_func(self, func):
         func._not_found = self._not_found_prefixes
-        super(not_found_method, self).prepare_func(func)
+        super(not_found_handler, self).prepare_func(func)
 
 
 class template_display(BaseDecorator):
@@ -163,9 +164,8 @@ class template_method(template_display, method):
             args = args[1:]
         else:
             raise RuntimeError(
-                "Error registering template_method withot template given"
+                "Error registering template_method without template given."
             )
-        # endif
         super(template_method, self).__init__(template, *args, **kwargs)
 
 

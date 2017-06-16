@@ -79,10 +79,10 @@ class Server(object):
     }
 
     def __init__(self):
-        # temporary
-        # several containers will be turned into tuples at postfork time
         self._initialize_basic_components()
         self._controllers = AttributeDict()
+        # temporary
+        # _not_found_methods will be turned into tuples at postfork time
         self._not_found_methods = {}
         self._error_method = self._default_error_method
         self._custom_error_handlers = {}
