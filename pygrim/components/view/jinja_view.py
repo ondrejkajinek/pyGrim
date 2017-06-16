@@ -49,7 +49,7 @@ class JinjaView(AbstractView):
         self._initialize_extensions(config)
 
     def get_template_directory(self):
-        return self._env.loader.searchpath
+        return tuple(self._env.loader.searchpath)
 
     def render(self, context):
         if not context.template:

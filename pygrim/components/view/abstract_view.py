@@ -12,7 +12,7 @@ class AbstractView(object):
         context.set_response_body(self.render(context))
 
     def get_template_directory(self):
-        return ""
+        return ()
 
     def render(self, context):
         return ""
