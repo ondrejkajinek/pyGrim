@@ -55,6 +55,7 @@ class ResponseWrap(object):
         self._start_response = start_response
 
     def __call__(self, status, headers):
+        log.debug("starting response with:%r:%r", status, headers)
         self._start_response(status, headers)
         self._start_response = self.noop
 
@@ -104,7 +105,11 @@ class Server(object):
                 context.get_response_status_code(),
                 context.get_response_headers()
             )
-            body = context.get_response_body()
+            body = (
+                None
+                if context.is_request_head()
+                else context.get_response_body()
+            )
             if context.generates_response():
                 for part in body():
                     yield part
@@ -280,7 +285,6 @@ class Server(object):
                 except RoutePassed:
                     continue
             else:
-                # TODO: reset current route to None
                 raise RouteNotFound()
         except RouteNotFound:
             self._handle_not_found(context=context)

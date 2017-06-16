@@ -45,6 +45,8 @@ class Router(AbstractRouter):
             if route.matches(context):
                 context.current_route = route
                 yield route
+        else:
+            context.current_route = None
 
     def pop_group(self):
         try:
