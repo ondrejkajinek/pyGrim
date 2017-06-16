@@ -2,7 +2,7 @@
 
 from logging import getLogger
 from pygrim import (
-    error_handler, error_method, method, not_found_method,
+    custom_error_handler, error_handler, method, not_found_handler,
     template_display, template_method
 )
 from time import time
@@ -134,7 +134,7 @@ class Test(object):
             }
         }
 
-    @not_found_method("/detail/")
+    @not_found_handler("/detail/")
     def detail_not_found(self, context):
         context.view_data.update({
             "text": (
@@ -145,7 +145,7 @@ class Test(object):
         context.template = "layout.jinja"
         context.set_view(True)
 
-    @not_found_method()
+    @not_found_handler()
     def not_found(self, context):
         context.view_data.update({
             "text": (
@@ -156,7 +156,7 @@ class Test(object):
         context.template = "layout.jinja"
         context.set_view(True)
 
-    @error_handler(TypeError)
+    @custom_error_handler(TypeError)
     def type_error_handle(self, context, exc):
         context.view_data.update({
             "text": (
@@ -168,7 +168,7 @@ class Test(object):
         context.set_response_status(501)
         context.set_view(True)
 
-    @error_method()
+    @error_handler()
     def ise_handle(self, context, exc):
         context.view_data.update({
             "text": (
