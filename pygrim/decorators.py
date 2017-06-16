@@ -139,15 +139,16 @@ class template_display(BaseDecorator):
     puts it to context, sets specified template and displays it.
     """
 
-    def __init__(self, template, *args, **kwargs):
+    def __init__(self, template, view, *args, **kwargs):
         self._template = template
+        self._view = view
         super(template_display, self).__init__(*args, **kwargs)
 
     def post_call(self, fun, args, kwargs, res):
         context = kwargs.get("context")
         context.view_data.update(res.get("data") or {})
         context.template = res.get("_template", self._template)
-        context.set_view(True)
+        context.set_view(res.get("_view", self._view))
         return super(template_display, self).post_call(fun, args, kwargs, res)
 
 

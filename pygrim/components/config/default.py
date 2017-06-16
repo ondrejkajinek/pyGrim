@@ -2,11 +2,11 @@
 
 DEFAULT_CONFIG = {
     "pygrim": {
-        "debug": True
+        "debug": True,
+        "dump_switch": "jkxd",
     },
     "jinja": {
         "debug": True,
-        "dump_switch": "jkxd",
         "environment": {
             "autoescape": ("jinja",)
         },
@@ -26,7 +26,6 @@ DEFAULT_CONFIG = {
         }
     },
     "view": {
-        "enabled": True,
-        "type": "jinja"
+        "types": ("jinja",)
     }
 }

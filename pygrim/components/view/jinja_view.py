@@ -1,7 +1,6 @@
 # coding: utf8
 
 from .abstract_view import AbstractView
-from ..utils.json2 import dumps as json_dumps
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 from os import getcwd, path
 
@@ -20,7 +19,6 @@ class JinjaView(AbstractView):
 
     def __init__(self, config, extra_functions):
         self._debug = config.get("jinja:debug", False)
-        self._dump_switch = config.get("jinja:dump_switch", "jkxd")
         auto_reload = config.get("jinja:environment:auto_reload", True)
         self._env = Environment(
             extensions=self._get_extensions(config),
@@ -60,10 +58,6 @@ class JinjaView(AbstractView):
         if context.session is not None:
             context.view_data["flashes"] = context.session.get_flashes()
 
-        if self._debug and self._dump_switch in context.GET():
-            context.view_data["template_path"] = context.template
-            context.template = self._dump_switch
-
         context.view_data.update({
             "css": tuple(self._css | set(
                 set(context.view_data.pop("extra_css", ()))
@@ -82,16 +76,12 @@ class JinjaView(AbstractView):
                 context.view_data.pop("extra_js_footer_async", ())
             ))
         })
-        if context.template == self._dump_switch:
-            context.set_response_content_type("application/json")
-            result = json_dumps(context.view_data)
-        else:
-            template = self._env.get_template(context.template)
-            context.view_data.update({
-                "context": context
-            })
-            result = template.render(**context.view_data)
 
+        template = self._env.get_template(context.template)
+        context.view_data.update({
+            "context": context
+        })
+        result = template.render(**context.view_data)
         if context.session is not None:
             context.session.del_flashes()
 

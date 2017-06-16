@@ -2,7 +2,8 @@
 
 from .components.config import AbstractConfig, YamlConfig
 from .components.exceptions import (
-    ControllerAttributeCollision, DuplicateContoller, UnknownController,
+    ControllerAttributeCollision, DuplicateContoller,
+    UnknownController, UnknownView,
     WrongConfigBase, WrongRouterBase, WrongSessionHandlerBase, WrongViewBase
 )
 from .components.grim_dicts import AttributeDict
@@ -17,7 +18,9 @@ from .components.session import (
     RedisSentinelSessionStorage, SessionStorage
 )
 from .components.utils import ensure_tuple
-from .components.view import AbstractView, DummyView, JinjaView, RawView
+from .components.view import (
+    AbstractView, DummyView, JsonView, JinjaView, RawView
+)
 from .http import Context
 
 from inspect import getmembers, ismethod, getmro
@@ -76,7 +79,9 @@ class Server(object):
     }
 
     KNOWN_VIEW_CLASSES = {
+        "dummy": DummyView,
         "jinja": JinjaView,
+        "json": JsonView,
         "raw": RawView
     }
 
@@ -207,14 +212,26 @@ class Server(object):
 
         return storage_class
 
-    def _find_view_class(self):
-        view_type = self.config.get("view:type")
-        try:
-            view_class = self.KNOWN_VIEW_CLASSES[view_type]
-        except KeyError:
-            raise RuntimeError("Unknown view class: %r.", view_class)
+    def _find_view_classes(self):
+        view_types = self.config.gettuple("view:types")
+        # view is disabled when only dummy view is configured
+        if len(view_types) == 1 and view_types[0] == "dummy":
+            log.info(
+                "View is disabled. No sensible output will be created"
+            )
+        else:
+            for view_type in ("json", "raw"):
+                if view_type not in view_types:
+                    view_types += (view_type,)
 
-        return view_class
+        for view_type in view_types:
+            log.debug("View type: %r", view_type)
+            try:
+                view_class = self.KNOWN_VIEW_CLASSES[view_type]
+            except KeyError:
+                raise RuntimeError("Unknown view class: %r.", view_class)
+            else:
+                yield view_type, view_class
 
     def _handle_by_route(self, route, context):
         if route.requires_session():
@@ -374,23 +391,22 @@ class Server(object):
         initialize_loggers(config)
 
     def _register_view(self):
-        if self.config.get("view:enabled", True):
-            view_class = self._find_view_class()
-        else:
-            view_class = DummyView
-
         extra_functions = {
             "print_css": self._jinja_print_css,
             "print_js": self._jinja_print_js,
             "url_for": self._jinja_url_for,
         }
-        view = view_class(self.config, extra_functions)
-        if not isinstance(view, AbstractView):
-            raise WrongViewBase(view)
+        self._views = {}
+        for view_name, view_class in self._find_view_classes():
+            view = view_class(self.config, extra_functions)
+            if not isinstance(view, AbstractView):
+                raise WrongViewBase(view)
 
-        self.view = view
+            self._views[view_name] = view
 
     def _setup_env(self):
+        self._debug = self.config.getbool("pygrim:debug", True)
+        self._dump_switch = self.config.get("pygrim:dump_switch", "jkxd")
         locale = self.config.get("pygrim:locale", None)
         if locale:
             log.debug("Setting locale 'LC_ALL' to %r", locale)
@@ -440,7 +456,7 @@ class Server(object):
         try:
             url = self.router.url_for(route, params)
         except RouteNotRegistered:
-            if self.config.get("pygrim:debug", True) is False:
+            if self._debug is False:
                 url = "#"
             else:
                 raise

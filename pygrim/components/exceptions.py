@@ -40,6 +40,14 @@ class UnknownController(ComponentException):
         )
 
 
+class UnknownView(ComponentException):
+
+    def __init__(self, view):
+        super(UnknownView, self).__init__(
+            "Requested view %r was not registered" % view
+        )
+
+
 class WrongComponentBase(ComponentException):
 
     _template = "%r has to be derived from %r."
