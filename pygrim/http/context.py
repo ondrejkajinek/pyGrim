@@ -15,16 +15,17 @@ log = getLogger("pygrim.http.context")
 
 class Context(object):
 
-    def __init__(self, environment, config):
+    def __init__(self, environment, config, model):
         self.config = config
-        self._suppress_port = config.getbool("context:suppress_port", False)
-        self._force_https = config.getbool("context:force_https", False)
-        self._default_headers = config.get("context:default_headers", None)
-
         self.current_route = None
+        self.model = model
         self.session = None
         self.template = None
         self.view_data = {}
+
+        self._suppress_port = config.getbool("context:suppress_port", False)
+        self._force_https = config.getbool("context:force_https", False)
+        self._default_headers = config.get("context:default_headers", None)
 
         self._request = Request(environment)
         self._response = Response()
@@ -32,7 +33,7 @@ class Context(object):
             self.add_response_headers(self._default_headers)
         self._route_params = None
         self._session_loaded = False
-        self._view = False
+        self._view = None
 
         self.set_route_params()
 

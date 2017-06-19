@@ -91,8 +91,10 @@ class Server(object):
 
     def __init__(self):
         self._initialize_basic_components()
-        self._controllers = AttributeDict()
         self._setup_env()
+
+        self._controllers = AttributeDict()
+        self._model = None
         # temporary
         # _not_found_methods will be turned into tuples at postfork time
         self._not_found_methods = {}
@@ -101,7 +103,7 @@ class Server(object):
 
     def __call__(self, environment, start_response):
         start_response = ResponseWrap(start_response)
-        context = Context(environment, self.config)
+        context = Context(environment, self.config, self._model)
         # if views are disabled, set view to dummy
         if self._view_disabled():
             context.set_view("dummy")
@@ -149,9 +151,15 @@ class Server(object):
             raise DuplicateContoller(controller)
 
         self._enhance_controller(controller, self._controllers, "_controllers")
-        self._enhance_controller(controller, self.router, "_router")
+        self._enhance_controller(controller, self._router, "_router")
+        self._enhance_controller(controller, self._model, "_model")
         self._process_decorated_methods(controller)
         self._controllers[controller.__class__.__name__] = controller
+
+    def register_model(self, model):
+        self._model = model
+        for controller in self._controllers.itervalues():
+            self._enhance_controller(controller, self._model, "_model")
 
     def _default_error_method(self, context, exc):
         log.exception(exc.message)
