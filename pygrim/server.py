@@ -94,12 +94,13 @@ class Server(object):
         self._setup_env()
 
         self._controllers = AttributeDict()
+        self._custom_error_handlers = {}
+        self._error_method = self._default_error_method
         self._model = None
         # temporary
         # _not_found_methods will be turned into tuples at postfork time
         self._not_found_methods = {}
-        self._error_method = self._default_error_method
-        self._custom_error_handlers = {}
+        self._route_register_func = None
 
     def __call__(self, environment, start_response):
         start_response = ResponseWrap(start_response)
@@ -136,7 +137,7 @@ class Server(object):
         This method needs to be called in uwsgi postfork
         """
         self._finalize_not_found_handlers()
-        if hasattr(self, "_route_register_func"):
+        if self._route_register_func is not None:
             self._route_register_func(self._router)
             self._finalize_routes()
             log.debug("Routes loaded")
@@ -160,6 +161,9 @@ class Server(object):
         self._model = model
         for controller in self._controllers.itervalues():
             self._enhance_controller(controller, self._model, "_model")
+
+    def register_router_creator(self, register_func):
+        self._route_register_func = register_func
 
     def _default_error_method(self, context, exc):
         log.exception(exc.message)
