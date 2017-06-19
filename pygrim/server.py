@@ -134,7 +134,8 @@ class Server(object):
 
     def do_postfork(self):
         """
-        This method needs to be called in uwsgi postfork
+        This method needs to be called in uwsgi postfork,
+        or after server instance has been initialized.
         """
         self._finalize_not_found_handlers()
         if self._route_register_func is not None:
@@ -165,6 +166,8 @@ class Server(object):
             )
 
         self._model = model
+        # Rewrite _model in controllers that were registered so far,
+        # destroying original one
         for controller in self._controllers.itervalues():
             setattr(controller, "_model", self._model)
 
