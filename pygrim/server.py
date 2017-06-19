@@ -158,6 +158,12 @@ class Server(object):
         self._controllers[controller.__class__.__name__] = controller
 
     def register_model(self, model):
+        if self._model is not None:
+            log.warning(
+                "Model is already registered: %r",
+                self._model.__class__.__name__
+            )
+
         self._model = model
         for controller in self._controllers.itervalues():
             self._enhance_controller(controller, self._model, "_model")
