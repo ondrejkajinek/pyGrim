@@ -102,6 +102,10 @@ class Server(object):
     def __call__(self, environment, start_response):
         start_response = ResponseWrap(start_response)
         context = Context(environment, self.config)
+        # if views are disabled, set view to dummy
+        if self._view_disabled():
+            context.set_view("dummy")
+
         try:
             self._handle_request(context=context)
         except:
@@ -312,8 +316,16 @@ class Server(object):
         except:
             self._handle_error(context=context, exc=exc_info()[1])
 
-        if context.get_view():
-            self.view.display(context)
+        if self._debug and self._dump_switch in context.GET():
+            context.set_response_content_type("application/json")
+            context.view_data["template_path"] = context.template
+            context.set_view("json")
+
+        view = context.get_view()
+        if view is None or view not in self._views:
+            raise UnknownView(view)
+
+        self._views[view].display(context)
 
     def _initialize_basic_components(self):
         self._load_config()
@@ -435,6 +447,9 @@ class Server(object):
             if path.isfile(abs_path)
             else ""
         )
+
+    def _view_disabled(self):
+        return len(self._views) == 1 and "dummy" in self._views
 
     # jinja extra methods
     def _jinja_print_css(self, css_list):
