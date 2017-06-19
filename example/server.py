@@ -7,7 +7,7 @@ from uwsgidecorators import postfork as postfork_decorator
 
 # local
 from model import Model
-from routes import Routes
+from routes import register_routes
 from test_iface import Test
 from second_controller import Second
 
@@ -24,7 +24,6 @@ register_session_handler("myhandler", MySessionClass)
 
 inheritance = (
     WebServer,
-    Routes
 )
 controllers = (
     Test,
@@ -58,6 +57,7 @@ Server = type("Server", inheritance, {
 #   this object on every request)
 application = Server()
 application.register_model(Model())
+application.register_router_creator(register_routes)
 for controller_class in controllers:
     application.register_controller(controller_class())
 
