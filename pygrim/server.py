@@ -241,7 +241,6 @@ class Server(object):
                     view_types += (view_type,)
 
         for view_type in view_types:
-            log.debug("View type: %r", view_type)
             try:
                 view_class = self.KNOWN_VIEW_CLASSES[view_type]
             except KeyError:
@@ -425,6 +424,7 @@ class Server(object):
             if not isinstance(view, AbstractView):
                 raise WrongViewBase(view)
 
+            log.debug("Registering view class %r", view.__class__.__name__)
             self._views[view_name] = view
 
     def _setup_env(self):
