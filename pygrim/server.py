@@ -151,9 +151,9 @@ class Server(object):
         if controller.__class__.__name__ in self._controllers:
             raise DuplicateContoller(controller)
 
-        self._enhance_controller(controller, self._controllers, "_controllers")
-        self._enhance_controller(controller, self._router, "_router")
-        self._enhance_controller(controller, self._model, "_model")
+        self._enhance_controller(controller, "_controllers", self._controllers)
+        self._enhance_controller(controller, "_router", self._router)
+        self._enhance_controller(controller, "_model", self._model)
         self._process_decorated_methods(controller)
         self._controllers[controller.__class__.__name__] = controller
 
@@ -180,7 +180,7 @@ class Server(object):
         context.set_response_body("Not found")
         context.set_response_status(404)
 
-    def _enhance_controller(self, controller, attribute, attr_name):
+    def _enhance_controller(self, controller, attr_name, attribute):
         if hasattr(controller, attr_name):
             raise ControllerAttributeCollision(controller, attr_name)
 
