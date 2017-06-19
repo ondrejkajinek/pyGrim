@@ -1,12 +1,15 @@
 # coding: utf8
 
 
+# uwsgi and libs
 from pygrim import Server as WebServer
+from uwsgidecorators import postfork as postfork_decorator
+
+# local
+from model import Model
 from routes import Routes
 from test_iface import Test
 from second_controller import Second
-from uwsgidecorators import postfork as postfork_decorator
-# from pygrim.components.session import FileSessionStorage
 
 
 # to create custom session handler, view, etc:
@@ -54,6 +57,7 @@ Server = type("Server", inheritance, {
 #   server is filename and application is method (uwsgi will do __call__ on
 #   this object on every request)
 application = Server()
+application.register_model(Model())
 for controller_class in controllers:
     application.register_controller(controller_class())
 

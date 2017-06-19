@@ -18,6 +18,14 @@ class Second(object):
             "text": u"Hello, this controller calls other controller's method."
         })
 
+    @template_method("layout.jinja", "jinja")
+    def model(self, context):
+        return {
+            "data": {
+                "text": "Now: %s" % self._model.get_time().isoformat()
+            }
+        }
+
     @method()
     def redirect(self, context):
         context.redirect(self._router.url_for(

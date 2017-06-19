@@ -14,6 +14,7 @@ class Routes(object):
         router.map(Route("GET", "/cookie_show", "Test:cookie_show"))
         router.map(Route("GET", "/cookie_set", "Test:cookie_set"))
         router.map(Route("GET", "/redirect", "Second:redirect"))
+        router.map(Route("GET", "/model", "Second:model"))
         router.map(
             Route("GET", "/template_display", "Test:use_template_display")
         )
