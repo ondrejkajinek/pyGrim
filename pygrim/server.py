@@ -166,7 +166,7 @@ class Server(object):
 
         self._model = model
         for controller in self._controllers.itervalues():
-            self._enhance_controller(controller, self._model, "_model")
+            setattr(controller, "_model", self._model)
 
     def register_router_creator(self, register_func):
         self._route_register_func = register_func
