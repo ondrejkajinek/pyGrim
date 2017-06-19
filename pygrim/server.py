@@ -277,7 +277,6 @@ class Server(object):
         )
         try:
             for one in getmro(exc.__class__):
-                log.debug("Looking up error handler for %r.", one)
                 if one in self._custom_error_handlers:
                     self._custom_error_handlers[one](context=context, exc=exc)
                     raise DispatchFinished()
@@ -357,7 +356,7 @@ class Server(object):
                 "Duplicate handling of error %r with %r and %r.",
                 err_cls, self._custom_error_handlers[err_cls], method
             )
-        log.debug("Registered %r to handle %r.", method, err_cls)
+        log.debug("Method %r registered to handle %r.", method, err_cls)
         self._custom_error_handlers[err_cls] = method
 
     def _process_decorated_methods(self, controller):
@@ -435,6 +434,8 @@ class Server(object):
         if locale:
             log.debug("Setting locale 'LC_ALL' to %r", locale)
             setlocale(LC_ALL, str(locale))
+
+        log.debug("PyGrim environment set up.")
 
     def _static_file_mtime(self, static_file):
 
