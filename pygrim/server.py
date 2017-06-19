@@ -135,7 +135,7 @@ class Server(object):
         """
         self._finalize_not_found_handlers()
         if hasattr(self, "_route_register_func"):
-            self._route_register_func(self.router)
+            self._route_register_func(self._router)
             self._finalize_routes()
             log.debug("Routes loaded")
         else:
@@ -180,7 +180,7 @@ class Server(object):
         )
 
     def _finalize_routes(self):
-        for route in self.router.get_routes():
+        for route in self._router.get_routes():
             try:
                 controller = self._controllers[route.get_controller_name()]
             except KeyError:
@@ -303,7 +303,7 @@ class Server(object):
 
     def _handle_request(self, context):
         try:
-            for route in self.router.matching_routes(context):
+            for route in self._router.matching_routes(context):
                 try:
                     self._handle_by_route(route=route, context=context)
                     break
@@ -389,7 +389,7 @@ class Server(object):
         if not isinstance(router, AbstractRouter):
             raise WrongRouterBase(router)
 
-        self.router = router
+        self._router = router
 
     def _register_session_handler(self):
         if self.config.get("session:enabled", False):
@@ -473,7 +473,7 @@ class Server(object):
     def _jinja_url_for(self, route, params=None):
         params = params or {}
         try:
-            url = self.router.url_for(route, params)
+            url = self._router.url_for(route, params)
         except RouteNotRegistered:
             if self._debug is False:
                 url = "#"
