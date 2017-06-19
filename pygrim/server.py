@@ -257,7 +257,7 @@ class Server(object):
             try:
                 view_class = self.KNOWN_VIEW_CLASSES[view_type]
             except KeyError:
-                raise RuntimeError("Unknown view class: %r.", view_class)
+                raise RuntimeError("Unknown view class: %r.", view_type)
             else:
                 yield view_type, view_class
 
