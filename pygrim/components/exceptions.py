@@ -12,6 +12,16 @@ class ComponentException(BaseException):
         return ".".join((cls.__module__, cls.__name__))
 
 
+class ComponentTypeAlreadyRegistered(ComponentException):
+
+    def __init__(self, type_, type_name, conflict_class):
+        super(ComponentTypeAlreadyRegistered, self).__init__(
+            "%s type %r is already registered as class %r" % (
+                type_, type_name, self._full_class_name(conflict_class)
+            )
+        )
+
+
 class ControllerAttributeCollision(ComponentException):
 
     def __init__(self, controller, attr_name):

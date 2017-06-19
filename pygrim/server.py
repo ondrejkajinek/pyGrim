@@ -2,8 +2,8 @@
 
 from .components.config import AbstractConfig, YamlConfig
 from .components.exceptions import (
-    ControllerAttributeCollision, DuplicateContoller,
-    UnknownController, UnknownView,
+    ComponentTypeAlreadyRegistered, ControllerAttributeCollision,
+    DuplicateContoller, UnknownController, UnknownView,
     WrongConfigBase, WrongRouterBase, WrongSessionHandlerBase, WrongViewBase
 )
 from .components.grim_dicts import AttributeDict
@@ -39,18 +39,22 @@ except ImportError:
 log = getLogger("pygrim.server")
 
 
-def register_view_class(name, cls):
-    if name in Server.KNOWN_VIEW_CLASSES:
-        raise RuntimeError("")
-
-    Server.KNOWN_VIEW_CLASSES[name] = cls
-
-
 def register_session_handler(name, cls):
     if name in Server.KNOWN_SESSION_HANDLERS:
-        raise RuntimeError("")
+        raise ComponentTypeAlreadyRegistered(
+            "SessionHandler", name, Server.KNOWN_SESSION_HANDLERS[name]
+        )
 
     Server.KNOWN_SESSION_HANDLERS[name] = cls
+
+
+def register_view_class(name, cls):
+    if name in Server.KNOWN_VIEW_CLASSES:
+        raise ComponentTypeAlreadyRegistered(
+            "View", name, Server.KNOWN_VIEW_CLASSES[name]
+        )
+
+    Server.KNOWN_VIEW_CLASSES[name] = cls
 
 
 class ResponseWrap(object):
