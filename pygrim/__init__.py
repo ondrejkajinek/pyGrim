@@ -3,7 +3,7 @@
 from . import decorators, server
 
 # compat, remove asap
-from .components.routing import Route, RouteGroup
+from .components.routing import Route, RouteGroup, RoutePassed
 from .components import session
 from .decorators import (
     custom_error_handler, error_handler, method, not_found_handler,
