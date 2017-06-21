@@ -459,7 +459,7 @@ class Server(object):
 
     def _static_file_mtime(self, static_file):
 
-        def get_static_file_abs_path(static_file):
+        def get_static_file_abs_path():
             static_map = ensure_tuple(self.config.get("uwsgi:static-map", ()))
             for mapping in static_map:
                 prefix, mapped_dir = map(string_strip, mapping.split("="))
@@ -470,7 +470,7 @@ class Server(object):
             else:
                 return ""
 
-        abs_path = get_static_file_abs_path(static_file)
+        abs_path = get_static_file_abs_path()
         return (
             "v=%d" % int(path.getmtime(abs_path))
             if path.isfile(abs_path)
