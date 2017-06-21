@@ -336,9 +336,7 @@ class Server(object):
             self._handle_error(context=context, exc=exc_info()[1])
 
         if self._debug and self._dump_switch in context.GET():
-            context.set_response_content_type("application/json")
-            context.view_data["template_path"] = context.template
-            context.set_view("json")
+            self._set_dump_view(context)
 
         view = context.get_view()
         if view is None or view not in self._views:
@@ -439,6 +437,15 @@ class Server(object):
 
             log.debug("Registering view class %r", view.__class__.__name__)
             self._views[view_name] = view
+
+    def _set_dump_view(self, context):
+        context.set_response_content_type("application/json")
+        context.view_data.update({
+            key: getattr(context, key)
+            for key
+            in ("current_route", "session", "template", "_route_params")
+        })
+        context.set_view("json")
 
     def _setup_env(self):
         self._debug = self.config.getbool("pygrim:debug", True)

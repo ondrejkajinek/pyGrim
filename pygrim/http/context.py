@@ -151,6 +151,9 @@ class Context(object):
             self._response.status, http_responses[self._response.status]
         )
 
+    def get_route_params(self):
+        return self._route_params.copy()
+
     def get_view(self):
         return self._view
 
@@ -173,11 +176,6 @@ class Context(object):
                 "Session handler: %r loaded session: %r",
                 type(session_handler), self.session
             )
-
-    def pop_route_params(self):
-        params = self._route_params.copy()
-        self.set_route_params()
-        return params
 
     def redirect(self, url, status=302):
         self._response.status = status

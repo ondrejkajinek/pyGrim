@@ -47,6 +47,7 @@ class Router(AbstractRouter):
                 yield route
         else:
             context.current_route = None
+            context.set_route_params()
 
     def pop_group(self):
         try:

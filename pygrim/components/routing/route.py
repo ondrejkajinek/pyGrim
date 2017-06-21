@@ -66,7 +66,7 @@ class Route(RouteObject):
     def dispatch(self, context):
         self._handle(
             context=context,
-            **context.pop_route_params()
+            **context.get_route_params()
         )
 
     def get_controller_name(self):
@@ -121,6 +121,14 @@ class Route(RouteObject):
 
         log.debug("Route constructed url: %r for params: %r" % (url, params))
         return "/%s" % url.strip("/")
+
+    def _asdict(self):
+        return {
+            "handle_name": self.get_full_handle_name(),
+            "name": self.get_name(),
+            "pattern": self.get_pattern(),
+            "regular": self.is_regex()
+        }
 
     def _pattern_to_readable(self):
         param_names = self.URL_PARAM_REGEXP.findall(self._pattern.pattern)
