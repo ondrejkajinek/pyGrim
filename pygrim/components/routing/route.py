@@ -69,11 +69,11 @@ class Route(RouteObject):
             **context.pop_route_params()
         )
 
-    def full_handle_name(self):
-        return "%s:%s" % (self.get_controller_name(), self.get_handle_name())
-
     def get_controller_name(self):
         return self._controller_name
+
+    def get_full_handle_name(self):
+        return "%s:%s" % (self.get_controller_name(), self.get_handle_name())
 
     def get_handle_name(self):
         return self._handle_name

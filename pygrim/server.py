@@ -282,7 +282,7 @@ class Server(object):
         log.exception(
             "Error while dispatching to: %r.",
             (
-                context.current_route.full_handle_name()
+                context.current_route.get_full_handle_name()
                 if context.current_route
                 else "<no route>"
             )
