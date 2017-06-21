@@ -3,7 +3,7 @@
 from logging import getLogger
 from pygrim import (
     custom_error_handler, error_handler, method, not_found_handler,
-    template_display, template_method
+    template_display, template_method, RoutePassed
 )
 from time import time
 
@@ -124,15 +124,28 @@ class Test(object):
 
     @template_method("layout.jinja", "jinja")
     def inner_group_test(self, context, param=None):
+        text = context.view_data.get("previous_text") or ""
+        text += (
+            "This method is mapped to route in inner group. "
+            "Regexp route is used with optional parameter 'param'. "
+            "Given value is: %r" % param
+        )
         return {
             "data": {
-                "text": (
-                    "This method is mapped to route in inner group. "
-                    "Regexp route is used with optional parameter 'param'. "
-                    "Given value is: %r" % param
-                )
+                "text": text
             }
         }
+
+    @method()
+    def str_inner_group_test_pass(self, context, param=None):
+        context.view_data.update({
+            "previous_text": (
+                "This method received route params %r. "
+                "It does nothing but RoutePassed, so another matching route "
+                "will be searched for." % context.get_route_params()
+            )
+        })
+        raise RoutePassed()
 
     @not_found_handler("/detail/")
     def detail_not_found(self, context):

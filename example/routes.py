@@ -53,7 +53,12 @@ def register_routes(router):
                     ),
                     Route(
                         "GET",
-                        re_compile(r"/test(/(?P<param>[^/]+))?"),
+                        re_compile(r"/test/(?P<param>[a-z]+)[^/]*"),
+                        "Test:str_inner_group_test_pass"
+                    ),
+                    Route(
+                        "GET",
+                        re_compile(r"/test(/(?P<param>[a-z0-9]+))?"),
                         "Test:inner_group_test"
                     ),
                 )
