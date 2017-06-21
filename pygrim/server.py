@@ -272,7 +272,7 @@ class Server(object):
         except RoutePassed:
             raise
 
-        log.debug("Dispatch succeded on: %r.", context.current_route)
+        log.debug("Dispatch succeeded on: %r.", context.current_route)
         # when exception is raised, we're not sure if session is valid,
         # so we only store it when no exception was raised
         if context.session_loaded():
@@ -397,6 +397,7 @@ class Server(object):
                 "Duplicate handling of not-found %r with %r and %r.",
                 prefix, self._not_found_methods[prefix], method
             )
+
         log.debug("Method %r registered to handle not-found state", method)
         self._not_found_methods[prefix] = method
 
