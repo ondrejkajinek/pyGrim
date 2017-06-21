@@ -15,8 +15,9 @@
 	{% endif %}
 	<a href="{{ base_url(context) }}">Home</a>
 	<a href="{{ url_for("home") }}">Home 2</a>
-	<a href="{{ url_for("home", {"jkxd": ""}) }}">Home dump</a>
+	<a href="{{ url_for("home") }}?jkxd">Home dump</a>
 	<a href="{{ url_for("template_show", {"template": "test"}) }}">Template show test</a>
+	<a href="{{ url_for("template_show", {"template": "test"}) }}?jkxd">Template show test dump</a>
 </body>
 
 </html>
