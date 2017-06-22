@@ -76,7 +76,9 @@ class NormalizedDict(dict):
         return value
 
     def setdefault(self, key, default=None):
-        return super(NormalizedDict, self).setdefault(key, default)
+        return super(NormalizedDict, self).setdefault(
+            self._normalize_key(key), default
+        )
 
     def update(self, other=None):
         iterator = (
