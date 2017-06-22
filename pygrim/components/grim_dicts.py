@@ -19,10 +19,13 @@ class AttributeDict(dict):
 
 class ImmutableDict(dict):
 
+    def __init__(self, *args, **kwargs):
+        super(ImmutableDict, self).__init__(*args, **kwargs)
+
     def __hash__(self):
         return id(self)
 
-    def _immutable(self, *args, **kwarsg):
+    def _immutable(self, *args, **kwargs):
         raise TypeError("object is immutable")
 
     __setitem__ = _immutable
@@ -34,31 +37,70 @@ class ImmutableDict(dict):
     popitem = _immutable
 
 
-class NormalizedImmutableDict(ImmutableDict):
+class NormalizedDict(dict):
 
-    def __init__(self, container=None):
-        super(NormalizedImmutableDict, self).__init__({
-            self._normalize_key(key): container[key]
-            for key
-            in (container or {}).iterkeys()
-        })
+    def __init__(self, *args, **kwargs):
+        super(NormalizedDict, self).__init__((
+            (self._normalize_key(key), value)
+            for key, value
+            in dict(*args, **kwargs).iteritems()
+        ))
 
     def __getitem__(self, key):
         """
         raises KeyError when normalized key is not found
         """
-        return super(NormalizedImmutableDict, self).__getitem__(
+        return super(NormalizedDict, self).__getitem__(
             self._normalize_key(key)
         )
 
+    def __setitem__(self, key, value):
+        super(NormalizedDict, self).__setitem__(
+            self._normalize_key(key), value
+        )
+
+    def __delitem__(self, key):
+        super(NormalizedDict, self).__delitem__(self._normalize_key(key))
+
+    def pop(self, key, *args, **kwargs):
+        try:
+            value = super(NormalizedDict, self).pop(self._normalize_key(key))
+        except:
+            if "default" in kwargs:
+                value = kwargs["default"]
+            elif args:
+                value = args[0]
+            else:
+                raise
+
+        return value
+
+    def setdefault(self, key, default=None):
+        return super(NormalizedDict, self).setdefault(key, default)
+
+    def update(self, other=None):
+        iterator = (
+            other.iteritems()
+            if isinstance(other, dict)
+            else other or ()
+        )
+        for key, value in iterator:
+            self.__setitem__(key, value)
+
     def get(self, key, default=None):
-        return super(NormalizedImmutableDict, self).get(
+        return super(NormalizedDict, self).get(
             self._normalize_key(key), default
         )
 
     def _normalize_key(self, key):
-        normalized = key.lower().replace("-", "_")
+        normalized = key.lower().replace("_", "-")
         if normalized.startswith("http_"):
             normalized = normalized[5:]
 
         return normalized
+
+
+class NormalizedImmutableDict(ImmutableDict, NormalizedDict):
+
+    def __init__(self, *args, **kwargs):
+        super(NormalizedImmutableDict, self).__init__(*args, **kwargs)

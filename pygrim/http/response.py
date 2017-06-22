@@ -6,6 +6,8 @@ from logging import getLogger
 from os import SEEK_END
 from urllib import quote_plus as url_quoteplus
 
+from ..components.grim_dicts import NormalizedDict
+
 log = getLogger("pygrim.http.response")
 
 
@@ -35,9 +37,9 @@ class Response(object):
     def __init__(self):
         self.body = ""
         self.cookies = {}
-        self.headers = {
-            "Content-Type": "text/html"
-        }
+        self.headers = NormalizedDict((
+            ("Content-Type", "text/html"),
+        ))
         self.status = 200
         self.is_generator = False
 

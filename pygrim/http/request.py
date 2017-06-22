@@ -105,7 +105,7 @@ class Request(object):
             ):
                 headers[key] = environment.get(key)
 
-        self._headers = NormalizedImmutableDict(headers)
+        self._headers = NormalizedImmutableDict(**headers)
 
     def _parse_query_params(self, method):
         return self._parse_string(
@@ -146,4 +146,4 @@ class Request(object):
         env["path_info"] = env.pop("PATH_INFO").rstrip("/") + "/"
         env["request_method"] = method
         env["server_port"] = self._get_port(env)
-        self.environment = NormalizedImmutableDict(env)
+        self.environment = NormalizedImmutableDict(**env)
