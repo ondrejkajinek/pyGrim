@@ -42,3 +42,33 @@ class Second(object):
                 "text": "Message: %s" % message
             }
         }
+
+    @method()
+    def generator(self, context):
+        context.set_view("raw")
+        context.set_response_body((
+            str(i) * 100 + "<br />"
+            for i
+            in xrange(4)
+        ))
+
+    @method()
+    def generator_fction(self, context):
+
+        def fction():
+            for i in xrange(10):
+                yield str(i) * 100 + "<br />"
+
+        context.set_view("raw")
+        context.set_response_body(fction)
+
+    @method()
+    def broken_generator_fction(self, context):
+
+        def fction():
+            for i in xrange(10):
+                yield str(i) * 100 + "<br />"
+            raise RuntimeError()
+
+        context.set_view("raw")
+        context.set_response_body(fction)

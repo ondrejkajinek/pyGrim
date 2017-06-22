@@ -13,6 +13,11 @@ def register_routes(router):
     router.map(Route("GET", "/cookie_set", "Test:cookie_set"))
     router.map(Route("GET", "/redirect", "Second:redirect"))
     router.map(Route("GET", "/model", "Second:model"))
+    router.map(Route("GET", "/generator", "Second:generator"))
+    router.map(Route("GET", "/generator_fction", "Second:generator_fction"))
+    router.map(Route(
+        "GET", "/broken_generator_fction", "Second:broken_generator_fction"
+    ))
     router.map(
         Route("GET", "/template_display", "Test:use_template_display")
     )
