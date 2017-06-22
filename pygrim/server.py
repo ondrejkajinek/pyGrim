@@ -121,16 +121,16 @@ class Server(object):
                 context.get_response_status_code(),
                 context.get_response_headers()
             )
-            body = (
-                None
-                if context.is_request_head()
-                else context.get_response_body()
-            )
+            is_head = context.is_request_head()
             if context.generates_response():
-                for part in body():
-                    yield part
+                for part in context.get_response_body():
+                    if not is_head:
+                        yield part
             else:
-                yield body
+                if is_head:
+                    log.debug("HEAD - not returning body")
+                else:
+                    yield context.get_response_body()
 
     def do_postfork(self):
         """

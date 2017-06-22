@@ -1,7 +1,7 @@
 # coding: utf8
 
 from datetime import datetime, timedelta
-from inspect import isgeneratorfunction
+from inspect import isgenerator, isgeneratorfunction
 from logging import getLogger
 from os import SEEK_END
 from urllib import quote_plus as url_quoteplus
@@ -39,20 +39,21 @@ class Response(object):
             "Content-Type": "text/html"
         }
         self.status = 200
-        self.is_generator_function = False
+        self.is_generator = False
 
-    def finalize(self):
+    def finalize(self, is_head):
         if self.status in self.NO_CONTENT_STATUSES:
             del self.headers["Content-Type"]
             self.body = ""
         else:
-            if isinstance(self.body, unicode):
-                self.body = self.body.encode("utf-8")
-
             if isinstance(self.body, str):
                 self.headers["Content-Length"] = len(self.body)
-            elif isgeneratorfunction(self.body):
-                self.is_generator_function = True
+                if is_head:
+                    self.body = ""
+            elif isgenerator(self.body):
+                pass
+                # do not set body to None when is_head
+                # we want to iterate over body to see if no error occur
             else:
                 if "Content-Length" not in self.headers:
                     if (
@@ -61,18 +62,21 @@ class Response(object):
                     ):
                         self.body.seek(0, SEEK_END)
                         self.headers["Content-Length"] = self.body.tell()
-                        self.body.seek(0)
                     else:
                         log.warning(
                             "Unable to get Content-Length for type %r",
                             type(self.body)
                         )
 
-                try:
-                    self.body = self.body.read()
-                except AttributeError:
-                    log.critical("Can't read read response body content!")
-                    log.exception("Can't read read response body content!")
+                if is_head:
+                    self.body = ""
+                else:
+                    try:
+                        self.body.seek(0)
+                        self.body = self.body.read()
+                    except AttributeError:
+                        log.critical("Can't read read response body content!")
+                        log.exception("Can't read read response body content!")
 
         self.headers = [
             (key, str(value))
@@ -83,6 +87,17 @@ class Response(object):
         if self.cookies:
             for cookie in self._serialized_cookies():
                 self.headers.append(("Set-Cookie", cookie))
+
+    def set_body(self, body):
+        if isgeneratorfunction(body):
+            self.body = body()
+        elif isinstance(body, unicode):
+            self.body = body.encode("utf-8")
+        else:
+            self.body = body
+
+        if isgenerator(self.body):
+            self.is_generator = True
 
     def _serialize_cookie(self, name, cookie):
         params = (

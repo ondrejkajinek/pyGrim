@@ -93,10 +93,10 @@ class Context(object):
             }
 
     def finalize_response(self):
-        self._response.finalize()
+        self._response.finalize(is_head=self.is_request_head())
 
     def generates_response(self):
-        return self._response.is_generator_function
+        return self._response.is_generator
 
     def get_cookies(self):
         return self._request.cookies.copy()
@@ -192,7 +192,7 @@ class Context(object):
         return self._session_loaded
 
     def set_response_body(self, body):
-        self._response.body = body
+        self._response.set_body(body)
 
     def set_response_content_type(self, content_type):
         self._response.headers["Content-Type"] = content_type
