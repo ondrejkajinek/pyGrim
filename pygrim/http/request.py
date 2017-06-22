@@ -99,7 +99,7 @@ class Request(object):
 
     def _parse_headers(self, environment):
         headers = {}
-        for key in environment.keys():
+        for key in environment.iterkeys():
             upper_key = key.upper()
             if (
                 upper_key.startswith("X_") or
