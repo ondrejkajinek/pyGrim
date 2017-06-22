@@ -1,5 +1,6 @@
 # coding: utf8
 
+from ..components.routing import StopDispatch
 from ..components.grim_dicts import ImmutableDict
 from .request import Request
 from .response import Response
@@ -180,6 +181,7 @@ class Context(object):
     def redirect(self, url, status=302):
         self._response.status = status
         self._response.headers["Location"] = url
+        raise StopDispatch()
 
     def save_session(self, session_handler):
         session_handler.save(self.session)

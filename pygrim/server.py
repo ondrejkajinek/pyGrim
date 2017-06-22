@@ -10,8 +10,8 @@ from .components.grim_dicts import AttributeDict
 from .components.log import initialize_loggers
 from .components.routing import AbstractRouter, Router
 from .components.routing import (
-    DispatchFinished, MissingRouteHandle, RouteNotFound, RouteNotRegistered,
-    RoutePassed
+    MissingRouteHandle, RouteNotFound, RouteNotRegistered, RoutePassed,
+    StopDispatch
 )
 from .components.session import (
     DummySession, FileSessionStorage, RedisSessionStorage,
@@ -267,7 +267,7 @@ class Server(object):
 
         try:
             route.dispatch(context=context)
-        except DispatchFinished:
+        except StopDispatch:
             pass
         except RoutePassed:
             raise
@@ -291,17 +291,17 @@ class Server(object):
             for one in getmro(exc.__class__):
                 if one in self._custom_error_handlers:
                     self._custom_error_handlers[one](context=context, exc=exc)
-                    raise DispatchFinished()
+                    raise StopDispatch()
             self._error_method(context=context, exc=exc)
-            raise DispatchFinished()
-        except DispatchFinished:
+            raise StopDispatch()
+        except StopDispatch:
             return
         except:
             exc = exc_info()[1]
 
         try:
             self._default_error_method(context=context, exc=exc)
-        except DispatchFinished:
+        except StopDispatch:
             return
         except:
             log.critical("Error in default_error_method.")
@@ -317,7 +317,7 @@ class Server(object):
                     handle(context=context)
                     log.debug("RouteNotFound exception successfully handled.")
                     break
-        except DispatchFinished:
+        except StopDispatch:
             pass
 
     def _handle_request(self, context):

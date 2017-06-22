@@ -5,16 +5,6 @@ class BaseRoutingException(Exception):
     pass
 
 
-class DispatchFinished(BaseRoutingException):
-    """Raised by:
-    - server.display
-    - server.redirect
-Can be used by user to stop anything after. It means:
-    - finish request (session, etc.)
-    - return data to browser
-"""
-
-
 class MissingRouteHandle(BaseRoutingException):
 
     def __init__(self, controller, handle, route):
@@ -43,3 +33,14 @@ class RouteNotRegistered(BaseRoutingException):
 
 class RoutePassed(BaseRoutingException):
     pass
+
+
+class StopDispatch(BaseRoutingException):
+    """
+    Raised by:
+        - context.redirect
+
+    Can be used by user to stop anything after. It means:
+        - finish request (session, etc.)
+        - return data to browser
+    """
