@@ -46,13 +46,15 @@ class NormalizedDict(dict):
             in dict(*args, **kwargs).iteritems()
         ))
 
-    def __getitem__(self, key):
+    def __missing__(self, key):
         """
         raises KeyError when normalized key is not found
         """
-        return super(NormalizedDict, self).__getitem__(
-            self._normalize_key(key)
-        )
+        normalized = self._normalize_key(key)
+        if normalized not in self:
+            raise KeyError(key)
+
+        return self[normalized]
 
     def __setitem__(self, key, value):
         super(NormalizedDict, self).__setitem__(
