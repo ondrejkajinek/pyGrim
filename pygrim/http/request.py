@@ -91,9 +91,11 @@ class Request(object):
 
     def _get_port(self, env):
         try:
-            return int(env["SERVER_PORT"])
+            port = int(env.pop("SERVER_PORT"))
         except:
-            return self.DEFAULT_SCHEME_PORTS[env["wsgi.url_scheme"]]
+            port = self.DEFAULT_SCHEME_PORTS[env["wsgi.url_scheme"]]
+
+        return port
 
     def _parse_headers(self, environment):
         headers = {}
