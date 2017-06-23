@@ -1,3 +1,10 @@
+pygrim (0.1.27) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * FIX broken import
+
+ -- Václav Pokluda <root@darky>  Fri, 23 Jun 2017 11:51:26 +0200
+
 pygrim (0.1.26) testing; urgency=medium
 
   * COMMIT MESSASGES
