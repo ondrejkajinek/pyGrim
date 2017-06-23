@@ -5,7 +5,7 @@ from logging import getLogger
 from re import compile as re_compile, IGNORECASE as re_IGNORECASE
 from string import strip as string_strip
 from urllib import unquote_plus
-from pygrim.components import json2 as json
+from ..components.utils import json2 as json
 log = getLogger("pygrim.http.request")
 
 
