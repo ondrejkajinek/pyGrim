@@ -5,7 +5,7 @@ from logging import getLogger
 from re import compile as re_compile, IGNORECASE as re_IGNORECASE
 from string import strip as string_strip
 from urllib import unquote_plus
-
+from pygrim.components import json2 as json
 log = getLogger("pygrim.http.request")
 
 
@@ -24,10 +24,6 @@ class Request(object):
     )
 
     def __init__(self, environment):
-        self._params = {
-            "GET": None,
-            "POST": None
-        }
         self._parse_headers(environment)
         self._save_environment(environment)
         self.cookies = self._parse_string(self._headers.get("cookie", ""), ";")
@@ -40,10 +36,7 @@ class Request(object):
 
     def request_param(self, method, key=None, fallback=None):
         try:
-            if self._params[method] is None:
-                self._params[method] = self._parse_query_params(method)
-
-            value = self._params[method]
+            value = getattr(self, method)
             if key is not None:
                 value = value.get(key, fallback)
         except KeyError:
@@ -79,15 +72,37 @@ class Request(object):
 
         return ip
 
-    def _get_method_param_string(self, method):
-        """
-        no extra check is done since the method is called
-        after it is checked that `method` is ok
-        """
-        if method == "GET":
-            return self.environment["query_string"]
-        elif method == "POST":
-            return "".join(part for part in self.environment["wsgi.input"])
+    def __getattr__(self, attr):
+        if (
+            attr == "JSON" and
+            self._headers.get("content_type") == "application/json"
+        ):
+            try:
+                self.JSON = json.loads(self.RAW_POST)
+                return self.JSON
+            except:
+                log.exception("Error loding json data from request")
+                return {}
+        elif attr == "RAW_POST":
+            self.RAW_POST = "".join(
+                part for part in self.environment["wsgi.input"])
+            return self.RAW_POST
+        elif attr in ("GET", "DELETE"):
+            data = self._parse_string(self.environment["query_string"])
+            setattr(self, attr, data)
+            return data
+
+        elif attr in ("POST", "DELETE"):
+            c_t = self._headers.get("content_type")
+            if c_t is None or c_t == "application/x-www-form-urlencoded":
+                data = self._parse_string(self.RAW_POST)
+            else:
+                data = {}
+            setattr(self, attr, data)
+            return data
+        # endif
+        raise AttributeError(
+            "%r object has no attribute %r" % (self.__class__.__name__, attr))
 
     def _get_port(self, env):
         try:
@@ -107,12 +122,9 @@ class Request(object):
 
         self._headers = NormalizedImmutableDict(headers)
 
-    def _parse_query_params(self, method):
-        return self._parse_string(
-            self._get_method_param_string(method)
-        )
-
     def _parse_string(self, source, pairs_separator="&"):
+        if not source:
+            return ImmutableDict()
         parts = (
             item
             for item

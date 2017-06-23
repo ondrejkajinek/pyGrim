@@ -41,6 +41,12 @@ class Context(object):
     def POST(self, key=None, fallback=None):
         return self._request.request_param("POST", key, fallback)
 
+    def JSON(self, key=None, fallback=None):
+        return self._request.request_param("JSON", key, fallback)
+
+    def RAW_POST(self):
+        return self._request.RAW_POST
+
     def add_cookie(
         self, name, value, lifetime=None, domain=None, path=None,
         http_only=None, secure=None
