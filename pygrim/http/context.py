@@ -39,10 +39,16 @@ class Context(object):
         self.set_route_params()
 
     def GET(self, key=None, fallback=None):
-        return self._request.request_param("GET", key, fallback)
+        return self._request_param("GET", key, fallback)
 
     def POST(self, key=None, fallback=None):
-        return self._request.request_param("POST", key, fallback)
+        return self._request_param("POST", key, fallback)
+
+    def JSON(self, key=None, fallback=None):
+        return self._request_param("JSON", key, fallback)
+
+    def RAW_POST(self):
+        return self._request.RAW_POST
 
     def add_cookie(
         self, name, value, lifetime=None, domain=None, path=None,
@@ -207,3 +213,18 @@ class Context(object):
 
     def set_view(self, view):
         self._view = view
+
+    def _request_param(self, method, key=None, fallback=None):
+        try:
+            value = (
+                getattr(self._request, method)
+                if key is None
+                else getattr(self._request, method).get(key, fallback)
+            )
+        except AttributeError:
+            log.warning(
+                "Trying to get param sent by unknown method %r", method
+            )
+            value = None
+
+        return value
