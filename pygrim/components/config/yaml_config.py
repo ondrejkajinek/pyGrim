@@ -14,6 +14,13 @@ from yaml.constructor import ConstructorError
 
 class PygrimYamlLoader(BaseLoader):
 
+    """
+    This reimplements PyYAML loader
+
+    PyYAML loader rewrites values when multiple keys are present in dict.
+    PygrimYamlLoader will turn the value into list
+    """
+
     def construct_mapping(self, node, deep=False):
         if not isinstance(node, MappingNode):
             raise ConstructorError(
