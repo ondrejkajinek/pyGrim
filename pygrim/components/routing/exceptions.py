@@ -31,10 +31,6 @@ class RouteAlreadyExists(BaseRoutingException):
         )
 
 
-class RouteNotFound(BaseRoutingException):
-    pass
-
-
 class RouteNotRegistered(BaseRoutingException):
     pass
 
