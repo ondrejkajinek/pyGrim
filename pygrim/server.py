@@ -446,6 +446,15 @@ class Server(object):
     def _setup_env(self):
         self._debug = self.config.getbool("pygrim:debug", True)
         self._dump_switch = self.config.get("pygrim:dump_switch", "jkxd")
+        self._static_map = {
+            fix_trailing_slash(prefix): mapped_dir
+            for prefix, mapped_dir
+            in (
+                map(string_strip, mapping.split("="))
+                for mapping
+                in ensure_tuple(self.config.get("uwsgi:static-map", ()))
+            )
+        }
         locale = self.config.get("pygrim:locale", None)
         if locale:
             log.debug("Setting locale 'LC_ALL' to %r", locale)
@@ -453,24 +462,21 @@ class Server(object):
 
         log.debug("PyGrim environment set up.")
 
-    def _static_file_mtime(self, static_file):
+    def _static_file_abs_path(self, static_file):
+        for prefix, mapped_dir in self._static_map.iteritems():
+            if static_file.startswith(prefix):
+                return path.join(
+                    mapped_dir, path.relpath(static_file, prefix)
+                )
+        else:
+            return ""
 
-        def get_static_file_abs_path():
-            static_map = ensure_tuple(self.config.get("uwsgi:static-map", ()))
-            for mapping in static_map:
-                prefix, mapped_dir = map(string_strip, mapping.split("="))
-                if static_file.startswith(prefix):
-                    return path.join(
-                        mapped_dir, path.relpath(static_file, prefix)
-                    )
-            else:
-                return ""
-
-        abs_path = get_static_file_abs_path()
+    def _versioned_file(self, static_file):
+        abs_path = self._static_file_abs_path(static_file)
         return (
-            "v=%d" % int(path.getmtime(abs_path))
+            "%s?v=%d" % (escape(static_file), int(path.getmtime(abs_path)))
             if path.isfile(abs_path)
-            else ""
+            else escape(static_file)
         )
 
     def _view_disabled(self):
@@ -479,8 +485,8 @@ class Server(object):
     # jinja extra methods
     def _view_print_css(self, css_list):
         return Markup("\n".join(
-            """<link href="%s?%s" rel="stylesheet" type="text/css" />""" % (
-                escape(css), self._static_file_mtime(css)
+            """<link href="%s" rel="stylesheet" type="text/css" />""" % (
+                self._versioned_file(css)
             )
             for css
             in css_list
@@ -488,8 +494,8 @@ class Server(object):
 
     def _view_print_js(self, js_list, sync=True):
         return Markup("\n".join(
-            """<script %ssrc="%s?%s"></script>""" % (
-                "" if sync else "async ", js, self._static_file_mtime(js)
+            """<script src="%s"%s></script>""" % (
+                self._versioned_file(js), "" if sync else " async"
             )
             for js
             in js_list
