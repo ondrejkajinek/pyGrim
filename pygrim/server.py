@@ -421,9 +421,9 @@ class Server(object):
 
     def _register_view(self):
         extra_functions = {
-            "print_css": self._jinja_print_css,
-            "print_js": self._jinja_print_js,
-            "url_for": self._jinja_url_for,
+            "print_css": self._view_print_css,
+            "print_js": self._view_print_js,
+            "url_for": self._view_url_for,
         }
         self._views = {}
         for view_name, view_class in self._find_view_classes():
@@ -477,7 +477,7 @@ class Server(object):
         return len(self._views) == 1 and "dummy" in self._views
 
     # jinja extra methods
-    def _jinja_print_css(self, css_list):
+    def _view_print_css(self, css_list):
         return Markup("\n".join(
             """<link href="%s?%s" rel="stylesheet" type="text/css" />""" % (
                 escape(css), self._static_file_mtime(css)
@@ -486,7 +486,7 @@ class Server(object):
             in css_list
         ))
 
-    def _jinja_print_js(self, js_list, sync=True):
+    def _view_print_js(self, js_list, sync=True):
         return Markup("\n".join(
             """<script %ssrc="%s?%s"></script>""" % (
                 "" if sync else "async ", js, self._static_file_mtime(js)
@@ -495,7 +495,7 @@ class Server(object):
             in js_list
         ))
 
-    def _jinja_url_for(self, route, params=None):
+    def _view_url_for(self, route, params=None):
         params = params or {}
         try:
             url = self._router.url_for(route, params)
