@@ -39,7 +39,7 @@ class Request(object):
             value = getattr(self, method)
             if key is not None:
                 value = value.get(key, fallback)
-        except KeyError:
+        except AttributeError:
             log.warning(
                 "Trying to get param sent by unknown method %r", method
             )
