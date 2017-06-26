@@ -158,6 +158,14 @@ class Test(object):
         context.template = "layout.jinja"
         context.set_view("jinja")
 
+    @not_found_handler("/runtime-raising/")
+    def runtime_raising_not_found(self, context):
+        raise RuntimeError("This not-found handler raises RuntimeError!")
+
+    @not_found_handler("/type-raising/")
+    def type_raising_not_found(self, context):
+        raise TypeError("This not-found handler raises TypeError!")
+
     @not_found_handler()
     def not_found(self, context):
         context.view_data.update({
