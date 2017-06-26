@@ -10,8 +10,7 @@ from .components.grim_dicts import AttributeDict
 from .components.log import initialize_loggers
 from .components.routing import AbstractRouter, Router
 from .components.routing import (
-    MissingRouteHandle, RouteNotFound, RouteNotRegistered, RoutePassed,
-    StopDispatch
+    MissingRouteHandle, RouteNotRegistered, RoutePassed, StopDispatch
 )
 from .components.session import (
     DummySession, FileSessionStorage, RedisSessionStorage,
@@ -329,9 +328,7 @@ class Server(object):
                 except RoutePassed:
                     continue
             else:
-                raise RouteNotFound()
-        except RouteNotFound:
-            self._handle_not_found(context=context)
+                self._handle_not_found(context=context)
         except:
             self._handle_error(context=context, exc=exc_info()[1])
 
