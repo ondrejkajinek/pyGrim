@@ -6,7 +6,7 @@ from .abstract_view import AbstractView
 class RawView(AbstractView):
 
     def __init__(self, config, extra_functions):
-        pass
+        self._initialize_view(config)
 
-    def render(self, context):
+    def _render(self, context):
         return context.get_response_body()

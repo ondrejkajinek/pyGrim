@@ -4,4 +4,4 @@
 class DummyView(object):
 
     def __init__(self, config, extra_functions):
-        pass
+        self._initialize_view(config)

@@ -7,7 +7,7 @@ from ..utils.json2 import dumps as json_dumps
 class JsonView(AbstractView):
 
     def __init__(self, config, _unused):
-        pass
+        self._initialize_view(config)
 
-    def render(self, context):
+    def _render(self, context):
         return json_dumps(context.view_data)
