@@ -34,19 +34,6 @@ class Request(object):
         except KeyError:
             return True
 
-    def request_param(self, method, key=None, fallback=None):
-        try:
-            value = getattr(self, method)
-            if key is not None:
-                value = value.get(key, fallback)
-        except AttributeError:
-            log.warning(
-                "Trying to get param sent by unknown method %r", method
-            )
-            value = None
-
-        return value
-
     def _get_host(self, env):
         try:
             matches = self.HOST_REGEXP.match(self._headers["host"])

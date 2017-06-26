@@ -36,13 +36,13 @@ class Context(object):
         self.set_route_params()
 
     def GET(self, key=None, fallback=None):
-        return self._request.request_param("GET", key, fallback)
+        return self._request_param("GET", key, fallback)
 
     def POST(self, key=None, fallback=None):
-        return self._request.request_param("POST", key, fallback)
+        return self._request_param("POST", key, fallback)
 
     def JSON(self, key=None, fallback=None):
-        return self._request.request_param("JSON", key, fallback)
+        return self._request_param("JSON", key, fallback)
 
     def RAW_POST(self):
         return self._request.RAW_POST
@@ -209,3 +209,18 @@ class Context(object):
 
     def set_route_params(self, params=None):
         self._route_params = ImmutableDict(params or {})
+
+    def _request_param(self, method, key=None, fallback=None):
+        try:
+            value = (
+                getattr(self._request, method)
+                if key is None
+                else getattr(self._request, method).get(key, fallback)
+            )
+        except AttributeError:
+            log.warning(
+                "Trying to get param sent by unknown method %r", method
+            )
+            value = None
+
+        return value
