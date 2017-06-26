@@ -60,10 +60,6 @@ class JinjaView(AbstractView):
         if context.session is not None:
             context.view_data["flashes"] = context.session.get_flashes()
 
-        if self._debug and self._dump_switch in context.GET():
-            context.view_data["template_path"] = context.template
-            context.template = self._dump_switch
-
         context.view_data.update({
             "css": tuple(self._css | set(
                 set(context.view_data.pop("extra_css", ()))
@@ -82,11 +78,8 @@ class JinjaView(AbstractView):
                 context.view_data.pop("extra_js_footer_async", ())
             ))
         })
-        if context.template == self._dump_switch:
-            context.set_response_content_type("application/json")
-            dump_data = context.view_data.copy()  # shallow copy
-            dump_data["session"] = context.session
-            result = json_dumps(dump_data)
+        if self._debug and self._dump_switch in context.GET():
+            result = self._handle_dump(context)
         else:
             template = self._env.get_template(context.template)
             context.view_data.update({
@@ -94,10 +87,21 @@ class JinjaView(AbstractView):
             })
             result = template.render(**context.view_data)
 
-        if context.session is not None:
-            context.session.del_flashes()
+            if context.session is not None:
+                context.session.del_flashes()
 
         return result
+
+    def _handle_dump(self, context):
+        dump_data = context.view_data.copy()  # shallow copy
+        dump_data["content_type"] = context._response.headers.get(
+            "Content-Type"
+        )
+        dump_data["session"] = context.session
+        dump_data["template_path"] = context.template
+
+        context.set_response_content_type("application/json")
+        return json_dumps(dump_data)
 
     def _get_extensions(self, config):
         extensions = set((
