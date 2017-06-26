@@ -57,7 +57,7 @@ Server = type("Server", inheritance, {
 #   this object on every request)
 application = Server()
 application.register_model(Model())
-application.register_router_creator(register_routes)
+application.register_routes_creator(register_routes)
 for controller_class in controllers:
     application.register_controller(controller_class())
 

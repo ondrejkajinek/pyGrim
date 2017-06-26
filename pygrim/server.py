@@ -170,7 +170,7 @@ class Server(object):
         for controller in self._controllers.itervalues():
             setattr(controller, "_model", self._model)
 
-    def register_router_creator(self, register_func):
+    def register_routes_creator(self, register_func):
         self._route_register_func = register_func
 
     def _default_error_method(self, context, exc):
