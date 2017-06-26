@@ -168,7 +168,7 @@ class Server(object):
         # Rewrite _model in controllers that were registered so far,
         # destroying original one
         for controller in self._controllers.itervalues():
-            setattr(controller, "_model", self._model)
+            controller._model = self._model
 
     def register_routes_creator(self, register_func):
         self._route_register_func = register_func
@@ -254,11 +254,9 @@ class Server(object):
 
         for view_type in view_types:
             try:
-                view_class = self.KNOWN_VIEW_CLASSES[view_type]
+                yield view_type, self.KNOWN_VIEW_CLASSES[view_type]
             except KeyError:
                 raise RuntimeError("Unknown view class: %r.", view_type)
-            else:
-                yield view_type, view_class
 
     def _handle_by_route(self, route, context):
         if route.requires_session():
@@ -438,11 +436,11 @@ class Server(object):
 
     def _set_dump_view(self, context):
         context.set_response_content_type("application/json")
-        context.view_data.update({
-            key: getattr(context, key)
+        context.view_data.update(
+            (key, getattr(context, key))
             for key
             in ("current_route", "session", "template", "_route_params")
-        })
+        )
         context.set_view("json")
 
     def _setup_env(self):
