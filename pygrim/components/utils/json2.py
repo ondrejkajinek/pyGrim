@@ -54,7 +54,11 @@ def _dump_dict(source, nice, depth):
     ind += '%s:%s'
     items = (
         ind % (
-            _dumps(key, nice=nice, depth=depth),
+            _dumps(
+                key.encode("utf8") if isinstance(key, unicode) else str(key),
+                nice=nice,
+                depth=depth
+            ),
             _dumps(value, nice=nice, depth=depth + 1)
         )
         for key, value
