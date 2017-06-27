@@ -98,7 +98,7 @@ class NormalizedDict(dict):
 
     def _normalize_key(self, key):
         normalized = key.lower().replace("_", "-")
-        if normalized.startswith("http_"):
+        if normalized.startswith("http-"):
             normalized = normalized[5:]
 
         return normalized
