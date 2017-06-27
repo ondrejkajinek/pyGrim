@@ -24,10 +24,6 @@ class Request(object):
     )
 
     def __init__(self, environment):
-        self._params = {
-            "GET": None,
-            "POST": None
-        }
         self._parse_headers(environment)
         self._save_environment(environment)
         self.cookies = self._parse_string(self._headers.get("cookie", ""), ";")
