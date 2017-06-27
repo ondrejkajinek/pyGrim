@@ -63,16 +63,16 @@ class Context(object):
 
     def add_js(self, *args, **kwargs):
         location_path = "header" if kwargs.get("header", True) else "footer"
-        sync_path = "sync" if kwargs.get("sync", True) else "async"
-        extra = self.view_data.setdefault(
-            "extra_js_%s_%s" % (location_path, sync_path), set()
-        )
-        extra.update(set(args))
+        sync = "sync" if kwargs.get("sync", True) else "async"
+        self.view_data.setdefault(
+            "extra_js_%s_%s" % (location_path, sync), set()
+        ).update(set(args))
 
     def add_response_headers(self, headers):
         self._response.headers.update(
             (str(k), str(v))
-            for k, v in headers.items()
+            for k, v
+            in headers.iteritems()
         )
 
     def delete_cookie(
