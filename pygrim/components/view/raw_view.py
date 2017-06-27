@@ -10,3 +10,6 @@ class RawView(AbstractView):
 
     def _render(self, context):
         return context.get_response_body()
+
+    def _template_check(self, context):
+        pass

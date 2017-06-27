@@ -167,3 +167,13 @@ class Route(RouteObject):
             context.set_route_params(route_params)
 
         return match
+
+
+class NoRoute(Route):
+
+    def __init__(self):
+        self._handle = None
+        self._controller_name = None
+        self._handle_name = None
+        self._methods = ()
+        self._name = "<no route>"

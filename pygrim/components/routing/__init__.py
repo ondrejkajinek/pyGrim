@@ -2,7 +2,8 @@
 
 from .abstract_router import AbstractRouter
 from .exceptions import (
-    MissingRouteHandle, RouteNotRegistered, RoutePassed, StopDispatch
+    MissingRouteHandle, RouteNotFound, RouteNotRegistered, RoutePassed,
+    StopDispatch
 )
-from .route import Route, RouteGroup
+from .route import NoRoute, Route, RouteGroup
 from .router import Router

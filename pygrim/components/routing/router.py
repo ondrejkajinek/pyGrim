@@ -2,7 +2,7 @@
 
 from .abstract_router import AbstractRouter
 from .exceptions import RouteAlreadyExists, RouteNotRegistered
-from .route import Route, RouteGroup
+from .route import NoRoute, Route, RouteGroup
 from logging import getLogger
 from os.path import join as path_join
 from re import compile as re_compile
@@ -46,7 +46,7 @@ class Router(AbstractRouter):
                 context.current_route = route
                 yield route
         else:
-            context.current_route = None
+            context.current_route = NoRoute()
             context.set_route_params()
 
     def pop_group(self):

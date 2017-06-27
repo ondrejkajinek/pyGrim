@@ -1,13 +1,17 @@
 # coding: utf8
 
 from __future__ import print_function
+
+from .components.routing import RouteNotFound
+from .components.utils import ensure_tuple
+
 from functools import wraps
+from logging import getLogger
 try:
     from uwsgi import log as uwsgi_log
 except ImportError:
     uwsgi_log = print
 
-from logging import getLogger
 log = getLogger("pygrim.decorators")
 
 
@@ -69,68 +73,49 @@ class method(BaseDecorator):
         super(method, self).prepare_func(func)
 
 
-class custom_error_handler(BaseDecorator):
+class error_handler(BaseDecorator):
     """
-    Marks method as an error handler for specific exception.
+    Marks method as an error handler, optionally for specific exception.
     Can only catch exceptions derived from BaseException.
     Such method is used when error occurs during request handling.
-    Also exposes method, see method decorator.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, errors=None, path=None, *args, **kwargs):
+        errors = ensure_tuple(errors or (BaseException,))
+        paths = path or ("", )
         self._error_status = kwargs.pop("status", 500)
-        super(custom_error_handler, self).__init__(**kwargs)
-        for one in args:
+        for one in errors:
             if not issubclass(one, BaseException):
                 raise RuntimeError(
                     "%s must be subclass of BaseException" % (one,)
                 )
-        self.err_classes = args
+
+        super(error_handler, self).__init__(*args, **kwargs)
+        self.error_classes = errors
+        self.paths = ensure_tuple(paths)
 
     def pre_call(self, fun, args, kwargs):
         kwargs.get("context").set_response_status(self._error_status)
-        super(custom_error_handler, self).pre_call(fun, args, kwargs)
-
-    def prepare_func(self, func):
-        func._custom_error = self.err_classes
-        super(custom_error_handler, self).prepare_func(func)
-
-
-class error_handler(BaseDecorator):
-    """
-    Marks method as an error handler.
-    It is called when exception is not handled by any custom_error_handler.
-    Such method is used when error occurs during request handling.
-    Also exposes method, see method decorator.
-    """
-
-    def pre_call(self, fun, args, kwargs):
-        kwargs.get("context").set_response_status(500)
         return super(error_handler, self).pre_call(fun, args, kwargs)
 
     def prepare_func(self, func):
-        func._error = True
+        func._errors = self.error_classes
+        func._paths = self.paths
         super(error_handler, self).prepare_func(func)
 
 
-class not_found_handler(BaseDecorator):
+class not_found_handler(error_handler):
     """
     Marks method as not-found handler.
     Such method is called when no route matches requested url.
     Also exposes method, see method decorator.
     """
 
-    def __init__(self, *args, **kwargs):
-        super(not_found_handler, self).__init__(**kwargs)
-        self._not_found_prefixes = args or ("",)
-
-    def pre_call(self, fun, args, kwargs):
-        kwargs.get("context").set_response_status(404)
-        return super(not_found_handler, self).pre_call(fun, args, kwargs)
-
-    def prepare_func(self, func):
-        func._not_found = self._not_found_prefixes
-        super(not_found_handler, self).prepare_func(func)
+    def __init__(self, path=None, *args, **kwargs):
+        kwargs["status"] = kwargs.get("status", 404)
+        super(not_found_handler, self).__init__(
+            errors=(RouteNotFound,), path=path, *args, **kwargs
+        )
 
 
 class template_display(BaseDecorator):

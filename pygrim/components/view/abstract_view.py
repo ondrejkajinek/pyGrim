@@ -38,11 +38,7 @@ class AbstractView(object):
         self._initialize_assets(config)
 
     def _pre_render(self, context):
-        if not context.template:
-            raise RuntimeError(
-                "Trying to render response but no template has been set."
-            )
-
+        self._template_check(context)
         if context.session is not None:
             context.view_data["flashes"] = context.session.get_flashes()
 
@@ -71,3 +67,9 @@ class AbstractView(object):
 
     def _render(self, context):
         return ""
+
+    def _template_check(self, context):
+        if not context.template:
+            raise RuntimeError(
+                "Trying to render response but no template has been set."
+            )
