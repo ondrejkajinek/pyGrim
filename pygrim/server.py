@@ -177,10 +177,12 @@ class Server(object):
         log.exception(exc.message)
         context.set_response_body("Internal Server Error")
         context.set_response_status(500)
+        context.set_view("raw")
 
     def _default_not_found_method(self, context):
         context.set_response_body("Not found")
         context.set_response_status(404)
+        context.set_view("raw")
 
     def _enhance_controller(self, controller, attr_name, attribute):
         if hasattr(controller, attr_name):
