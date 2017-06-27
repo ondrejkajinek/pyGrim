@@ -62,7 +62,7 @@ class ResponseWrap(object):
         self._start_response = start_response
 
     def __call__(self, status, headers):
-        log.debug("starting response with:%r:%r", status, headers)
+        log.debug("Starting response with: %r: %r", status, headers)
         self._start_response(status, headers)
         self._start_response = self.noop
 
@@ -124,7 +124,7 @@ class Server(object):
                         yield part
             else:
                 if is_head:
-                    log.debug("HEAD - not returning body")
+                    log.debug("This is HEAD request, not returning body.")
                 else:
                     yield context.get_response_body()
 
@@ -432,7 +432,7 @@ class Server(object):
             if not isinstance(view, AbstractView):
                 raise WrongViewBase(view)
 
-            log.debug("Registering view class %r", view.__class__.__name__)
+            log.debug("Registering view class %r.", view.__class__.__name__)
             self._views[view_name] = view
 
     def _set_dump_view(self, context):
@@ -458,7 +458,7 @@ class Server(object):
         }
         locale = self.config.get("pygrim:locale", None)
         if locale:
-            log.debug("Setting locale 'LC_ALL' to %r", locale)
+            log.debug("Setting locale 'LC_ALL' to %r.", locale)
             setlocale(LC_ALL, str(locale))
 
         log.debug("PyGrim environment set up.")
