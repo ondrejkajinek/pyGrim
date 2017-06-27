@@ -38,14 +38,23 @@ class Context(object):
 
         self.set_route_params()
 
+    def DELETE(self, key=None, fallback=None):
+        return self._request_param("DELETE", key, fallback)
+
     def GET(self, key=None, fallback=None):
         return self._request_param("GET", key, fallback)
+
+    def JSON(self, key=None, fallback=None):
+        return self._request_param("JSON", key, fallback)
+
+    def PARAM(self, key=None, fallback=None):
+        return self._request_param(self.get_request_method(), key, fallback)
 
     def POST(self, key=None, fallback=None):
         return self._request_param("POST", key, fallback)
 
-    def JSON(self, key=None, fallback=None):
-        return self._request_param("JSON", key, fallback)
+    def PUT(self, key=None, fallback=None):
+        return self._request_param("PUT", key, fallback)
 
     def RAW_POST(self):
         return self._request.RAW_POST
