@@ -2,7 +2,7 @@
 
 from logging import getLogger
 from pygrim import (
-    custom_error_handler, error_handler, method, not_found_handler,
+    error_handler, method, not_found_handler,
     template_display, template_method, RoutePassed
 )
 from time import time
@@ -147,7 +147,7 @@ class Test(object):
         })
         raise RoutePassed()
 
-    @not_found_handler("/detail/")
+    @not_found_handler(path="/detail/")
     def detail_not_found(self, context):
         context.view_data.update({
             "text": (
@@ -158,11 +158,11 @@ class Test(object):
         context.template = "layout.jinja"
         context.set_view("jinja")
 
-    @not_found_handler("/runtime-raising/")
+    @not_found_handler(path="/runtime-raising/")
     def runtime_raising_not_found(self, context):
         raise RuntimeError("This not-found handler raises RuntimeError!")
 
-    @not_found_handler("/type-raising/")
+    @not_found_handler(path="/type-raising/")
     def type_raising_not_found(self, context):
         raise TypeError("This not-found handler raises TypeError!")
 
@@ -177,7 +177,7 @@ class Test(object):
         context.template = "layout.jinja"
         context.set_view("jinja")
 
-    @custom_error_handler(TypeError)
+    @error_handler(errors=TypeError)
     def type_error_handle(self, context, exc):
         context.view_data.update({
             "text": (
@@ -194,7 +194,7 @@ class Test(object):
         context.view_data.update({
             "text": (
                 u"500: This method is used when exception is raised "
-                u"and is not handled by any custom_error_handler"
+                u"and is handled by BaseException handler."
             )
         })
         context.template = "layout.jinja"
