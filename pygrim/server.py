@@ -17,7 +17,7 @@ from .components.session import (
     DummySession, FileSessionStorage, RedisSessionStorage,
     RedisSentinelSessionStorage, SessionStorage
 )
-from .components.utils import ensure_tuple
+from .components.utils import ensure_tuple, fix_trailing_slash
 from .components.view import (
     AbstractView, DummyView, JsonView, JinjaView, RawView
 )
