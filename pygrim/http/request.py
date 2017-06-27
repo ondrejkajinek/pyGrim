@@ -28,6 +28,40 @@ class Request(object):
         self._save_environment(environment)
         self.cookies = self._parse_string(self._headers.get("cookie", ""), ";")
 
+    def __getattr__(self, attr):
+        save = True
+        if (
+            attr == "JSON" and
+            self._headers.get("content_type") == "application/json"
+        ):
+            try:
+                data = json.loads(self.RAW_POST)
+            except:
+                log.exception("Error loding json data from request")
+                data = {}
+                save = False
+        elif attr == "RAW_POST":
+            data = "".join(
+                part for part in self.environment["wsgi.input"]
+            )
+        elif attr in ("GET", "DELETE"):
+            data = self._parse_string(self.environment["query_string"])
+        elif attr in ("POST", "PUT"):
+            if self._headers.get("content_type") in (
+                None, "application/x-www-form-urlencoded"
+            ):
+                data = self._parse_string(self.RAW_POST)
+            else:
+                data = {}
+        else:
+            raise AttributeError("%r object has no attribute %r" % (
+                self.__class__.__name__, attr
+            ))
+
+        if save:
+            setattr(self, attr, data)
+        return data
+
     def special_port(self, scheme, port):
         try:
             return self.DEFAULT_SCHEME_PORTS[scheme] != port
@@ -58,38 +92,6 @@ class Request(object):
             ip = None
 
         return ip
-
-    def __getattr__(self, attr):
-        if (
-            attr == "JSON" and
-            self._headers.get("content_type") == "application/json"
-        ):
-            try:
-                self.JSON = json.loads(self.RAW_POST)
-                return self.JSON
-            except:
-                log.exception("Error loding json data from request")
-                return {}
-        elif attr == "RAW_POST":
-            self.RAW_POST = "".join(
-                part for part in self.environment["wsgi.input"])
-            return self.RAW_POST
-        elif attr in ("GET", "DELETE"):
-            data = self._parse_string(self.environment["query_string"])
-            setattr(self, attr, data)
-            return data
-
-        elif attr in ("POST", "DELETE"):
-            c_t = self._headers.get("content_type")
-            if c_t is None or c_t == "application/x-www-form-urlencoded":
-                data = self._parse_string(self.RAW_POST)
-            else:
-                data = {}
-            setattr(self, attr, data)
-            return data
-        # endif
-        raise AttributeError(
-            "%r object has no attribute %r" % (self.__class__.__name__, attr))
 
     def _get_port(self, env):
         try:
