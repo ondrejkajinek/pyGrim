@@ -268,10 +268,6 @@ class Server(object):
             raise
 
         log.debug("Dispatch succeeded on: %r.", context.current_route)
-        # when exception is raised, we're not sure if session is valid,
-        # so we only store it when no exception was raised
-        if context.session_loaded():
-            context.save_session(self.session_handler)
 
     def _handle_error(self, context, exc):
         log.exception(
@@ -326,6 +322,7 @@ class Server(object):
             else:
                 self._handle_not_found(context=context)
         except:
+            context.current_route = None
             self._handle_error(context=context, exc=exc_info()[1])
 
         if self._debug and self._dump_switch in context.GET():
@@ -336,6 +333,10 @@ class Server(object):
             raise UnknownView(view)
 
         self._views[view].display(context)
+        # We want to save session only when request was handled with route
+        # handle -- current_route is set
+        if context.current_route and context.session_loaded():
+            context.save_session(self.session_handler)
 
     def _initialize_basic_components(self):
         self._load_config()
