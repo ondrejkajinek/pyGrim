@@ -1,3 +1,18 @@
+pygrim (0.1.28) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * Fixed _dump_dict: keys were not cast to string
+  * Fixed an error in parameters parsing, refactor
+  * Implemented context methods PUT and DELETE methods. Method PARAM can
+    be used to access data sent with http method
+  * Fixed an unhandled exception from not-found methods
+  * Method request_param moved to Context class
+  * Fixed an error in except clause
+  * Added comment about PygrimYamlLoader -- reimplementation of default
+    PyYAML BaseLoader
+
+ -- Václav Pokluda <root@darky>  Tue, 27 Jun 2017 14:20:05 +0200
+
 pygrim (0.1.27) testing; urgency=medium
 
   * COMMIT MESSASGES
