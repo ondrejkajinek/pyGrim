@@ -183,5 +183,3 @@ class uses_data(BaseDecorator):
         method_returned = method(context) or {}
         context.view_data.update(method_returned.get("data", {}))
         return super(uses_data, self).pre_call(fun, args, kwargs)
-
-# eof
