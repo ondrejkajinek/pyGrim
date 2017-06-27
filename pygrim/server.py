@@ -243,10 +243,8 @@ class Server(object):
     def _find_view_classes(self):
         view_types = self.config.gettuple("view:types")
         # view is disabled when only dummy view is configured
-        if len(view_types) == 1 and view_types[0] == "dummy":
-            log.info(
-                "View is disabled. No sensible output will be created"
-            )
+        if view_types == ("dummy",):
+            log.info("View is disabled, no output will be created!")
         else:
             for view_type in ("json", "raw"):
                 if view_type not in view_types:
@@ -480,6 +478,7 @@ class Server(object):
         )
 
     def _view_disabled(self):
+        # it is a bit faster than self._views == ["dummy"]
         return len(self._views) == 1 and "dummy" in self._views
 
     # jinja extra methods
