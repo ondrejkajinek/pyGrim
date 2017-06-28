@@ -148,7 +148,7 @@ class Test(object):
         raise RoutePassed()
 
     @not_found_handler(path="/detail/")
-    def detail_not_found(self, context):
+    def detail_not_found(self, context, exc):
         context.view_data.update({
             "text": (
                 u"404: This method is called when no route is registered "
@@ -159,15 +159,15 @@ class Test(object):
         context.set_view("jinja")
 
     @not_found_handler(path="/runtime-raising/")
-    def runtime_raising_not_found(self, context):
+    def runtime_raising_not_found(self, context, exc):
         raise RuntimeError("This not-found handler raises RuntimeError!")
 
     @not_found_handler(path="/type-raising/")
-    def type_raising_not_found(self, context):
+    def type_raising_not_found(self, context, exc):
         raise TypeError("This not-found handler raises TypeError!")
 
     @not_found_handler()
-    def not_found(self, context):
+    def not_found(self, context, exc):
         context.view_data.update({
             "text": (
                 u"404: This method is called when "
