@@ -6,7 +6,7 @@ uwsgi:
    master: true
    module: server:application
    pidfile: /home/ondrak/public_html/pygrim_test/pygrim.pid
-   processes: 2
+   processes: 1
    procname: pygrim_test
    procname-master: pygrim_test_m
    pythonpath: /home/ondrak/public_html/pygrim_test/
