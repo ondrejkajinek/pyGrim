@@ -20,9 +20,7 @@ class Test(object):
         context.template = "layout.jinja"
         context.set_view("jinja")
 
-    @method(
-        session=True
-    )
+    @method()
     def session_text(self, context):
         context.session.setdefault("text", "")
         context.session["text"] += "a"
@@ -71,7 +69,7 @@ class Test(object):
             }
         }
 
-    @template_method("nonexisting.jinja", "jinja", session=True)
+    @template_method("nonexisting.jinja", "jinja")
     def use_template_method(self, context):
         return {
             "data": {
