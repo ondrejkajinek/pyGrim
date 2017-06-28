@@ -171,6 +171,7 @@ class Server(object):
         self._enhance_controller(controller, "_model", self._model)
         self._process_decorated_methods(controller)
         self._controllers[controller.__class__.__name__] = controller
+        log.debug("Controller %r registered", get_instance_name(controller))
 
     def register_model(self, model):
         if self._model is not None:

@@ -15,7 +15,7 @@ class Session(dict):
         log.debug("loaded: %r", self)
 
     def get_content(self):
-        log.debug("saving:%r", self)
+        log.debug("saving: %r", self)
         return super(Session, self).copy()
 
     def get_id(self):
