@@ -17,7 +17,10 @@ from .components.session import (
     DummySession, FileSessionStorage, RedisSessionStorage,
     RedisSentinelSessionStorage, SessionStorage
 )
-from .components.utils import ensure_tuple, fix_trailing_slash
+from .components.utils import (
+    ensure_tuple, fix_trailing_slash, get_instance_name, get_class_name,
+    get_method_name
+)
 from .components.view import (
     AbstractView, DummyView, JsonView, JinjaView, RawView
 )
@@ -161,7 +164,7 @@ class Server(object):
         if self._model is not None:
             log.warning(
                 "Model is already registered: %r",
-                self._model.__class__.__name__
+                get_instance_name(self._model)
             )
 
         self._model = model
@@ -269,12 +272,6 @@ class Server(object):
             except KeyError:
                 raise RuntimeError("Unknown view class: %r.", view_type)
 
-    def _get_error_name(self, error):
-        return "%s:%s" % (error.__module__, error.__name__)
-
-    def _get_method_name(self, method):
-        return "%s:%s" % (method.__self__.__class__.__name__, method.__name__)
-
     def _handle_by_route(self, context):
         for route in self._router.matching_routes(context):
             try:
@@ -306,8 +303,8 @@ class Server(object):
                 handler(context=context, exc=exc)
                 log.debug(
                     "Error %r handled with %r.",
-                    self._get_error_name(exc.__class__),
-                    self._get_method_name(handler)
+                    get_class_name(exc.__class__),
+                    get_method_name(handler)
                 )
                 break
         except StopDispatch:
@@ -375,16 +372,16 @@ class Server(object):
         if key in self._error_handlers:
             raise RuntimeError(
                 "Duplicate handling of error %r on %r with %r and %r." % (
-                    self._get_error_name(error),
+                    get_class_name(error),
                     prefix,
-                    self._get_method_name(self._error_handlers[key]),
-                    self._get_method_name(method)
+                    get_method_name(self._error_handlers[key]),
+                    get_method_name(method)
                 )
             )
 
         log.debug(
             "Method %r registered to handle %r on %r.",
-            self._get_method_name(method), self._get_error_name(error), prefix
+            get_method_name(method), get_class_name(error), prefix
         )
         self._error_handlers[key] = method
 
@@ -436,7 +433,7 @@ class Server(object):
             if not isinstance(view, AbstractView):
                 raise WrongViewBase(view)
 
-            log.debug("Registering view class %r.", view.__class__.__name__)
+            log.debug("Registering view class %r.", get_instance_name(view))
             self._views[view_name] = view
 
     def _set_dump_view(self, context):

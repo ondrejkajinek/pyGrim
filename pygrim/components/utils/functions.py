@@ -61,6 +61,18 @@ def fix_trailing_slash(pattern):
     )
 
 
+def get_instance_name(instance):
+    return get_class_name(instance.__class__)
+
+
+def get_class_name(cls):
+    return "%s.%s" % (cls.__module__, cls.__name__)
+
+
+def get_method_name(method):
+    return "%s.%s" % (method.__self__.__class__.__name__, method.__name__)
+
+
 def is_regex(pattern):
     return type(pattern) == REGEXP_TYPE
 
