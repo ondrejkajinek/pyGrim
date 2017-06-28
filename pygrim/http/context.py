@@ -2,6 +2,7 @@
 
 from ..components.routing import StopDispatch
 from ..components.grim_dicts import ImmutableDict
+from .exceptions import HeadersAlreadySent
 from .request import Request
 from .response import Response
 from logging import getLogger
@@ -27,6 +28,7 @@ class Context(object):
         self._force_https = config.getbool("context:force_https", False)
         self._default_headers = config.get("context:default_headers", None)
 
+        super(Context, self).__setattr__("_can_create_session", True)
         self._request = Request(environment)
         self._response = Response()
         if self._default_headers:
@@ -40,6 +42,12 @@ class Context(object):
 
     def __getattr__(self, key):
         if key == "session":
+            if (
+                self._can_create_session is False and
+                self._request.cookies.get("SESS_ID") is None
+            ):
+                raise HeadersAlreadySent("can't create new session!")
+
             super(Context, self).__setattr__("_session_loaded", False)
             self.load_session()
             return self.session
@@ -47,7 +55,7 @@ class Context(object):
         raise AttributeError(key)
 
     def __setattr__(self, key, value):
-        if key == "_session_loaded":
+        if key == ("_can_create_session", "_session_loaded"):
             raise RuntimeError("%r is readonly!" % key)
 
         super(Context, self).__setattr__(key, value)
@@ -124,6 +132,7 @@ class Context(object):
 
     def finalize_response(self):
         self._response.finalize(is_head=self.is_request_head())
+        super(Context, self).__setattr__("_can_create_session", False)
 
     def generates_response(self):
         return self._response.is_generator
@@ -202,6 +211,9 @@ class Context(object):
         if self._session_loaded is False:
             self.session = self._session_handler.load(self._request)
             super(Context, self).__setattr__("_session_loaded", True)
+            self.add_cookie(
+                **self._session_handler.cookie_for(self.session)
+            )
             log.debug(
                 "Session handler: %r loaded session: %r",
                 type(self._session_handler), self.session
@@ -214,10 +226,6 @@ class Context(object):
 
     def save_session(self):
         self._session_handler.save(self.session)
-        if self.session_loaded():
-            self.add_cookie(
-                **self._session_handler.cookie_for(self.session)
-            )
 
     def session_loaded(self):
         return self._session_loaded

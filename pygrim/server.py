@@ -24,7 +24,7 @@ from .components.utils import (
 from .components.view import (
     AbstractView, DummyView, JsonView, JinjaView, RawView
 )
-from .http import Context
+from .http import Context, HeadersAlreadySent
 
 from inspect import getmembers, ismethod, getmro
 from jinja2 import escape, Markup
@@ -123,16 +123,28 @@ class Server(object):
                 context.get_response_status_code(),
                 context.get_response_headers()
             )
-            is_head = context.is_request_head()
-            if context.generates_response():
-                for part in context.get_response_body():
-                    if not is_head:
-                        yield part
-            else:
-                if is_head:
-                    log.debug("This is HEAD request, not returning body.")
+            try:
+                is_head = context.is_request_head()
+                if context.generates_response():
+                    for part in context.get_response_body():
+                        if not is_head:
+                            yield part
                 else:
-                    yield context.get_response_body()
+                    if is_head:
+                        log.debug("This is HEAD request, not returning body.")
+                    else:
+                        yield context.get_response_body()
+
+                # We want to save session only when request was handled with
+                # route handle -- current_route is set
+                if context.current_route and context.session_loaded():
+                    context.save_session()
+            except HeadersAlreadySent as exc:
+                yield "CRITICAL ERROR WHEN SENDING RESPONSE: %s" % exc
+                for key, value in context.get_response_headers():
+                    if key == "content-length":
+                        yield " " * int(value)
+                        break
 
     def do_postfork(self):
         """
@@ -335,10 +347,6 @@ class Server(object):
             raise UnknownView(view)
 
         self._views[view].display(context)
-        # We want to save session only when request was handled with route
-        # handle -- current_route is set
-        if context.current_route and context.session_loaded():
-            context.save_session()
 
     def _initialize_basic_components(self):
         self._load_config()
