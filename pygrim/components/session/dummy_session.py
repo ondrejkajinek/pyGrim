@@ -10,7 +10,7 @@ class DummySession(SessionStorage):
         pass
 
     def load(self, request):
-        return Session("__empty__", {}, False)
+        return Session("__empty__")
 
     def save(self, session):
         pass

@@ -77,6 +77,7 @@ class Server(object):
     }
 
     KNOWN_SESSION_HANDLERS = {
+        "dummy": DummySession,
         "file": FileSessionStorage,
         "redis": RedisSessionStorage,
         "redis-sentinel": RedisSentinelSessionStorage
@@ -101,7 +102,9 @@ class Server(object):
 
     def __call__(self, environment, start_response):
         start_response = ResponseWrap(start_response)
-        context = Context(environment, self.config, self._model)
+        context = Context(
+            environment, self.config, self._model, self._session_handler
+        )
         # if views are disabled, set view to dummy
         if self._view_disabled():
             context.set_view("dummy")
@@ -275,9 +278,6 @@ class Server(object):
     def _handle_by_route(self, context):
         for route in self._router.matching_routes(context):
             try:
-                if route.requires_session():
-                    context.load_session(self.session_handler)
-
                 route.dispatch(context=context)
                 break
             except RoutePassed:
@@ -341,7 +341,7 @@ class Server(object):
         # We want to save session only when request was handled with route
         # handle -- current_route is set
         if context.current_route and context.session_loaded():
-            context.save_session(self.session_handler)
+            context.save_session()
 
     def _initialize_basic_components(self):
         self._load_config()
@@ -406,16 +406,20 @@ class Server(object):
         self._router = router
 
     def _register_session_handler(self):
-        if self.config.get("session:enabled", False):
-            storage_class = self._find_session_handler()
+        try:
+            storage_type = self.config.get("session:type", "dummy")
+            storage_class = self.KNOWN_SESSION_HANDLERS[storage_type]
+        except KeyError:
+            raise RuntimeError("Unknown session storage: %r.", storage_type)
         else:
-            storage_class = DummySession
+            if storage_type == "dummy":
+                log.warning("Session is disabled!")
 
         handler = storage_class(self.config)
         if not isinstance(handler, SessionStorage):
             raise WrongSessionHandlerBase(handler)
 
-        self.session_handler = handler
+        self._session_handler = handler
 
     def _register_logger(self, config):
         initialize_loggers(config)

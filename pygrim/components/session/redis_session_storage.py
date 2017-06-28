@@ -38,7 +38,7 @@ class RedisSessionStorageBase(SessionStorage):
             log.exception("Loading session failed!")
             raise SessionLoadError()
         else:
-            return Session(session_id, session, session_new)
+            return Session(session_id, session)
 
     def save(self, session):
         try:

@@ -61,12 +61,10 @@ class method(BaseDecorator):
     properly derived from this class.
     """
     def __init__(self, *args, **kwargs):
-        self._session = bool(kwargs.pop("session", False))
         self._dispatch_name = kwargs.pop("dispatch_name", None)
         super(method, self).__init__(*args, **kwargs)
 
     def prepare_func(self, func):
-        func._session = self._session
         func._dispatch_name = self._dispatch_name or func.__name__
         self._expose(func)
 

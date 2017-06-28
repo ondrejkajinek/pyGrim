@@ -39,7 +39,7 @@ class AbstractView(object):
 
     def _pre_render(self, context):
         self._template_check(context)
-        if context.session is not None:
+        if context.session_loaded():
             context.view_data["flashes"] = context.session.get_flashes()
 
         context.view_data.update({
@@ -62,7 +62,7 @@ class AbstractView(object):
         })
 
     def _post_render(self, context):
-        if context.session is not None:
+        if not context.session_loaded():
             context.session.del_flashes()
 
     def _render(self, context):

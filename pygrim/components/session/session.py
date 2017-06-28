@@ -6,12 +6,13 @@ log = getLogger("pygrim.session.session")
 
 class Session(dict):
 
-    def __init__(self, session_id, content, new_session):
+    def __init__(self, session_id, *args, **kwargs):
         self._id = session_id
-        self._new = new_session
-        content['_flashes'] = content.get('_flashes', [])
-        log.debug("loaded:%r", content)
-        super(Session, self).__init__(content)
+        super(Session, self).__init__(*args, **kwargs)
+        if "_flashes" not in self:
+            self["_flashes"] = []
+
+        log.debug("loaded: %r", self)
 
     def get_content(self):
         log.debug("saving:%r", self)
@@ -28,6 +29,3 @@ class Session(dict):
 
     def del_flashes(self):
         self['_flashes'] = []
-
-    def need_cookie(self):
-        return self._new

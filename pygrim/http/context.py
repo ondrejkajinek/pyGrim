@@ -16,11 +16,10 @@ log = getLogger("pygrim.http.context")
 
 class Context(object):
 
-    def __init__(self, environment, config, model):
+    def __init__(self, environment, config, model, session_handler):
         self.config = config
         self.current_route = None
         self.model = model
-        self.session = None
         self.template = None
         self.view_data = {}
 
@@ -33,10 +32,25 @@ class Context(object):
         if self._default_headers:
             self.add_response_headers(self._default_headers)
         self._route_params = None
-        self._session_loaded = False
+        self._session_handler = session_handler
+        super(Context, self).__setattr__("_session_loaded", False)
         self._view = None
 
         self.set_route_params()
+
+    def __getattr__(self, key):
+        if key == "session":
+            super(Context, self).__setattr__("_session_loaded", False)
+            self.load_session()
+            return self.session
+
+        raise AttributeError(key)
+
+    def __setattr__(self, key, value):
+        if key == "_session_loaded":
+            raise RuntimeError("%r is readonly!" % key)
+
+        super(Context, self).__setattr__(key, value)
 
     def DELETE(self, key=None, fallback=None):
         return self._request_param("DELETE", key, fallback)
@@ -184,13 +198,13 @@ class Context(object):
     def is_request_post(self):
         return self._request.environment["request_method"] == "POST"
 
-    def load_session(self, session_handler):
+    def load_session(self):
         if self._session_loaded is False:
-            self.session = session_handler.load(self._request)
-            self._session_loaded = True
+            self.session = self._session_handler.load(self._request)
+            super(Context, self).__setattr__("_session_loaded", True)
             log.debug(
                 "Session handler: %r loaded session: %r",
-                type(session_handler), self.session
+                type(self._session_handler), self.session
             )
 
     def redirect(self, url, status=302):
@@ -198,11 +212,11 @@ class Context(object):
         self._response.headers["Location"] = url
         raise StopDispatch()
 
-    def save_session(self, session_handler):
-        session_handler.save(self.session)
-        if self.session.need_cookie():
+    def save_session(self):
+        self._session_handler.save(self.session)
+        if self.session_loaded():
             self.add_cookie(
-                **session_handler.cookie_for(self.session)
+                **self._session_handler.cookie_for(self.session)
             )
 
     def session_loaded(self):
