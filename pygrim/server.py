@@ -214,7 +214,7 @@ class Server(object):
             for key
             in sorted(
                 self._error_handlers,
-                key=lambda x: 1e3 * x[0].count("/") + len(getmro(x[1])),
+                key=lambda x: 1e3 * len(getmro(x[1])) + x[0].count("/"),
                 reverse=True
             )
         )
@@ -366,8 +366,8 @@ class Server(object):
         self.config = config
 
     def _matching_error_handlers(self, request_uri, exc_mro):
-        for prefix, err_cls, handler in self._error_handlers:
-            for exc in exc_mro:
+        for exc in exc_mro:
+            for prefix, err_cls, handler in self._error_handlers:
                 if request_uri.startswith(prefix) and exc is err_cls:
                     yield handler
 
