@@ -3,13 +3,12 @@
 from config import AbstractConfig
 from routing.router import AbstractRouter
 from session.session_storage import SessionStorage
+from utils import get_class_name, get_instance_name
 from view.abstract_view import AbstractView
 
 
 class ComponentException(BaseException):
-
-    def _full_class_name(self, cls):
-        return ".".join((cls.__module__, cls.__name__))
+    pass
 
 
 class ComponentTypeAlreadyRegistered(ComponentException):
@@ -17,7 +16,7 @@ class ComponentTypeAlreadyRegistered(ComponentException):
     def __init__(self, type_, type_name, conflict_class):
         super(ComponentTypeAlreadyRegistered, self).__init__(
             "%s type %r is already registered as class %r" % (
-                type_, type_name, self._full_class_name(conflict_class)
+                type_, type_name, get_class_name(conflict_class)
             )
         )
 
@@ -26,8 +25,8 @@ class ControllerAttributeCollision(ComponentException):
 
     def __init__(self, controller, attr_name):
         super(ControllerAttributeCollision, self).__init__(
-            "Controller %r already has attribute %r" % (
-                self._full_class_name(controller.__class__), attr_name
+            "Controller %r already has attribute %r: %r" % (
+                get_instance_name(controller), attr_name
             )
         )
 
@@ -37,7 +36,7 @@ class DuplicateContoller(ComponentException):
     def __init__(self, controller):
         super(DuplicateContoller, self).__init__(
             "Another instance of %r is already registered as controller" % (
-                self._full_class_name(controller.__class__)
+                get_instance_name(controller)
             )
         )
 
@@ -65,8 +64,7 @@ class WrongComponentBase(ComponentException):
     def __init__(self, instance, required_parent):
         super(WrongComponentBase, self).__init__(
             self._template % (
-                self._full_class_name(instance.__class__),
-                self._full_class_name(required_parent)
+                get_instance_name(instance), get_class_name(required_parent)
             )
         )
 
