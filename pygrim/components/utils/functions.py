@@ -31,6 +31,8 @@ def ensure_bool(a):
             if a.isdigit()
             else a.lower().strip() == "true"
         )
+    else:
+        res = a
 
     return bool(res)
 
