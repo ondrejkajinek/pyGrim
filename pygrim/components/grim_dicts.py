@@ -1,5 +1,7 @@
 # coding: utf8
 
+from .utils import ensure_string
+
 from logging import getLogger
 
 log = getLogger("pygrim.http.grim_dicts")
@@ -97,7 +99,7 @@ class NormalizedDict(dict):
         )
 
     def _normalize_key(self, key):
-        normalized = key.lower().replace("_", "-")
+        normalized = ensure_string(key).lower().replace("_", "-")
         if normalized.startswith("http-"):
             normalized = normalized[5:]
 
