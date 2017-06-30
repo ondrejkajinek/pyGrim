@@ -41,7 +41,7 @@ class FileSessionStorage(SessionStorage):
         return successful
 
     def load(self, request):
-        session_id, session_new = self._get_id(request)
+        session_id = self._get_id(request)
         try:
             if os.path.isfile(self._get_path(session_id)):
                 with open(self._get_path(session_id), "r") as cin:

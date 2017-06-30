@@ -27,7 +27,7 @@ class RedisSessionStorageBase(SessionStorage):
         return True
 
     def load(self, request):
-        session_id, session_new = self._get_id(request)
+        session_id = self._get_id(request)
         try:
             data = self.redis.get(session_id)
             if data:

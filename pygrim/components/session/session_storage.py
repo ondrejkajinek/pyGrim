@@ -44,11 +44,9 @@ class SessionStorage(object):
         cookie = request.cookies.get(self._cookie["name"])
         if cookie:
             session_id = cookie
-            session_new = False
-            log.debug("will be loading session:%r", session_id)
+            log.debug("Session to be loaded: %r", session_id)
         else:
             session_id = str(uuid4())
-            log.debug("created new session:%r", session_id)
-            session_new = True
+            log.debug("Session to be created: %r", session_id)
 
-        return session_id, session_new
+        return session_id
