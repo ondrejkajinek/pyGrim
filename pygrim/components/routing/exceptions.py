@@ -28,7 +28,11 @@ class RouteNotFound(BaseRoutingException):
 
 
 class RouteNotRegistered(BaseRoutingException):
-    pass
+
+    def __init__(self, route_name):
+        super(RouteNotRegistered, self).__init__(
+            "Route %r was not registered" % route_name
+        )
 
 
 class RoutePassed(BaseRoutingException):

@@ -64,7 +64,7 @@ class Router(AbstractRouter):
 
     def _get_named_route(self, name):
         if not self._has_named_route(name):
-            raise RouteNotRegistered()
+            raise RouteNotRegistered(name)
 
         return self._named_routes[name]
 
