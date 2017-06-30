@@ -29,9 +29,7 @@ class FileSessionStorage(SessionStorage):
                 os.remove(full_path)
                 successful = True
             except OSError:
-                log.exception(
-                    "Can't delete session %r", session.get_id()
-                )
+                log.exception("Can't delete session %r", session.get_id())
                 successful = False
         else:
             log.error(

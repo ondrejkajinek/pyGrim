@@ -14,11 +14,7 @@ log = getLogger("pygrim.http.response")
 class Response(object):
 
     COOKIE_PARTS = (
-        lambda c: (
-            "Domain=%s" % c["domain"]
-            if c.get("domain")
-            else None
-        ),
+        lambda c: "Domain=%s" % c["domain"] if c.get("domain") else None,
         lambda c: (
             "Expires=%s" % (
                 (datetime.utcnow() + timedelta(seconds=c["lifetime"]))
@@ -86,9 +82,8 @@ class Response(object):
             in self.headers.iteritems()
         ]
 
-        if self.cookies:
-            for cookie in self._serialized_cookies():
-                self.headers.append(("Set-Cookie", cookie))
+        for cookie in self._serialized_cookies():
+            self.headers.append(("Set-Cookie", cookie))
 
     def set_body(self, body):
         if isgeneratorfunction(body):

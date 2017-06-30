@@ -17,6 +17,7 @@ from json import *
 
 # JSON does not support these values, so we mark them as invalid
 InvalidJsonFloatValues = map(float, ("inf", "-inf", "NaN"))
+
 """
 TODO: translate
 Jaký je rozdíl mezi reálným číslem a ženou?

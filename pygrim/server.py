@@ -123,16 +123,17 @@ class Server(object):
                 context.get_response_status_code(),
                 context.get_response_headers()
             )
+            is_head = context.is_request_head()
+            if is_head:
+                log.debug("This is HEAD request, not returning body.")
+
             try:
-                is_head = context.is_request_head()
                 if context.generates_response():
                     for part in context.get_response_body():
                         if not is_head:
                             yield part
                 else:
-                    if is_head:
-                        log.debug("This is HEAD request, not returning body.")
-                    else:
+                    if not is_head:
                         yield context.get_response_body()
 
                 # We want to save session only when request was handled with
@@ -316,8 +317,7 @@ class Server(object):
                 handler(context=context, exc=exc)
                 log.debug(
                     "Error %r handled with %r.",
-                    get_class_name(exc.__class__),
-                    get_method_name(handler)
+                    get_class_name(exc.__class__), get_method_name(handler)
                 )
                 break
         except StopDispatch:

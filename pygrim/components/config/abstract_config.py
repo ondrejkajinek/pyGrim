@@ -49,20 +49,14 @@ class AbstractConfig(object):
         return self._get_typed(ensure_tuple, key, *args, **kwargs)
 
     def _default_value(self, *args, **kwargs):
-        """
-        there must be this construction because this raises IndexError
-            everytime because args[0] is executed before kwargs.get
-        try:
-            return kwargs.get("default", args[0])
-        except IndexError:
-            raise RuntimeError("No default value given")
-        """
-
         if "default" in kwargs:
-            return kwargs["default"]
-        if args:
-            return args[0]
-        raise NoDefaultValue()
+            value = kwargs["default"]
+        elif args:
+            value = args[0]
+        else:
+            raise NoDefaultValue()
+
+        return value
 
     def _get_typed(self, construct, key, *args, **kwargs):
         value = self.get(key, *args, **kwargs)

@@ -24,20 +24,17 @@ class Context(object):
         self.template = None
         self.view_data = {}
 
-        self._suppress_port = config.getbool("context:suppress_port", False)
-        self._force_https = config.getbool("context:force_https", False)
-        self._default_headers = config.get("context:default_headers", None)
-
         super(Context, self).__setattr__("_can_create_session", True)
+        self._force_https = config.getbool("context:force_https", False)
         self._request = Request(environment)
         self._response = Response()
-        if self._default_headers:
-            self.add_response_headers(self._default_headers)
         self._route_params = None
         self._session_handler = session_handler
         super(Context, self).__setattr__("_session_loaded", False)
+        self._suppress_port = config.getbool("context:suppress_port", False)
         self._view = None
 
+        self.add_response_headers(config.get("context:default_headers", {}))
         self.set_route_params()
 
     def __getattr__(self, key):
@@ -96,14 +93,14 @@ class Context(object):
 
     def add_css(self, *args):
         extra = self.view_data.setdefault("extra_css", set())
-        extra.update(set(args))
+        extra.update(args)
 
     def add_js(self, *args, **kwargs):
         location_path = "header" if kwargs.get("header", True) else "footer"
         sync = "sync" if kwargs.get("sync", True) else "async"
         self.view_data.setdefault(
             "extra_js_%s_%s" % (location_path, sync), set()
-        ).update(set(args))
+        ).update(args)
 
     def add_response_headers(self, headers):
         self._response.headers.update(
@@ -116,10 +113,10 @@ class Context(object):
         self, name, domain=None, path=None, http_only=None, secure=None
     ):
         if name in self._response.cookies:
-            self._response.cookies[name].update({
-                "lifetime": -1,
-                "value": None
-            })
+            self._response.cookies[name].update((
+                ("lifetime", -1),
+                ("value", None)
+            ))
         else:
             self._response.cookies[name] = {
                 "domain": domain,
@@ -211,9 +208,7 @@ class Context(object):
         if self._session_loaded is False:
             self.session = self._session_handler.load(self._request)
             super(Context, self).__setattr__("_session_loaded", True)
-            self.add_cookie(
-                **self._session_handler.cookie_for(self.session)
-            )
+            self.add_cookie(**self._session_handler.cookie_for(self.session))
             log.debug(
                 "Session handler: %r loaded session: %r",
                 type(self._session_handler), self.session

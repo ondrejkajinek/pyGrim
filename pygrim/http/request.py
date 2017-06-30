@@ -95,13 +95,7 @@ class Request(object):
         )
 
     def _parse_string(self, source, pairs_separator="&"):
-        parts = (
-            item
-            for item
-            in source.split(pairs_separator)
-            if item
-        )
-
+        parts = (item for item in source.split(pairs_separator) if item)
         parsed = {}
         for part in parts:
             key, value = (

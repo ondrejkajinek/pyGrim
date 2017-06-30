@@ -35,11 +35,7 @@ def ensure_bool(a):
 
 
 def ensure_string(text):
-    return (
-        text.encode("utf8")
-        if isinstance(text, unicode)
-        else str(text)
-    )
+    return text.encode("utf8") if isinstance(text, unicode) else str(text)
 
 
 def ensure_tuple(variable):

@@ -1,6 +1,7 @@
 # coding: utf8
 
 from ..utils.json2 import dumps as json_dumps
+
 from datetime import date, datetime
 from dateutil.parser import parse as parse_dt
 from jinja2.ext import Extension
@@ -11,8 +12,7 @@ from os import path
 log = getLogger("pygrim.components.jinja_ext.base")
 
 DTS = (
-    type(datetime.min),
-    type(date.min),
+    type(datetime.min), type(date.min),
 )
 
 
@@ -84,8 +84,7 @@ class BaseExtension(Extension):
 
     def seo(self, text):
         return self.DASH_SQUEEZER.sub(
-            "-",
-            self._seo_dashize(self._seo_remove(text))
+            "-", self._seo_dashize(self._seo_remove(text))
         )
 
     def site_url(self, context, site):

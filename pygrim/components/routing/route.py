@@ -132,9 +132,7 @@ class Route(RouteObject):
         readable = self.URL_PARAM_REGEXP.sub(r"%(\1)s", self._pattern.pattern)
         optional_names = set()
         for optional in self.URL_OPTIONAL_REGEXP.findall(readable):
-            optional_names.update(
-                set(self.URL_FORMAT_REGEXP.findall(optional[2]))
-            )
+            optional_names.update(self.URL_FORMAT_REGEXP.findall(optional[2]))
 
         readable = self.URL_OPTIONAL_REGEXP.sub(r"\1\2\3", readable)
         readable = remove_trailing_slah(readable).lstrip("^")
@@ -155,13 +153,10 @@ class Route(RouteObject):
         if self.is_regex():
             matches = self._pattern.match(uri)
             match = matches is not None
-            route_params = matches.groupdict() if matches else {}
+            context.set_route_params(matches.groupdict() if match else {})
         else:
             match = self._pattern == uri
-            route_params = {}
-
-        if match:
-            context.set_route_params(route_params)
+            context.set_route_params()
 
         return match
 
