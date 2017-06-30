@@ -202,10 +202,11 @@ class Server(object):
         context.set_view("raw")
 
     def _enhance_controller(self, controller, attr_name, attribute):
-        if hasattr(controller, attr_name):
-            raise ControllerAttributeCollision(controller, attr_name)
-
-        setattr(controller, attr_name, attribute)
+        try:
+            attr = getattr(controller, attr_name)
+            raise ControllerAttributeCollision(controller, attr_name, attr)
+        except AttributeError:
+            setattr(controller, attr_name, attribute)
 
     def _finalize_error_handlers(self):
         has_not_found = ("", RouteNotFound) in self._error_handlers

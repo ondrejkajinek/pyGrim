@@ -23,10 +23,10 @@ class ComponentTypeAlreadyRegistered(ComponentException):
 
 class ControllerAttributeCollision(ComponentException):
 
-    def __init__(self, controller, attr_name):
+    def __init__(self, controller, attr_name, attribute):
         super(ControllerAttributeCollision, self).__init__(
             "Controller %r already has attribute %r: %r" % (
-                get_instance_name(controller), attr_name
+                get_instance_name(controller), attr_name, attribute
             )
         )
 
