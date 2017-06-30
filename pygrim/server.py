@@ -271,14 +271,12 @@ class Server(object):
         return storage_class
 
     def _find_view_classes(self):
-        view_types = self.config.gettuple("view:types")
+        view_types = self.config.getset("view:types")
         # view is disabled when only dummy view is configured
         if view_types == ("dummy",):
             log.info("View is disabled, no output will be created!")
         else:
-            for view_type in ("json", "raw"):
-                if view_type not in view_types:
-                    view_types += (view_type,)
+            view_types.update(("raw", "json"))
 
         for view_type in view_types:
             try:
