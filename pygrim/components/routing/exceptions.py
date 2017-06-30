@@ -5,16 +5,6 @@ class BaseRoutingException(Exception):
     pass
 
 
-class MissingRouteHandle(BaseRoutingException):
-
-    def __init__(self, controller, handle, route):
-        super(MissingRouteHandle, self).__init__(
-            "Controller %r has no method %r to handle route %r." % (
-                controller, handle, route
-            )
-        )
-
-
 class RouteAlreadyExists(BaseRoutingException):
 
     def __init__(self, name):

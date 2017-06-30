@@ -42,34 +42,6 @@ class BaseDecorator(object):
 
         return wrapper
 
-    def _expose(self, func):
-        if func._dispatch_name.startswith("_"):
-            uwsgi_log(
-                "pygrim WARNING: Internal method %r will not be exposed!" % (
-                    func.__name__
-                )
-            )
-        else:
-            log.debug("Exposing %r", func)
-            func._exposed = True
-
-
-class method(BaseDecorator):
-    """
-    Exposes method to server so that it can be used for route handling.
-    Every decorator that is supposed to expose methods has to be
-    properly derived from this class.
-    """
-    def __init__(self, *args, **kwargs):
-        self._dispatch_name = kwargs.pop("dispatch_name", None)
-        super(method, self).__init__(*args, **kwargs)
-
-    def prepare_func(self, func):
-        func._dispatch_name = self._dispatch_name or func.__name__
-        self._expose(func)
-
-        super(method, self).prepare_func(func)
-
 
 class error_handler(BaseDecorator):
     """
@@ -116,41 +88,37 @@ class not_found_handler(error_handler):
         )
 
 
-class template_display(BaseDecorator):
+class route(BaseDecorator):
+
+    def __init__(self, methods, pattern, name=None, *args, **kwargs):
+        self._route = {
+            "methods": methods,
+            "name": name,
+            "pattern": pattern
+        }
+        super(route, self).__init__(*args, **kwargs)
+
+    def prepare_func(self, func):
+        func._route = self._route
+
+
+class template(BaseDecorator):
     """
     Takes result of decorated method (expects {"data": view_data}),
     puts it to context, sets specified template and displays it.
     """
 
-    def __init__(self, template, view, *args, **kwargs):
-        self._template = template
+    def __init__(self, template_, view, *args, **kwargs):
+        self._template = template_
         self._view = view
-        super(template_display, self).__init__(*args, **kwargs)
+        super(template, self).__init__(*args, **kwargs)
 
     def post_call(self, fun, args, kwargs, res):
         context = kwargs.get("context")
         context.view_data.update(res.get("data") or {})
         context.template = res.get("_template", self._template)
         context.set_view(res.get("_view", self._view))
-        return super(template_display, self).post_call(fun, args, kwargs, res)
-
-
-class template_method(template_display, method):
-    """
-    Combines the funcionality of template_display and method decorators
-    """
-
-    def __init__(self, *args, **kwargs):
-        if "template" in kwargs:
-            template = kwargs.pop("template")
-        elif args:
-            template = args[0]
-            args = args[1:]
-        else:
-            raise RuntimeError(
-                "Error registering template_method without template given."
-            )
-        super(template_method, self).__init__(template, *args, **kwargs)
+        return super(template, self).post_call(fun, args, kwargs, res)
 
 
 class uses_data(BaseDecorator):

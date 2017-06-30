@@ -41,14 +41,6 @@ class DuplicateContoller(ComponentException):
         )
 
 
-class UnknownController(ComponentException):
-
-    def __init__(self, controller):
-        super(UnknownController, self).__init__(
-            "Requested controller %r was not registered" % controller
-        )
-
-
 class UnknownView(ComponentException):
 
     def __init__(self, view):

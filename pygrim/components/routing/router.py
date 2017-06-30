@@ -20,6 +20,9 @@ class Router(AbstractRouter):
     def get_routes(self):
         return self._routes
 
+    def has_routes(self):
+        return bool(self._routes)
+
     def map(self, route):
         if isinstance(route, Route):
             full_pattern = "%s" % path_join(

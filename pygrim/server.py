@@ -3,15 +3,14 @@
 from .components.config import AbstractConfig, YamlConfig
 from .components.exceptions import (
     ComponentTypeAlreadyRegistered, ControllerAttributeCollision,
-    DuplicateContoller, UnknownController, UnknownView,
+    DuplicateContoller, UnknownView,
     WrongConfigBase, WrongRouterBase, WrongSessionHandlerBase, WrongViewBase
 )
 from .components.grim_dicts import AttributeDict
 from .components.log import initialize_loggers
-from .components.routing import AbstractRouter, NoRoute, Router
+from .components.routing import AbstractRouter, NoRoute, Route, Router
 from .components.routing import (
-    MissingRouteHandle, RouteNotFound, RouteNotRegistered, RoutePassed,
-    StopDispatch
+    RouteNotFound, RouteNotRegistered, RoutePassed, StopDispatch
 )
 from .components.session import (
     DummySession, FileSessionStorage, RedisSessionStorage,
@@ -100,8 +99,6 @@ class Server(object):
         self._controllers = AttributeDict()
         self._error_handlers = {}
         self._model = None
-        # temporary
-        self._route_register_func = None
 
     def __call__(self, environment, start_response):
         start_response = ResponseWrap(start_response)
@@ -153,12 +150,10 @@ class Server(object):
         or after server instance has been initialized.
         """
         self._finalize_error_handlers()
-        if self._route_register_func is not None:
-            self._route_register_func(self._router)
-            self._finalize_routes()
-            log.debug("Routes loaded")
-        else:
-            log.warning("There is no function to register routes!")
+        if not self._router.has_routes():
+            log.warning(
+                "No routes were registered, no requests will be handled!"
+            )
 
         if hasattr(self, "postfork"):
             self.postfork()
@@ -186,9 +181,6 @@ class Server(object):
         # destroying original one
         for controller in self._controllers.itervalues():
             controller._model = self._model
-
-    def register_routes_creator(self, register_func):
-        self._route_register_func = register_func
 
     def _default_error_handler(self, context, exc):
         log.exception(exc.message)
@@ -229,28 +221,6 @@ class Server(object):
             self._error_handlers += (
                 ("", BaseException, self._default_error_handler),
             )
-
-    def _finalize_routes(self):
-        for route in self._router.get_routes():
-            try:
-                controller = self._controllers[route.get_controller_name()]
-            except KeyError:
-                raise UnknownController(route.get_controller_name())
-
-            try:
-                # raises if method does not exist
-                method = getattr(controller, route.get_handle_name())
-                # raises if method is not exposed
-                if method._exposed is True:
-                    route.assign_method(method)
-            except AttributeError:
-                raise MissingRouteHandle(
-                    controller,
-                    route.get_handle_name(),
-                    route.get_name() or route.get_pattern()
-                )
-
-        self._controllers = tuple(self._controllers.itervalues())
 
     def _find_config_class(self):
         for key in self.KNOWN_CONFIG_FORMATS:
@@ -309,7 +279,7 @@ class Server(object):
         else:
             log.exception(
                 "Error while dispatching to: %r.",
-                context.current_route.get_full_handle_name()
+                context.current_route.get_handle_name()
             )
 
         try:
@@ -404,6 +374,16 @@ class Server(object):
         for unused_, member in getmembers(controller, predicate=ismethod):
             if getattr(member, "_errors", None):
                 self._process_error_handler(member)
+
+            if getattr(member, "_route", None):
+                self._process_route_handler(member)
+
+    def _process_route_handler(self, handle):
+        kwargs = handle.__dict__.pop("_route")
+        kwargs["handle"] = handle
+        route = Route(**kwargs)
+        self._router.map(route)
+        log.debug("Method %r registered to handle route %r", handle, route)
 
     def _register_router(self):
         router_class = self._find_router_class()

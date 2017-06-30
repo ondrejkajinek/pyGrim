@@ -1,9 +1,10 @@
 # coding: utf8
 
 from ..utils import (
-    ensure_string, ensure_tuple, fix_trailing_slash, is_regex,
+    ensure_string, ensure_tuple, fix_trailing_slash, get_method_name, is_regex,
     remove_trailing_slah
 )
+
 from logging import getLogger
 from re import compile as re_compile
 from string import upper as string_upper
@@ -40,43 +41,20 @@ class Route(RouteObject):
     URL_OPTIONAL_REGEXP = re_compile("([^%])\((/?)(.*?)\)\?")
     URL_PARAM_REGEXP = re_compile("\(\?P<([^>]+)>[^)]+\)")
 
-    def __init__(self, methods, pattern, handle_name, name=None):
+    def __init__(self, methods, pattern, handle, name=None):
         super(Route, self).__init__(pattern)
-        # temporary
-        # pyGrim will assign requested method on its postfork event
-        self._handle = None
-        try:
-            controller_name, handle_name = handle_name.split(":", 1)
-        except RuntimeError:
-            log.error(
-                "Invalid handle %r, use format Controller:Method!",
-                handle_name
-            )
-            raise
-        else:
-            self._controller_name = controller_name
-            self._handle_name = handle_name
-
+        self._handle = handle
         self._methods = tuple(map(string_upper, ensure_tuple(methods)))
         self._name = name
 
-    def assign_method(self, method):
-        self._handle = method
+    def __str__(self):
+        return "ROUTE: %r" % self._asdict()
 
     def dispatch(self, context):
-        self._handle(
-            context=context,
-            **context.get_route_params()
-        )
-
-    def get_controller_name(self):
-        return self._controller_name
-
-    def get_full_handle_name(self):
-        return "%s:%s" % (self.get_controller_name(), self.get_handle_name())
+        self._handle(context=context, **context.get_route_params())
 
     def get_handle_name(self):
-        return self._handle_name
+        return get_method_name(self._handle)
 
     def get_name(self):
         return self._name
@@ -121,7 +99,7 @@ class Route(RouteObject):
 
     def _asdict(self):
         return {
-            "handle_name": self.get_full_handle_name(),
+            "handle_name": get_method_name(self._handle),
             "name": self.get_name(),
             "pattern": self.get_pattern(),
             "regular": self.is_regex()
@@ -165,7 +143,8 @@ class NoRoute(Route):
 
     def __init__(self):
         self._handle = None
-        self._controller_name = None
-        self._handle_name = None
         self._methods = ()
         self._name = "<no route>"
+
+    def get_handle_name(self):
+        return self._name
