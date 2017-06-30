@@ -45,7 +45,6 @@ class Context(object):
             ):
                 raise HeadersAlreadySent("can't create new session!")
 
-            super(Context, self).__setattr__("_session_loaded", False)
             self.load_session()
             return self.session
 

@@ -135,17 +135,17 @@ class Server(object):
                 else:
                     if not is_head:
                         yield context.get_response_body()
-
-                # We want to save session only when request was handled with
-                # route handle -- current_route is set
-                if context.current_route and context.session_loaded():
-                    context.save_session()
             except HeadersAlreadySent as exc:
                 yield "CRITICAL ERROR WHEN SENDING RESPONSE: %s" % exc
                 for key, value in context.get_response_headers():
                     if key == "content-length":
                         yield " " * int(value)
                         break
+            else:
+                # We want to save session only when request was handled with
+                # route handle -- current_route is set
+                if context.current_route and context.session_loaded():
+                    context.save_session()
 
     def do_postfork(self):
         """
