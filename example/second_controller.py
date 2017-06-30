@@ -2,14 +2,16 @@
 
 
 from logging import getLogger
-from pygrim import method, template_method
+from pygrim import route, template
+from re import compile as re_compile
+from time import sleep
 
 log = getLogger(__file__)
 
 
 class Second(object):
 
-    @method()
+    @route("GET", "/second", "second_home")
     def home(self, context):
         # This would cause
         # self._controllers.Second.home(context)
@@ -18,7 +20,8 @@ class Second(object):
             "text": u"Hello, this controller calls other controller's method."
         })
 
-    @template_method("layout.jinja", "jinja")
+    @route("GET", "/model", "model")
+    @template("layout.jinja", "jinja")
     def model(self, context):
         return {
             "data": {
@@ -26,7 +29,7 @@ class Second(object):
             }
         }
 
-    @method()
+    @route("GET", "/redirect", "redirect")
     def redirect(self, context):
         context.redirect(self._router.url_for(
             "message",
@@ -35,15 +38,16 @@ class Second(object):
             }
         ))
 
-    @template_method("layout.jinja", "jinja")
+    @route("GET", re_compile(r"/message/((?P<message>[^/]+))?"), "message")
+    @template("layout.jinja", "jinja")
     def message(self, context, message):
         return {
             "data": {
-                "text": "Message: %s" % message
+                "text": "Message: %s" % (message or "NO MESSAGE")
             }
         }
 
-    @method()
+    @route("GET", "/generator", "generator")
     def generator(self, context):
         context.set_view("raw")
         context.set_response_body((
@@ -52,17 +56,18 @@ class Second(object):
             in xrange(4)
         ))
 
-    @method()
+    @route("GET", "/generator_fction", "generator_function")
     def generator_fction(self, context):
 
         def fction():
             for i in xrange(10):
                 yield str(i) * 100 + "<br />"
+                sleep(2)
 
         context.set_view("raw")
         context.set_response_body(fction)
 
-    @method()
+    @route("GET", "/broken_generator_fction", "broken_generator_function")
     def broken_generator_fction(self, context):
 
         def fction():

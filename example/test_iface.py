@@ -2,9 +2,9 @@
 
 from logging import getLogger
 from pygrim import (
-    error_handler, method, not_found_handler,
-    template_display, template_method, RoutePassed
+    error_handler, not_found_handler, route, template, RoutePassed
 )
+from re import compile as re_compile
 from time import time
 
 log = getLogger(__file__)
@@ -12,15 +12,16 @@ log = getLogger(__file__)
 
 class Test(object):
 
-    @method()
+    @route("GET", "/", "home")
     def home(self, context):
         context.view_data.update({
             "text": u"Hello, this is the most simple case."
         })
+        context.add_js("/tmp/added_header_async.js", sync=False)
         context.template = "layout.jinja"
         context.set_view("jinja")
 
-    @method()
+    @route("GET", "/session", "session")
     def session_text(self, context):
         context.session.setdefault("text", "")
         context.session["text"] += "a"
@@ -34,7 +35,8 @@ class Test(object):
         context.template = "layout.jinja"
         context.set_view("jinja")
 
-    @template_method("layout.jinja", "jinja")
+    @route("GET", "/cookie_show", "cookie_show")
+    @template("layout.jinja", "jinja")
     def cookie_show(self, context):
         return {
             "data": {
@@ -42,7 +44,8 @@ class Test(object):
             }
         }
 
-    @template_method("layout.jinja", "jinja")
+    @route("GET", "/cookie_set", "cookie_set")
+    @template("layout.jinja", "jinja")
     def cookie_set(self, context):
         cur_time = int(time())
         context.add_cookie(name="test", value=cur_time, lifetime=3600)
@@ -57,34 +60,37 @@ class Test(object):
             }
         }
 
-    @method()
-    @template_display("layout.jinja", "jinja")
+    @route("GET", "/template", "template")
+    @template("layout.jinja", "jinja")
     def use_template_display(self, context):
         return {
             "data": {
                 "text": (
-                    "This method uses @template_display to render template. "
-                    "The handle is exposed via @method decorator."
+                    "This method uses @template to set template and view."
                 )
             }
         }
 
-    @template_method("nonexisting.jinja", "jinja")
-    def use_template_method(self, context):
+    @route("GET", "/template_rewrite", "template_rewrite")
+    @template("nonexisting.jinja", "jinja")
+    def use_template_override(self, context):
         return {
             "data": {
                 "text": (
-                    u"This method uses @template_method to expose method "
+                    u"This method uses @template decorator "
                     u"and set a template to 'nonexisting.jinja'. "
                     u"However, template is overriden to 'layout.jinja'. "
-                    u"This method also loads session via its decorator."
+                    u"This method also loads session."
                 ),
                 "session_text": context.session.get("text")
             },
             "_template": "layout.jinja"
         }
 
-    @template_method("layout.jinja", "jinja")
+    @route(
+        "GET", re_compile(r"/template/(?P<template>[^/]+)"), "template_show"
+    )
+    @template("layout.jinja", "jinja")
     def template_show(self, context, template):
         return {
             "data": {
@@ -92,15 +98,16 @@ class Test(object):
             }
         }
 
-    @method()
+    @route("GET", "/type_error", "type_error")
     def type_error(self, context):
         raise TypeError("This method raises 'TypeError'")
 
-    @method()
+    @route("GET", "/runtime_error", "runtime_error")
     def runtime_error(self, context):
         raise RuntimeError("This method raises 'RuntimeError'")
 
-    @template_method("layout.jinja", "jinja")
+    @route("GET", "/group/test")
+    @template("layout.jinja", "jinja")
     def group_test(self, context):
         return {
             "data": {
@@ -108,7 +115,8 @@ class Test(object):
             }
         }
 
-    @template_method("layout.jinja", "jinja")
+    @route("GET", re_compile("/group/inner_group/test/(?P<param>[0-9]+)"))
+    @template("layout.jinja", "jinja")
     def int_inner_group_test(self, context, param):
         return {
             "data": {
@@ -120,7 +128,8 @@ class Test(object):
             }
         }
 
-    @template_method("layout.jinja", "jinja")
+    @route("GET", re_compile("/group/inner_group/test/(?P<param>[a-z0-9]+)"))
+    @template("layout.jinja", "jinja")
     def inner_group_test(self, context, param=None):
         text = context.view_data.get("previous_text") or ""
         text += (
@@ -134,7 +143,7 @@ class Test(object):
             }
         }
 
-    @method()
+    @route("GET", re_compile("/group/inner_group/test/(?P<param>[a-z]+)[^/]*"))
     def str_inner_group_test_pass(self, context, param=None):
         context.view_data.update({
             "previous_text": (
@@ -156,11 +165,11 @@ class Test(object):
         context.template = "layout.jinja"
         context.set_view("jinja")
 
-    @not_found_handler(path="/runtime-raising/")
+    @not_found_handler(path="/runtime_error/")
     def runtime_raising_not_found(self, context, exc):
         raise RuntimeError("This not-found handler raises RuntimeError!")
 
-    @not_found_handler(path="/type-raising/")
+    @not_found_handler(path="/type_error/")
     def type_raising_not_found(self, context, exc):
         raise TypeError("This not-found handler raises TypeError!")
 
