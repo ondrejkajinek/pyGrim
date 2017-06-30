@@ -2,6 +2,7 @@
 
 from collections import Mapping
 from re import compile as re_compile
+from string import strip as string_strip
 
 REGEXP_TYPE = type(re_compile(r""))
 TRAILING_SLASH_REGEXP = re_compile("/\??\$?$|\$?$")
@@ -78,4 +79,12 @@ def remove_trailing_slah(pattern):
         re_compile(TRAILING_SLASH_REGEXP.sub("", pattern.pattern))
         if is_regex(pattern)
         else TRAILING_SLASH_REGEXP.sub("", pattern)
+    )
+
+
+def split_to_iterable(value, separator=","):
+    return (
+        map(string_strip, value.split(separator))
+        if isinstance(value, basestring)
+        else value
     )

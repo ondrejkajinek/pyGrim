@@ -1,7 +1,8 @@
 # coding: utf8
 
 from .default import DEFAULT_CONFIG
-from ..utils.functions import deep_update, ensure_bool, ensure_tuple
+from ..utils.functions import deep_update, ensure_bool, split_to_iterable
+
 from copy import deepcopy
 from logging import getLogger
 log = getLogger(__name__)
@@ -45,8 +46,15 @@ class AbstractConfig(object):
     def getint(self, key, *args, **kwargs):
         return self._get_typed(int, key, *args, **kwargs)
 
+    def getset(self, key, *args, **kwargs):
+        return self._get_typed(
+            lambda x: set(split_to_iterable(x)), key, *args, **kwargs
+        )
+
     def gettuple(self, key, *args, **kwargs):
-        return self._get_typed(ensure_tuple, key, *args, **kwargs)
+        return self._get_typed(
+            lambda x: tuple(split_to_iterable(x)), key, *args, **kwargs
+        )
 
     def _default_value(self, *args, **kwargs):
         if "default" in kwargs:
