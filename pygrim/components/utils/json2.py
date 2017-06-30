@@ -1,5 +1,7 @@
 # coding: utf8
 
+from .functions import ensure_string
+
 from collections import Iterable
 from cStringIO import StringIO
 from datetime import date, datetime, timedelta
@@ -55,11 +57,7 @@ def _dump_dict(source, nice, depth):
     ind += '%s:%s'
     items = (
         ind % (
-            _dumps(
-                key.encode("utf8") if isinstance(key, unicode) else str(key),
-                nice=nice,
-                depth=depth
-            ),
+            _dumps(ensure_string(key), nice=nice, depth=depth),
             _dumps(value, nice=nice, depth=depth + 1)
         )
         for key, value
