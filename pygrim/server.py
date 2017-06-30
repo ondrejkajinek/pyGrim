@@ -267,6 +267,9 @@ class Server(object):
             storage_class = self.KNOWN_SESSION_HANDLERS[storage_type]
         except KeyError:
             raise RuntimeError("Unknown session handler: %r.", storage_type)
+        else:
+            if storage_type == "dummy":
+                log.warning("Session is disabled!")
 
         return storage_class
 
@@ -410,15 +413,7 @@ class Server(object):
         self._router = router
 
     def _register_session_handler(self):
-        try:
-            storage_type = self.config.get("session:type", "dummy")
-            storage_class = self.KNOWN_SESSION_HANDLERS[storage_type]
-        except KeyError:
-            raise RuntimeError("Unknown session storage: %r.", storage_type)
-        else:
-            if storage_type == "dummy":
-                log.warning("Session is disabled!")
-
+        storage_class = self._find_session_handler()
         handler = storage_class(self.config)
         if not isinstance(handler, SessionStorage):
             raise WrongSessionHandlerBase(handler)
