@@ -14,9 +14,6 @@ from uuid import UUID
 # redefine functions as required
 from json import *
 
-
-# TODO: unify implementation of dumps2 and dumps2fs using StringIO
-
 # JSON does not support these values, so we mark them as invalid
 InvalidJsonFloatValues = map(float, ("inf", "-inf", "NaN"))
 
