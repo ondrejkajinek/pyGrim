@@ -65,7 +65,8 @@ def _dump_dict(source, nice, depth):
 
 
 def _dump_iterable(source, nice, depth):
-    return "[%s]" % ",".join(
+    glue = ", " if nice else ","
+    return "[%s]" % glue.join(
         _dumps(i, nice=nice, depth=depth) for i in source
     )
 
