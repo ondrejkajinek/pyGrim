@@ -1,6 +1,9 @@
 # coding: utf8
 
 from ..components.grim_dicts import ImmutableDict, NormalizedImmutableDict
+from ..components.utils import get_instance_name
+from ..components.utils.json2 import loads as json_loads
+
 from logging import getLogger
 from re import compile as re_compile, IGNORECASE as re_IGNORECASE
 from string import strip as string_strip
@@ -27,6 +30,39 @@ class Request(object):
         self._parse_headers(environment)
         self._save_environment(environment)
         self.cookies = self._parse_string(self._headers.get("cookie", ""), ";")
+
+    def __getattr__(self, attr):
+        save = True
+        if (
+            attr == "JSON" and
+            self._headers.get("content_type") == "application/json"
+        ):
+            try:
+                data = json_loads(self.RAW_POST)
+            except:
+                log.exception("Error loding json data from request")
+                data = {}
+                save = False
+        elif attr == "RAW_POST":
+            data = "".join(part for part in self.environment["wsgi.input"])
+        elif attr in ("GET", "DELETE"):
+            data = self._parse_string(self.environment["query_string"])
+        elif attr in ("POST", "PUT"):
+            if self._headers.get("content_type") in (
+                None, "application/x-www-form-urlencoded"
+            ):
+                data = self._parse_string(self.RAW_POST)
+            else:
+                data = {}
+        else:
+            raise AttributeError("%r object has no attribute %r" % (
+                get_instance_name(self), attr
+            ))
+
+        if save:
+            setattr(self, attr, data)
+
+        return data
 
     def special_port(self, scheme, port):
         try:
