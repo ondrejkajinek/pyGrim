@@ -104,6 +104,7 @@ class BaseExtension(Extension):
             "readable_size": self.readable_size,
             "seo": self.seo,
             "site_url": self.site_url,
+            # override Jinja builtin with json2.dumps
             "tojson": self.to_json
         }
 
