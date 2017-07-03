@@ -159,15 +159,18 @@ class Server(object):
             self.postfork()
 
     def register_controller(self, controller):
-        if controller.__class__.__name__ in self._controllers:
+        # Do not use get_instance_name,
+        # since it would append file name to controller class name
+        controller_name = controller.__class__.__name__
+        if controller_name in self._controllers:
             raise DuplicateContoller(controller)
 
         self._enhance_controller(controller, "_controllers", self._controllers)
         self._enhance_controller(controller, "_router", self._router)
         self._enhance_controller(controller, "_model", self._model)
         self._process_decorated_methods(controller)
-        self._controllers[controller.__class__.__name__] = controller
-        log.debug("Controller %r registered", get_instance_name(controller))
+        self._controllers[controller_name] = controller
+        log.debug("Controller %r registered", controller_name)
 
     def register_model(self, model):
         if self._model is not None:
