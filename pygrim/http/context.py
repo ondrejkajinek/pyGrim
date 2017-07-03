@@ -254,8 +254,8 @@ class Context(object):
     def set_response_status(self, status):
         self._response.status = status
 
-    def set_route_params(self, params=None):
-        self._route_params = ImmutableDict(params or {})
+    def set_route_params(self, *args, **kwargs):
+        self._route_params = ImmutableDict(*args, **kwargs)
 
     def set_view(self, view):
         self._view = view
