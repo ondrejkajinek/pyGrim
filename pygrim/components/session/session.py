@@ -1,7 +1,7 @@
 # coding: utf8
 from logging import getLogger
 
-log = getLogger("pygrim.session.session")
+log = getLogger("pygrim.components.session.session")
 
 
 class Session(dict):

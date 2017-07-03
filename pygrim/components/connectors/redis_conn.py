@@ -3,7 +3,7 @@
 from logging import getLogger
 from string import strip as string_strip
 
-log = getLogger("jsonrpc.connectors.redis")
+log = getLogger("jsonrpc.components.connectors.redis")
 
 
 def connect_redis(config, section="session:args:"):

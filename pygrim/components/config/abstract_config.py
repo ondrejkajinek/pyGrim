@@ -5,7 +5,8 @@ from ..utils.functions import deep_update, ensure_bool, split_to_iterable
 
 from copy import deepcopy
 from logging import getLogger
-log = getLogger(__name__)
+
+log = getLogger("pygrim.components.config.abstract_config")
 
 
 class NoDefaultValue(Exception):

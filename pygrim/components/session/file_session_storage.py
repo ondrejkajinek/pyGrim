@@ -10,7 +10,7 @@ from logging import getLogger
 import cPickle as pickle
 import os
 
-log = getLogger("pygrim.session.file_session_storage")
+log = getLogger("pygrim.components.session.file_session_storage")
 
 
 class FileSessionStorage(SessionStorage):

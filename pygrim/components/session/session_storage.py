@@ -3,7 +3,7 @@ from logging import getLogger
 from uuid import uuid4
 
 
-log = getLogger("pygrim.session.session_storage")
+log = getLogger("pygrim.components.session.session_storage")
 
 
 class SessionStorage(object):

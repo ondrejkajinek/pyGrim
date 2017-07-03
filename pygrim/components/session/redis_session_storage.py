@@ -11,7 +11,7 @@ from logging import getLogger
 
 import cPickle as pickle
 
-log = getLogger("pygrim.session.redis_session_storage")
+log = getLogger("pygrim.components.session.redis_session_storage")
 
 
 class RedisSessionStorageBase(SessionStorage):

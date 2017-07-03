@@ -10,7 +10,7 @@ from re import compile as re_compile
 from string import upper as string_upper
 from urllib import quote_plus
 
-log = getLogger("pygrim.components.route")
+log = getLogger("pygrim.components.routing.route")
 
 
 class RouteObject(object):

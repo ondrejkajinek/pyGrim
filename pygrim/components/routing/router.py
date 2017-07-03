@@ -7,7 +7,7 @@ from logging import getLogger
 from os.path import join as path_join
 from re import compile as re_compile
 
-log = getLogger("pygrim.components.router")
+log = getLogger("pygrim.components.routing.router")
 
 
 class Router(AbstractRouter):
