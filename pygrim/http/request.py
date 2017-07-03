@@ -59,16 +59,6 @@ class Request(object):
 
         return ip
 
-    def _get_method_param_string(self, method):
-        """
-        no extra check is done since the method is called
-        after it is checked that `method` is ok
-        """
-        if method == "GET":
-            return self.environment["query_string"]
-        elif method == "POST":
-            return "".join(part for part in self.environment["wsgi.input"])
-
     def _get_port(self, env):
         try:
             port = int(env.pop("SERVER_PORT"))
@@ -88,11 +78,6 @@ class Request(object):
                 headers[key] = environment.get(key)
 
         self._headers = NormalizedImmutableDict(**headers)
-
-    def _parse_query_params(self, method):
-        return self._parse_string(
-            self._get_method_param_string(method)
-        )
 
     def _parse_string(self, source, pairs_separator="&"):
         parts = (item for item in source.split(pairs_separator) if item)
