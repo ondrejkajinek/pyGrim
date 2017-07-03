@@ -10,7 +10,7 @@ from types import GeneratorType
 from unicodedata import normalize as unicodedata_normalize
 from uuid import UUID
 
-# import everything from json to current namespace
+# import everything from json to current namespace,
 # redefine functions as required
 from json import *
 
@@ -76,7 +76,7 @@ def _dump_none():
 
 def _dump_number(source):
     if source in InvalidJsonFloatValues:
-        raise TypeError("JSON nemuze obsahovat float s hodnotou: %s" % source)
+        raise TypeError("JSON can't contain float with value: %s" % source)
 
     return str(source)
 
