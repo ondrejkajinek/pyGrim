@@ -361,7 +361,7 @@ class Server(object):
             )
 
         log.debug(
-            "Method %r registered to handle %r on %r.",
+            "Method %r registered to handle %r for request %r.",
             get_method_name(method), get_class_name(error), prefix
         )
         self._error_handlers[key] = method
