@@ -105,7 +105,7 @@ class Context(object):
 
     def add_response_headers(self, headers):
         self._response.headers.update(
-            (str(k), str(v))
+            (k, v)
             for k, v
             in headers.iteritems()
         )
