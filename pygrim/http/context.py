@@ -5,12 +5,14 @@ from ..components.grim_dicts import ImmutableDict
 from .exceptions import HeadersAlreadySent
 from .request import Request
 from .response import Response
-from logging import getLogger
 
 try:
     from compatibility import http_responses
 except ImportError:
     from .codes import http_responses
+
+from inspect import isgenerator
+from logging import getLogger
 
 log = getLogger("pygrim.http.context")
 
@@ -141,7 +143,7 @@ class Context(object):
             log.warning("Trying to use disabled flash messages!")
 
     def generates_response(self):
-        return self._response.is_generator
+        return isgenerator(self.get_response_body())
 
     def get_cookies(self):
         return self._request.cookies.copy()

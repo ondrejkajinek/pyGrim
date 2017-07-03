@@ -37,7 +37,6 @@ class Response(object):
             ("Content-Type", "text/html"),
         ))
         self.status = 200
-        self.is_generator = False
 
     def finalize(self, is_head):
         if self.status in self.NO_CONTENT_STATUSES:
@@ -92,9 +91,6 @@ class Response(object):
             self.body = body.encode("utf-8")
         else:
             self.body = body
-
-        if isgenerator(self.body):
-            self.is_generator = True
 
     def _serialize_cookie(self, name, cookie):
         params = (
