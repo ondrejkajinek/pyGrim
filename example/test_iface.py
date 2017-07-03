@@ -60,6 +60,13 @@ class Test(object):
             }
         }
 
+    @route("GET", "/flash", "flash")
+    def flash(self, context):
+        context.flash("info", "First flash message")
+        context.flash("info", "Second flash message")
+        context.template = "flash.jinja"
+        context.set_view("jinja")
+
     @route("GET", "/template", "template")
     @template("layout.jinja", "jinja")
     def use_template_display(self, context):
