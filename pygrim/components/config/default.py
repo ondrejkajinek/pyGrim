@@ -20,6 +20,7 @@ DEFAULT_CONFIG = {
     },
     "session": {
         "enabled": True,
+        "flash": True,
         "type": "file",
         "args": {
             "session_dir": "/tmp/pygrim_session/"

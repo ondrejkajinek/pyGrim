@@ -126,15 +126,29 @@ class Context(object):
                 "value": None
             }
 
+    def delete_flashes(self):
+        if "_flash" in self.session:
+            self.session["_flash"] = []
+
     def finalize_response(self):
         self._response.finalize(is_head=self.is_request_head())
         super(Context, self).__setattr__("_can_create_session", False)
+
+    def flash(self, type_, message):
+        if "_flash" in self.session:
+            self.session["_flash"].append((type_, message))
+        else:
+            log.warning("Trying to use disabled flash messages!")
 
     def generates_response(self):
         return self._response.is_generator
 
     def get_cookies(self):
         return self._request.cookies.copy()
+
+    def get_flashes(self):
+        for type_, message in self.session.get("_flash"):
+            yield type_, message
 
     def get_request_host(self):
         return self._request.environment["host"]
@@ -212,6 +226,11 @@ class Context(object):
                 "Session handler: %r loaded session: %r",
                 type(self._session_handler), self.session
             )
+            if (
+                self.config.getbool("session:flash", True) and
+                "_flash" not in self.session
+            ):
+                self.session["_flash"] = []
 
     def redirect(self, url, status=302):
         self._response.status = status

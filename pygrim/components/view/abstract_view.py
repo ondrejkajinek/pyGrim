@@ -39,8 +39,11 @@ class AbstractView(object):
 
     def _pre_render(self, context):
         self._template_check(context)
-        if context.session_loaded():
-            context.view_data["flashes"] = context.session.get_flashes()
+        context.view_data["flashes"] = (
+            context.get_flashes()
+            if self._use_flash(context)
+            else ()
+        )
 
         context.view_data.update({
             "css": tuple(self._css | set(
@@ -62,8 +65,8 @@ class AbstractView(object):
         })
 
     def _post_render(self, context):
-        if not context.session_loaded():
-            context.session.del_flashes()
+        if self._use_flash(context):
+            context.delete_flashes()
 
     def _render(self, context):
         return ""
@@ -73,3 +76,6 @@ class AbstractView(object):
             raise RuntimeError(
                 "Trying to render response but no template has been set."
             )
+
+    def _use_flash(self, context):
+        return context.session_loaded() and "_flash" in context.session
