@@ -108,7 +108,7 @@ class template(BaseDecorator):
     puts it to context, sets specified template and displays it.
     """
 
-    def __init__(self, template_, view, *args, **kwargs):
+    def __init__(self, template_, view=None, *args, **kwargs):
         self._template = template_
         self._view = view
         super(template, self).__init__(*args, **kwargs)
@@ -117,7 +117,10 @@ class template(BaseDecorator):
         context = kwargs.get("context")
         context.view_data.update(res.get("data") or {})
         context.template = res.get("_template", self._template)
-        context.set_view(res.get("_view", self._view))
+        view = res.get("_view", self._view)
+        if view is not None:
+            context.set_view(view)
+
         return super(template, self).post_call(fun, args, kwargs, res)
 
 

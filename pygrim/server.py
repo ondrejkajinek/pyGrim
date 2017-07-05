@@ -105,9 +105,7 @@ class Server(object):
         context = Context(
             environment, self.config, self._model, self._session_handler
         )
-        # if views are disabled, set view to dummy
-        if self._view_disabled():
-            context.set_view("dummy")
+        context.set_view(self._default_view)
 
         try:
             self._handle_request(context=context)
@@ -433,6 +431,11 @@ class Server(object):
 
     def _setup_env(self):
         self._debug = self.config.getbool("pygrim:debug", True)
+        self._default_view = (
+            "dummy"
+            if self._view_disabled()
+            else self.config.get("view:default", "raw")
+        )
         self._dump_switch = self.config.get("pygrim:dump_switch", "jkxd")
         self._static_map = {
             fix_trailing_slash(prefix): mapped_dir

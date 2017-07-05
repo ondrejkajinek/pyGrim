@@ -27,6 +27,7 @@ DEFAULT_CONFIG = {
         }
     },
     "view": {
+        "default": "raw",
         "types": ("jinja",)
     }
 }
