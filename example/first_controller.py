@@ -33,7 +33,7 @@ class First(object):
         })
         context.template = "layout.jinja"
 
-    @route("GET", "/cookie_show", "cookie_show")
+    @route("GET", name="cookie_show")
     @template("layout.jinja")
     def cookie_show(self, context):
         return {
@@ -42,7 +42,7 @@ class First(object):
             }
         }
 
-    @route("GET", "/cookie_set", "cookie_set")
+    @route("GET", name="cookie_set")
     @template("layout.jinja")
     def cookie_set(self, context):
         cur_time = int(time())
@@ -58,7 +58,7 @@ class First(object):
             }
         }
 
-    @route("GET", "/flash", "flash")
+    @route("GET", name="flash")
     def flash(self, context):
         context.flash("info", "First flash message")
         context.flash("info", "Second flash message")
@@ -102,11 +102,11 @@ class First(object):
             }
         }
 
-    @route("GET", "/type_error", "type_error")
+    @route("GET", name="type_error")
     def type_error(self, context):
         raise TypeError("This method raises 'TypeError'")
 
-    @route("GET", "/runtime_error", "runtime_error")
+    @route("GET", name="runtime_error")
     def runtime_error(self, context):
         raise RuntimeError("This method raises 'RuntimeError'")
 

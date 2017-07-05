@@ -23,7 +23,7 @@ class Second(object):
             ) % context.view_data["text"]
         })
 
-    @route("GET", "/model", "model")
+    @route("GET", name="model")
     @template("layout.jinja")
     def model(self, context):
         return {
@@ -32,7 +32,7 @@ class Second(object):
             }
         }
 
-    @route("GET", "/redirect", "redirect")
+    @route("GET", name="redirect")
     def redirect(self, context):
         context.redirect(self._router.url_for(
             "message",
@@ -50,7 +50,7 @@ class Second(object):
             }
         }
 
-    @route("GET", "/generator", "generator")
+    @route("GET", name="generator")
     def generator(self, context):
         context.set_view("raw")
         context.set_response_body((
@@ -59,7 +59,7 @@ class Second(object):
             in xrange(4)
         ))
 
-    @route("GET", "/generator_fction", "generator_function")
+    @route("GET", name="generator_function")
     def generator_fction(self, context):
 
         def fction():
@@ -70,7 +70,7 @@ class Second(object):
         context.set_view("raw")
         context.set_response_body(fction)
 
-    @route("GET", "/broken_generator_fction", "broken_generator_function")
+    @route("GET", name="broken_generator_function")
     def broken_generator_fction(self, context):
 
         def fction():
