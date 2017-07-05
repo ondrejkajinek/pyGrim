@@ -21,7 +21,7 @@ class Second(object):
         })
 
     @route("GET", "/model", "model")
-    @template("layout.jinja", "jinja")
+    @template("layout.jinja")
     def model(self, context):
         return {
             "data": {
@@ -39,7 +39,7 @@ class Second(object):
         ))
 
     @route("GET", re_compile(r"/message/((?P<message>[^/]+))?"), "message")
-    @template("layout.jinja", "jinja")
+    @template("layout.jinja")
     def message(self, context, message):
         return {
             "data": {

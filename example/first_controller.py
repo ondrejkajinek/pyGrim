@@ -19,7 +19,6 @@ class First(object):
         })
         context.add_js("/tmp/added_header_async.js", sync=False)
         context.template = "layout.jinja"
-        context.set_view("jinja")
 
     @route("GET", "/session", "session")
     def session_text(self, context):
@@ -33,10 +32,9 @@ class First(object):
             "session_text": context.session.get("text")
         })
         context.template = "layout.jinja"
-        context.set_view("jinja")
 
     @route("GET", "/cookie_show", "cookie_show")
-    @template("layout.jinja", "jinja")
+    @template("layout.jinja")
     def cookie_show(self, context):
         return {
             "data": {
@@ -45,7 +43,7 @@ class First(object):
         }
 
     @route("GET", "/cookie_set", "cookie_set")
-    @template("layout.jinja", "jinja")
+    @template("layout.jinja")
     def cookie_set(self, context):
         cur_time = int(time())
         context.add_cookie(name="test", value=cur_time, lifetime=3600)
@@ -65,10 +63,9 @@ class First(object):
         context.flash("info", "First flash message")
         context.flash("info", "Second flash message")
         context.template = "flash.jinja"
-        context.set_view("jinja")
 
     @route("GET", "/template", "template")
-    @template("layout.jinja", "jinja")
+    @template("layout.jinja")
     def use_template_display(self, context):
         return {
             "data": {
@@ -79,7 +76,7 @@ class First(object):
         }
 
     @route("GET", "/template_rewrite", "template_rewrite")
-    @template("nonexisting.jinja", "jinja")
+    @template("nonexisting.jinja")
     def use_template_override(self, context):
         return {
             "data": {
@@ -97,7 +94,7 @@ class First(object):
     @route(
         "GET", re_compile(r"/template/(?P<template>[^/]+)"), "template_show"
     )
-    @template("layout.jinja", "jinja")
+    @template("layout.jinja")
     def template_show(self, context, template):
         return {
             "data": {
@@ -114,7 +111,7 @@ class First(object):
         raise RuntimeError("This method raises 'RuntimeError'")
 
     @route("GET", "/group/test")
-    @template("layout.jinja", "jinja")
+    @template("layout.jinja")
     def group_test(self, context):
         return {
             "data": {
@@ -123,7 +120,7 @@ class First(object):
         }
 
     @route("GET", re_compile("/group/inner_group/test/(?P<param>[0-9]+)"))
-    @template("layout.jinja", "jinja")
+    @template("layout.jinja")
     def int_inner_group_test(self, context, param):
         return {
             "data": {
@@ -136,7 +133,7 @@ class First(object):
         }
 
     @route("GET", re_compile("/group/inner_group/test/(?P<param>[a-z0-9]+)"))
-    @template("layout.jinja", "jinja")
+    @template("layout.jinja")
     def inner_group_test(self, context, param=None):
         text = context.view_data.get("previous_text") or ""
         text += (
@@ -170,7 +167,6 @@ class First(object):
             )
         })
         context.template = "layout.jinja"
-        context.set_view("jinja")
 
     @not_found_handler(path="/runtime_error/")
     def runtime_raising_not_found(self, context, exc):
@@ -189,7 +185,6 @@ class First(object):
             )
         })
         context.template = "layout.jinja"
-        context.set_view("jinja")
 
     @error_handler(errors=TypeError)
     def type_error_handle(self, context, exc):
@@ -201,7 +196,6 @@ class First(object):
         })
         context.template = "layout.jinja"
         context.set_response_status(501)
-        context.set_view("jinja")
 
     @error_handler()
     def ise_handle(self, context, exc):
@@ -212,4 +206,3 @@ class First(object):
             )
         })
         context.template = "layout.jinja"
-        context.set_view("jinja")

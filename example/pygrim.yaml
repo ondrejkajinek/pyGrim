@@ -32,5 +32,6 @@ session:
    type: file
 
 view:
+   default: jinja
    types:
       - jinja
