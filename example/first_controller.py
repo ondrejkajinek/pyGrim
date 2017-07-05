@@ -10,7 +10,7 @@ from time import time
 log = getLogger(__file__)
 
 
-class Test(object):
+class First(object):
 
     @route("GET", "/", "home")
     def home(self, context):

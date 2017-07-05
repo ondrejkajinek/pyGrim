@@ -7,7 +7,7 @@ from uwsgidecorators import postfork as postfork_decorator
 
 # local
 from model import Model
-from test_iface import Test
+from first_controller import First
 from second_controller import Second
 
 
@@ -25,7 +25,7 @@ inheritance = (
     WebServer,
 )
 controllers = (
-    Test,
+    First,
     Second
 )
 

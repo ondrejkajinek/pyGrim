@@ -15,7 +15,7 @@ class Second(object):
     def home(self, context):
         # This would cause
         # self._controllers.Second.home(context)
-        self._controllers.Test.home(context)
+        self._controllers.First.home(context)
         context.view_data.update({
             "text": u"Hello, this controller calls other controller's method."
         })
