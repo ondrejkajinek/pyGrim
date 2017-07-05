@@ -90,7 +90,7 @@ class not_found_handler(error_handler):
 
 class route(BaseDecorator):
 
-    def __init__(self, methods, pattern, name=None, *args, **kwargs):
+    def __init__(self, methods, pattern=None, name=None, *args, **kwargs):
         self._route = {
             "methods": methods,
             "name": name,
@@ -99,6 +99,9 @@ class route(BaseDecorator):
         super(route, self).__init__(*args, **kwargs)
 
     def prepare_func(self, func):
+        if self._route["pattern"] is None:
+            self._route["pattern"] = "/%s" % func.__name__
+
         func._route = self._route
 
 
