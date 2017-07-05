@@ -17,7 +17,10 @@ class Second(object):
         # self._controllers.Second.home(context)
         self._controllers.First.home(context)
         context.view_data.update({
-            "text": u"Hello, this controller calls other controller's method."
+            "text": (
+                u"Hello, this controller calls other controller's method. "
+                u"Original message: %r"
+            ) % context.view_data["text"]
         })
 
     @route("GET", "/model", "model")
