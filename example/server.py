@@ -2,7 +2,7 @@
 
 
 # uwsgi and libs
-from pygrim import Server as WebServer
+from pygrim import Server
 from uwsgidecorators import postfork as postfork_decorator
 
 # local
@@ -21,34 +21,11 @@ register_session_handler("myhandler", MySessionClass)
 """
 
 
-inheritance = (
-    WebServer,
-)
 controllers = (
     First,
     Second
 )
 
-
-def __init__(self, *args, **kwargs):
-    WebServer.__init__(self, *args, **kwargs)
-
-
-def postfork(self):
-    # for all interfaces call postfork to ensure all will be called
-    for cls in inheritance:
-        pfork = getattr(cls, "postfork", None)
-        if pfork:
-            pfork(self)
-
-# Dynamicaly creating type.
-# It allows me to do the trick with inheritance in postfork without
-#   using inspect
-
-Server = type("Server", inheritance, {
-    "__init__": __init__,
-    "postfork": postfork
-})
 
 # naming instance of Server as application
 #   can bee seen in configfile in section uwsgi->module=server:application
