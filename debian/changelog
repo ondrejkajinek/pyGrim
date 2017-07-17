@@ -1,3 +1,10 @@
+pygrim (0.1.29) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * fix loading debug configuration variable
+
+ -- Václav Pokluda <root@darky>  Mon, 17 Jul 2017 08:28:28 +0200
+
 pygrim (0.1.28) testing; urgency=medium
 
   * COMMIT MESSASGES
