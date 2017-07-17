@@ -449,7 +449,7 @@ class Server(object):
         try:
             url = self.router.url_for(route, params)
         except RouteNotRegistered:
-            if self.config.get("pygrim:debug", True) is False:
+            if self.config.getbool("pygrim:debug", True) is False:
                 url = "#"
             else:
                 raise
