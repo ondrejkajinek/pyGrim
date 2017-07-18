@@ -116,14 +116,17 @@ class template(BaseDecorator):
         self._view = view
         super(template, self).__init__(*args, **kwargs)
 
+    def pre_call(self, fun, args, kwargs):
+        context = kwargs.get("context")
+        context.template = self._template
+        if self._view is not None:
+            context.set_view(self._view)
+
+        return super(template, self).pre_call(fun, args, kwargs)
+
     def post_call(self, fun, args, kwargs, res):
         context = kwargs.get("context")
-        context.view_data.update(res.get("data") or {})
-        context.template = res.get("_template", self._template)
-        view = res.get("_view", self._view)
-        if view is not None:
-            context.set_view(view)
-
+        context.view_data.update(res or ())
         return super(template, self).post_call(fun, args, kwargs, res)
 
 
