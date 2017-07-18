@@ -8,6 +8,8 @@ from uwsgidecorators import postfork as postfork_decorator
 # local
 from model import Model
 from first_controller import First
+from group_controller import Group
+from inner_group_controller import InnerGroup
 from second_controller import Second
 
 
@@ -23,7 +25,9 @@ register_session_handler("myhandler", MySessionClass)
 
 controllers = (
     First,
-    Second
+    Second,
+    Group,
+    InnerGroup
 )
 
 
