@@ -2,7 +2,7 @@
 
 from ..utils import (
     ensure_string, ensure_tuple, fix_trailing_slash, get_method_name, is_regex,
-    remove_trailing_slah
+    remove_trailing_slash
 )
 
 from logging import getLogger
@@ -113,7 +113,7 @@ class Route(RouteObject):
             optional_names.update(self.URL_FORMAT_REGEXP.findall(optional[2]))
 
         readable = self.URL_OPTIONAL_REGEXP.sub(r"\1\2\3", readable)
-        readable = remove_trailing_slah(readable).lstrip("^")
+        readable = remove_trailing_slash(readable).lstrip("^")
         mandatory_names = set(param_names) - set(optional_names)
         if len(mandatory_names) + len(optional_names) < len(param_names):
             raise RuntimeError(
