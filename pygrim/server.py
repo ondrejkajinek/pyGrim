@@ -316,11 +316,16 @@ class Server(object):
         if self._debug and self._dump_switch in context.GET():
             self._set_dump_view(context)
 
-        view = context.get_view()
-        if view is None or view not in self._views:
-            raise UnknownView(view)
-
-        self._views[view].display(context)
+        try:
+            view = self._views[context.get_view()]
+        except KeyError:
+            raise UnknownView(context.get_view())
+        else:
+            try:
+                view.display(context)
+            except:
+                log.exception("Error when calling View.display")
+                raise
 
     def _initialize_basic_components(self):
         self._load_config()
