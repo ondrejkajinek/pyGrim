@@ -29,10 +29,37 @@ class RouteObject(object):
     def is_regex(self):
         return is_regex(self._pattern)
 
+    def set_pattern(self, pattern):
+        self._pattern = pattern
 
-class RouteGroup(RouteObject, list):
-    def __init__(self, pattern, *args, **kwargs):
-        super(RouteGroup, self).__init__(pattern, *args, **kwargs)
+
+class RouteGroup(RouteObject):
+
+    def __add__(self, other):
+        if not isinstance(other, RouteObject):
+            raise NotImplemented()
+
+        if isinstance(other, RouteGroup):
+            result = RouteGroup(self._concat_pattern(other))
+        else:
+            result = Route(
+                other._methods,
+                self._concat_pattern(other),
+                other._handle,
+                other._name
+            )
+
+        return result
+
+    def _concat_pattern(self, other):
+        full_pattern = "/".join((
+            remove_trailing_slash(self.get_pattern()),
+            other.get_pattern().lstrip("/")
+        ))
+        if any(i.is_regex() for i in (self, other)):
+            full_pattern = re_compile(full_pattern)
+
+        return full_pattern
 
 
 class Route(RouteObject):
@@ -64,9 +91,6 @@ class Route(RouteObject):
             self._supports_http_method(context.get_request_method()) and
             self._uri_matches(context)
         )
-
-    def set_pattern(self, pattern):
-        self._pattern = pattern
 
     def url_for(self, params):
         if self.is_regex():

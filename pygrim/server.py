@@ -377,14 +377,18 @@ class Server(object):
                 self._process_error_handler(member)
 
             if getattr(member, "_route", None):
-                self._process_route_handler(member)
+                self._process_route_handler(controller, member)
 
-    def _process_route_handler(self, handle):
+    def _process_route_handler(self, controller, handle):
         kwargs = handle.__dict__.pop("_route")
         kwargs["handle"] = handle
         route = Route(**kwargs)
+        route_group = getattr(controller, "_route_group", None)
+        if route_group:
+            route = route_group + route
+
         self._router.map(route)
-        log.debug("Method %r registered to handle route %r", handle, route)
+        log.debug("Method %r registered to handle route %s", handle, route)
 
     def _register_router(self):
         router_class = self._find_router_class()
