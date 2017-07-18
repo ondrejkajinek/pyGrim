@@ -35,9 +35,7 @@ class First(object):
     @template("layout.jinja")
     def cookie_show(self, context):
         return {
-            "data": {
-                "text": "COOKIES = %r" % context.get_cookies()
-            }
+            "text": "COOKIES = %r" % context.get_cookies()
         }
 
     @route("GET", name="cookie_set")
@@ -49,11 +47,9 @@ class First(object):
             name="test2", value=cur_time, path="/cookie_set", lifetime=7200
         )
         return {
-            "data": {
-                "text": u"Current time is %d, COOKIES = %r" % (
-                    cur_time, context.get_cookies()
-                )
-            }
+            "text": u"Current time is %d, COOKIES = %r" % (
+                cur_time, context.get_cookies()
+            )
         }
 
     @route("GET", name="flash")
@@ -66,27 +62,24 @@ class First(object):
     @template("layout.jinja")
     def use_template_display(self, context):
         return {
-            "data": {
-                "text": (
-                    "This method uses @template to set template and view."
-                )
-            }
+            "text": (
+                "This method uses @template to set template and view "
+                "(view is set via configured default view)."
+            )
         }
 
     @route("GET", "/template_rewrite", "template_rewrite")
     @template("nonexisting.jinja")
     def use_template_override(self, context):
+        context.template = "layout.jinja"
         return {
-            "data": {
-                "text": (
-                    u"This method uses @template decorator "
-                    u"and set a template to 'nonexisting.jinja'. "
-                    u"However, template is overriden to 'layout.jinja'. "
-                    u"This method also loads session."
-                ),
-                "session_text": context.session.get("text")
-            },
-            "_template": "layout.jinja"
+            "text": (
+                u"This method uses @template decorator "
+                u"and set a template to 'nonexisting.jinja'. "
+                u"However, template is overriden to 'layout.jinja'. "
+                u"This method also loads session."
+            ),
+            "session_text": context.session.get("text")
         }
 
     @route(
@@ -95,9 +88,7 @@ class First(object):
     @template("layout.jinja")
     def template_show(self, context, template):
         return {
-            "data": {
-                "text": "Template %r is given" % template
-            }
+            "text": "Template %r is given" % template
         }
 
     @route("GET", name="type_error")

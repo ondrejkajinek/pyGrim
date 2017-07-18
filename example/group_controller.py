@@ -12,7 +12,5 @@ class Group(object):
     @template("layout.jinja")
     def group_test(self, context):
         return {
-            "data": {
-                "text": "This method is mapped to route in group."
-            }
+            "text": "This method is mapped to route in group."
         }

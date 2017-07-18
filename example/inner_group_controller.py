@@ -15,13 +15,11 @@ class InnerGroup(Group):
     @template("layout.jinja")
     def int_inner_group_test(self, context, param):
         return {
-            "data": {
-                "text": (
-                    "This method is mapped to route in inner group. "
-                    "Regexp route is used with integer parameter 'param'. "
-                    "Given value is: %r" % param
-                )
-            }
+            "text": (
+                "This method is mapped to route in inner group. "
+                "Regexp route is used with integer parameter 'param'. "
+                "Given value is: %r" % param
+            )
         }
 
     @route("GET", re_compile("/test/(?P<param>[a-z0-9]+)"))
@@ -34,9 +32,7 @@ class InnerGroup(Group):
             "Given value is: %r" % param
         )
         return {
-            "data": {
-                "text": text
-            }
+            "text": text
         }
 
     @route("GET", re_compile("/test/(?P<param>[a-z]+)[^/]*"))

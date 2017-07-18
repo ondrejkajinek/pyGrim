@@ -27,9 +27,7 @@ class Second(object):
     @template("layout.jinja")
     def model(self, context):
         return {
-            "data": {
-                "text": "Now: %s" % self._model.get_time().isoformat()
-            }
+            "text": "Now: %s" % self._model.get_time().isoformat()
         }
 
     @route("GET", name="redirect")
@@ -45,9 +43,7 @@ class Second(object):
     @template("layout.jinja")
     def message(self, context, message):
         return {
-            "data": {
-                "text": "Message: %s" % (message or "NO MESSAGE")
-            }
+            "text": "Message: %s" % (message or "NO MESSAGE")
         }
 
     @route("GET", name="generator")
