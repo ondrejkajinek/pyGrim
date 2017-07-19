@@ -19,7 +19,7 @@ _suppress_none.contextfunction = True
 class JinjaView(AbstractView):
 
     def __init__(self, config, extra_functions):
-        self._debug = config.get("jinja:debug", False)
+        self._debug = config.getbool("jinja:debug", False)
         self._dump_switch = config.get("jinja:dump_switch", "jkxd")
         auto_reload = config.get("jinja:environment:auto_reload", True)
         self._env = Environment(
