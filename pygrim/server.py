@@ -121,9 +121,7 @@ class Server(object):
         raise DispatchFinished()
 
     def redirect(self, context, **kwargs):
-        if "url" in kwargs:
-            url = kwargs.pop("url")
-        elif "route_name" in kwargs:
+        if "route_name" in kwargs:
             url = "".join((
                 context.get_request_url(),
                 self.router.url_for(
@@ -131,6 +129,12 @@ class Server(object):
                     kwargs.pop("params", None) or {}
                 )
             ))
+            # safety
+            kwargs.pop("url", None)
+        elif "url" in kwargs:
+            url = kwargs.pop("url")
+            # safety
+            kwargs.pop("route_name", None)
         else:
             raise RuntimeError("Redirect needs 'url' or 'route_name' param.")
 
