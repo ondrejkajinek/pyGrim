@@ -52,6 +52,7 @@ class JinjaView(AbstractView):
     def _get_extensions(self, config):
         extensions = set((
             "pygrim.components.jinja_ext.BaseExtension",
+            "pygrim.components.jinja_ext.TimeExtension",
         ))
         extensions.update(
             config.get("jinja:extensions", ())

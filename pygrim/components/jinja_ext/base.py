@@ -1,19 +1,12 @@
 # coding: utf8
 
 from ..utils.json2 import dumps as json_dumps
-
-from datetime import date, datetime
-from dateutil.parser import parse as parse_dt
 from jinja2.ext import Extension
 from logging import getLogger
 from re import compile as re_compile, IGNORECASE as re_IGNORECASE
 from os import path
 
 log = getLogger("pygrim.components.jinja_ext.base")
-
-DTS = (
-    type(datetime.min), type(date.min),
-)
 
 
 class BaseExtension(Extension):
@@ -32,12 +25,6 @@ class BaseExtension(Extension):
         environment.filters.update(self._get_filters())
         environment.globals.update(self._get_functions())
 
-    def as_date(self, datum, strf=None):
-        if isinstance(datum, basestring):
-            datum = parse_dt(datum)
-
-        return datum.strftime(strf)
-
     def as_json(self, data):
         log.warning("Filter `as_json` is deprecated and will be removed soon.")
         return self.to_json(data)
@@ -46,22 +33,6 @@ class BaseExtension(Extension):
         return "%s%s" % (
             context.get_request_url(), context.get_request_root_uri()
         )
-
-    def date_format(self, source, format_str):
-        if isinstance(source, basestring):
-            obj = (
-                datetime.fromtimestamp(float(source))
-                if source.isdigit()
-                else parse_dt(source)
-            )
-        elif isinstance(source, (int, long)):
-            obj = datetime.fromtimestamp(source)
-        elif isinstance(source, DTS):
-            obj = source
-        else:
-            return None
-
-        return obj.strftime(format_str).decode('utf-8')
 
     def fit_image(self, path, size=160):
         if not path.startswith("/"):
@@ -95,10 +66,8 @@ class BaseExtension(Extension):
 
     def _get_filters(self):
         return {
-            "as_date": self.as_date,
             "as_json": self.as_json,
             "base_url": self.base_url,
-            "date_format": self.date_format,
             "fit_image": self.fit_image,
             "mins_from_secs": self.minutes_from_seconds,
             "readable_size": self.readable_size,
