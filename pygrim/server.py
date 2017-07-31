@@ -7,8 +7,7 @@ from .components.exceptions import (
 from .components.log import initialize_loggers
 from .components.routing import AbstractRouter, Router
 from .components.routing import (
-    DispatchFinished, MissingRouteHandle, RouteNotFound, RouteNotRegistered,
-    RoutePassed
+    DispatchFinished, MissingRouteHandle, RouteNotRegistered, RoutePassed
 )
 from .components.session import (
     DummySession, FileSessionStorage, RedisSessionStorage,
@@ -19,6 +18,7 @@ from .http import Context
 
 from inspect import getmembers, ismethod, getmro
 from jinja2 import escape, Markup
+from locale import LC_ALL, setlocale
 from logging import getLogger
 from os import path
 from string import strip as string_strip
@@ -51,6 +51,7 @@ class ResponseWrap(object):
         self._start_response = start_response
 
     def __call__(self, status, headers):
+        log.debug("starting response with:%r:%r", status, headers)
         self._start_response(status, headers)
         self._start_response = self.noop
 
@@ -76,6 +77,7 @@ class Server(object):
 
     def __init__(self):
         self._initialize_basic_components()
+        self._setup_env()
         self._methods = {}
         # temporary
         # self._not_found_methods will be changed to tuple
@@ -99,13 +101,19 @@ class Server(object):
                 context.get_response_status_code(),
                 context.get_response_headers()
             )
+
+            # to keep errors and other cases iteration should stay where it is
             body = context.get_response_body()
             if context.generates_response():
+                do_yield = not context.is_request_head()
                 for part in body():
-                    yield part
+                    if do_yield:
+                        yield part
+            elif context.is_request_head():
+                log.debug("HEAD - not returning body")
             else:
                 yield body
-
+            # endif
         return
 
     def display(self, *args, **kwargs):
@@ -113,9 +121,7 @@ class Server(object):
         raise DispatchFinished()
 
     def redirect(self, context, **kwargs):
-        if "url" in kwargs:
-            url = kwargs.pop("url")
-        elif "route_name" in kwargs:
+        if "route_name" in kwargs:
             url = "".join((
                 context.get_request_url(),
                 self.router.url_for(
@@ -123,6 +129,12 @@ class Server(object):
                     kwargs.pop("params", None) or {}
                 )
             ))
+            # safety
+            kwargs.pop("url", None)
+        elif "url" in kwargs:
+            url = kwargs.pop("url")
+            # safety
+            kwargs.pop("route_name", None)
         else:
             raise RuntimeError("Redirect needs 'url' or 'route_name' param.")
 
@@ -282,7 +294,7 @@ class Server(object):
         except DispatchFinished:
             pass
 
-        log.debug("RouteNotFound exception successfully handled.")
+        log.debug("Not found state handled.")
 
     def _handle_request(self, context):
         try:
@@ -293,10 +305,7 @@ class Server(object):
                 except RoutePassed:
                     continue
             else:
-                # TODO: reset current route to None
-                raise RouteNotFound()
-        except RouteNotFound:
-            self._handle_not_found(context=context)
+                self._handle_not_found(context=context)
         except:
             self._handle_error(context=context, exc=exc_info()[1])
 
@@ -391,6 +400,12 @@ class Server(object):
 
         self.view = view
 
+    def _setup_env(self):
+        locale = self.config.get("pygrim:locale", None)
+        if locale:
+            log.debug("Setting locale 'LC_ALL' to %r", locale)
+            setlocale(LC_ALL, str(locale))
+
     def _static_file_mtime(self, static_file):
 
         def get_static_file_abs_path(static_file):
@@ -438,7 +453,7 @@ class Server(object):
         try:
             url = self.router.url_for(route, params)
         except RouteNotRegistered:
-            if self.config.get("pygrim:debug", True) is False:
+            if self.config.getbool("pygrim:debug", True) is False:
                 url = "#"
             else:
                 raise

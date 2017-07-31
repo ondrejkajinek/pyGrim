@@ -1,9 +1,7 @@
 # coding: utf8
 
-from ..utils.functions import deep_update
+from ..utils.functions import deep_update, ensure_bool
 from copy import deepcopy
-from logging import getLogger
-log = getLogger(__name__)
 
 
 class NoDefaultValue(Exception):
@@ -64,20 +62,16 @@ class AbstractConfig(object):
 
         return target
 
-    def _get_typed(self, construct, key, *args, **kwargs):
-        value = self.get(key, *args, **kwargs)
-        try:
-            value = construct(value)
-        except ValueError:
-            raise TypeError(
-                "Wrong value %r for %r key: %r" % (value, construct, key))
-        return value
-
     def getfloat(self, key, *args, **kwargs):
         return self._get_typed(float, key, *args, **kwargs)
 
     def getint(self, key, *args, **kwargs):
         return self._get_typed(int, key, *args, **kwargs)
+
+    def getbool(self, key, *args, **kwargs):
+        return self._get_typed(ensure_bool, key, *args, **kwargs)
+
+    getboolean = getbool
 
     def _default_value(self, *args, **kwargs):
         """
@@ -89,11 +83,20 @@ class AbstractConfig(object):
             raise RuntimeError("No default value given")
         """
 
-        if args:
-            return args[0]
         if "default" in kwargs:
             return kwargs["default"]
+        if args:
+            return args[0]
         raise NoDefaultValue()
+
+    def _get_typed(self, construct, key, *args, **kwargs):
+        value = self.get(key, *args, **kwargs)
+        try:
+            return construct(value)
+        except ValueError:
+            raise TypeError(
+                "Wrong value %r for %r key: %r" % (value, construct, key)
+            )
 
     def _load_config(self, path):
         raise NotImplementedError()

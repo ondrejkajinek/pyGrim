@@ -17,8 +17,9 @@ class Context(object):
 
     def __init__(self, environment, config):
         self.config = config
-        self._suppress_port = config.get("context:suppress_port", False)
-        self._force_https = config.get("context:force_https", False)
+        self._suppress_port = config.getbool("context:suppress_port", False)
+        self._force_https = config.getbool("context:force_https", False)
+        self._default_headers = config.get("context:default_headers", None)
 
         self.current_route = None
         self.session = None
@@ -27,16 +28,33 @@ class Context(object):
 
         self._request = Request(environment)
         self._response = Response()
+        if self._default_headers:
+            self.add_response_headers(self._default_headers)
         self._route_params = None
         self._session_loaded = False
 
         self.set_route_params()
 
+    def DELETE(self, key=None, fallback=None):
+        return self._request_param("DELETE", key, fallback)
+
     def GET(self, key=None, fallback=None):
-        return self._request.request_param("GET", key, fallback)
+        return self._request_param("GET", key, fallback)
+
+    def JSON(self, key=None, fallback=None):
+        return self._request_param("JSON", key, fallback)
+
+    def PARAM(self, key=None, fallback=None):
+        return self._request_param(self.get_request_method(), key, fallback)
 
     def POST(self, key=None, fallback=None):
-        return self._request.request_param("POST", key, fallback)
+        return self._request_param("POST", key, fallback)
+
+    def PUT(self, key=None, fallback=None):
+        return self._request_param("PUT", key, fallback)
+
+    def RAW_POST(self):
+        return self._request.RAW_POST
 
     def add_cookie(
         self, name, value, lifetime=None, domain=None, path=None,
@@ -64,7 +82,10 @@ class Context(object):
         extra.update(set(args))
 
     def add_response_headers(self, headers):
-        self._response.headers.update(headers)
+        self._response.headers.update(
+            (str(k), str(v))
+            for k, v in headers.items()
+        )
 
     def delete_cookie(
         self, name, domain=None, path=None, http_only=None, secure=None
@@ -151,6 +172,10 @@ class Context(object):
     def is_request_get(self):
         return self._request.environment["request_method"] == "GET"
 
+    def is_request_head(self):
+        return self._request.environment.get(
+            "original_request_method") == "HEAD"
+
     def is_request_post(self):
         return self._request.environment["request_method"] == "POST"
 
@@ -193,3 +218,18 @@ class Context(object):
 
     def set_route_params(self, params=None):
         self._route_params = ImmutableDict(params or {})
+
+    def _request_param(self, method, key=None, fallback=None):
+        try:
+            value = (
+                getattr(self._request, method)
+                if key is None
+                else getattr(self._request, method).get(key, fallback)
+            )
+        except AttributeError:
+            log.warning(
+                "Trying to get param sent by unknown method %r", method
+            )
+            value = None
+
+        return value

@@ -18,6 +18,22 @@ def deep_update(original, override):
     return original
 
 
+def ensure_bool(a):
+    # Václav Pokluda: is ~25% quicker than isinstance(a, bool)
+    if a is True or a is False:
+        res = a
+    elif a is None:
+        res = False
+    elif isinstance(a, basestring):
+        res = (
+            int(a)
+            if a.isdigit()
+            else a.lower().strip() == "true"
+        )
+
+    return bool(res)
+
+
 def ensure_string(text):
     return (
         text.encode("utf8")

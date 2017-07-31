@@ -71,7 +71,8 @@ class method(BaseDecorator):
 
 class error_handler(method):
     """
-    Marks method as an error handler.
+    Marks method as an error handler for specific exception.
+    Can only catch exceptions derived from BaseExcepition.
     Such method is used when error occurs during request handling.
     Also exposes method, see method decorator.
     """
@@ -82,7 +83,7 @@ class error_handler(method):
         for one in args:
             if not issubclass(one, BaseException):
                 raise RuntimeError(
-                    "%s must be subclass of Basexception" % (one,)
+                    "%s must be subclass of BaseException" % (one,)
                 )
         self.err_classes = args
 

@@ -17,14 +17,14 @@ PACKAGES_REMOTE_DIR="/var/aptly/packages/"
 
 PY_VERSION=`python -c 'import sys; print(sys.version.split(" ",1)[0].rsplit(".",1)[0])'`
 
-all: deb
+all: pkg
 
 prePackCheck:
 	( \
 		apt-get install devscripts fakeroot python-all\
 	)
 
-deb: prePackCheck clean buildDeb
+pkg: prePackCheck clean buildDeb
 
 runGit:
 	python setup.py check
@@ -38,15 +38,13 @@ buildDeb: runGit
 	cd build/${PACKAGE_NAME}-${VERSION} && \
 		$(ENV) debuild -us -uc
 
-pkg: deb
+
+deb: pkg
+	scp build/${FULL_PKG_NAME} debian.ats:${PACKAGES_REMOTE_DIR} && \
+		ssh aptly@debian.ats bash pkg-to-testing ${PACKAGES_REMOTE_DIR}${FULL_PKG_NAME} jessie && \
+		git push
 
 debtest: deb
-	scp build/${FULL_PKG_NAME} debian.ats:${PACKAGES_REMOTE_DIR} && \
-		ssh aptly@debian.ats bash pkg-to-testing ${PACKAGES_REMOTE_DIR}${FULL_PKG_NAME} jessie
-
-debprod: deb
-	scp build/${FULL_PKG_NAME} debian.ats:${PACKAGES_REMOTE_DIR} && \
-		ssh aptly@debian.ats bash pkg-to-stable ${PACKAGES_REMOTE_DIR}${FULL_PKG_NAME} jessie
 
 clean:
 	rm -rf dist
