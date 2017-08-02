@@ -270,11 +270,6 @@ class Server(object):
         )
 
     def _handle_error(self, context, exc):
-        log.exception(
-            "Error while dispatching to: %r.",
-            context.current_route.get_handle_name()
-        )
-
         try:
             self._handle_generic_error(context, exc)
         except StopDispatch:
@@ -316,11 +311,15 @@ class Server(object):
             pass
         except:
             try:
+                log.exception(
+                    "Error while dispatching to: %r.",
+                    context.current_route.get_handle_name()
+                )
+                context.current_route = NoRoute()
                 self._handle_error(context=context, exc=exc_info()[1])
             except StopDispatch:
                 pass
             else:
-                context.current_route = NoRoute()
                 self._prepare_output(context)
         else:
             self._prepare_output(context)
