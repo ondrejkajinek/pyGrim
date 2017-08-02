@@ -278,7 +278,7 @@ class Server(object):
         try:
             self._handle_generic_error(context, exc)
         except StopDispatch:
-            return
+            raise
         except:
             exc = exc_info()[1]
             try:
@@ -313,28 +313,17 @@ class Server(object):
             except RouteNotFound as exc:
                 self._handle_not_found(context=context, exc=exc)
         except StopDispatch:
-            return
+            pass
         except:
             try:
                 self._handle_error(context=context, exc=exc_info()[1])
             except StopDispatch:
-                return
+                pass
             else:
                 context.current_route = NoRoute()
-
-        if self._debug and self._dump_switch in context.GET():
-            self._set_dump_view(context)
-
-        try:
-            view = self._views[context.get_view()]
-        except KeyError:
-            raise UnknownView(context.get_view())
+                self._prepare_output(context)
         else:
-            try:
-                view.display(context)
-            except:
-                log.exception("Error when calling View.display")
-                raise
+            self._prepare_output(context)
 
     def _initialize_basic_components(self):
         self._load_config()
@@ -357,6 +346,21 @@ class Server(object):
             for prefix, err_cls, handler in self._error_handlers:
                 if request_uri.startswith(prefix) and exc is err_cls:
                     yield handler
+
+    def _prepare_output(self, context):
+        if self._debug and self._dump_switch in context.GET():
+            self._set_dump_view(context)
+
+        try:
+            view = self._views[context.get_view()]
+        except KeyError:
+            raise UnknownView(context.get_view())
+        else:
+            try:
+                view.display(context)
+            except:
+                log.exception("Error when calling View.display")
+                raise
 
     def _process_error_handler(self, method):
         for prefix in method._paths:
