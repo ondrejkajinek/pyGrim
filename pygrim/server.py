@@ -270,25 +270,13 @@ class Server(object):
         )
 
     def _handle_error(self, context, exc):
-        request_uri = context.get_request_uri()
-        if isinstance(exc, RouteNotFound):
-            log.debug("No route found to handle request %r.", request_uri)
-        else:
-            log.exception(
-                "Error while dispatching to: %r.",
-                context.current_route.get_handle_name()
-            )
+        log.exception(
+            "Error while dispatching to: %r.",
+            context.current_route.get_handle_name()
+        )
 
         try:
-            for handler in self._matching_error_handlers(
-                request_uri, getmro(exc.__class__)
-            ):
-                handler(context=context, exc=exc)
-                log.debug(
-                    "Error %r handled with %r.",
-                    get_class_name(exc.__class__), get_method_name(handler)
-                )
-                break
+            self._handle_generic_error(context, exc)
         except StopDispatch:
             return
         except:
@@ -300,14 +288,39 @@ class Server(object):
                 log.exception("Error in default_error_handler.")
                 raise
 
+    def _handle_generic_error(self, context, exc):
+        request_uri = context.get_request_uri()
+        for handler in self._matching_error_handlers(
+            request_uri, getmro(exc.__class__)
+        ):
+            handler(context=context, exc=exc)
+            log.debug(
+                "Error %r handled with %r.",
+                get_class_name(exc.__class__), get_method_name(handler)
+            )
+            break
+
+    def _handle_not_found(self, context, exc):
+        request_uri = context.get_request_uri()
+        log.debug("No route found to handle request %r.", request_uri)
+        # let all its exceptions be raised to the caller
+        self._handle_generic_error(context=context, exc=exc)
+
     def _handle_request(self, context):
         try:
-            self._handle_by_route(context=context)
+            try:
+                self._handle_by_route(context=context)
+            except RouteNotFound as exc:
+                self._handle_not_found(context=context, exc=exc)
         except StopDispatch:
             return
         except:
-            self._handle_error(context=context, exc=exc_info()[1])
-            context.current_route = NoRoute()
+            try:
+                self._handle_error(context=context, exc=exc_info()[1])
+            except StopDispatch:
+                return
+            else:
+                context.current_route = NoRoute()
 
         if self._debug and self._dump_switch in context.GET():
             self._set_dump_view(context)
