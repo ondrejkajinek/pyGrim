@@ -153,9 +153,6 @@ class Server(object):
                 "No routes were registered, no requests will be handled!"
             )
 
-        if hasattr(self, "postfork"):
-            self.postfork()
-
     def register_controller(self, controller):
         # Do not use get_instance_name,
         # since it would append file name to controller class name
