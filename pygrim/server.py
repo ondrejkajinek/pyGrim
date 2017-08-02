@@ -366,11 +366,11 @@ class Server(object):
                 )
             )
 
+        self._error_handlers[key] = method
         log.debug(
             "Method %r registered to handle %r for request %r.",
             get_method_name(method), get_class_name(error), prefix
         )
-        self._error_handlers[key] = method
 
     def _process_decorated_methods(self, controller):
         """
@@ -426,8 +426,8 @@ class Server(object):
             if not isinstance(view, AbstractView):
                 raise WrongViewBase(view)
 
-            log.debug("Registering view class %r.", get_instance_name(view))
             self._views[view_name] = view
+            log.debug("Registering view class %r.", get_instance_name(view))
 
     def _set_dump_view(self, context):
         context.set_response_content_type("application/json")
@@ -457,8 +457,8 @@ class Server(object):
         }
         locale = self.config.get("pygrim:locale", None)
         if locale:
-            log.debug("Setting locale 'LC_ALL' to %r.", locale)
             setlocale(LC_ALL, str(locale))
+            log.debug("Locale 'LC_ALL' set to %r.", locale)
 
         log.debug("PyGrim environment set up.")
 
