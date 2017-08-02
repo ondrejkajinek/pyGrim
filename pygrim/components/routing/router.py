@@ -33,7 +33,17 @@ class Router(AbstractRouter):
                 if route.is_regex() or self._is_group_regular()
                 else full_pattern.rstrip("/") + "/"
             )
-            self._routes.append(route)
+            specificity = route.specificity()
+            index = next(
+                (
+                    i
+                    for i, r
+                    in enumerate(self._routes)
+                    if r.specificity() < specificity
+                ),
+                len(self._routes)
+            )
+            self._routes.insert(index, route)
         elif isinstance(route, RouteGroup):
             self.push_group(route)
             for one in route:

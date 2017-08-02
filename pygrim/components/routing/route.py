@@ -92,6 +92,13 @@ class Route(RouteObject):
             self._uri_matches(context)
         )
 
+    def specificity(self):
+        return (
+            self.URL_PARAM_REGEXP.sub("", self.get_pattern()).count("/")
+            if self.is_regex()
+            else self.get_pattern().count("/")
+        )
+
     def url_for(self, params):
         if self.is_regex():
             readable, param_names, optional_names = self._pattern_to_readable()
