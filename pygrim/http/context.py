@@ -128,10 +128,6 @@ class Context(object):
                 "value": None
             }
 
-    def delete_flashes(self):
-        if "_flash" in self.session:
-            self.session["_flash"] = []
-
     def finalize_response(self):
         self._response.finalize(is_head=self.is_request_head())
         super(Context, self).__setattr__("_can_create_session", False)
@@ -148,9 +144,15 @@ class Context(object):
     def get_cookies(self):
         return self._request.cookies.copy()
 
-    def get_flashes(self):
-        for type_, message in self.session.get("_flash"):
-            yield type_, message
+    def get_flashes(self, types=None):
+        messages = self.session.get("_flash")
+        index = 0
+        while index < len(messages):
+            if types is None or messages[index][0] in types:
+                message = messages.pop(index)
+                yield message[0], message[1]
+            else:
+                index += 1
 
     def get_request_host(self):
         return self._request.environment["host"]

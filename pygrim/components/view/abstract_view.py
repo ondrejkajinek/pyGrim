@@ -39,11 +39,6 @@ class AbstractView(object):
 
     def _pre_render(self, context):
         self._template_check(context)
-        context.view_data["flashes"] = (
-            context.get_flashes()
-            if self._use_flash(context)
-            else ()
-        )
 
         context.view_data.update({
             "css": tuple(self._css | set(
@@ -65,8 +60,7 @@ class AbstractView(object):
         })
 
     def _post_render(self, context):
-        if self._use_flash(context):
-            context.delete_flashes()
+        pass
 
     def _render(self, context):
         return ""
