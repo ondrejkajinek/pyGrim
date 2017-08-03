@@ -1,7 +1,6 @@
 # coding: utf8
 
 # std
-from logging import getLogger
 from os.path import join as path_join
 from re import compile as re_compile
 
@@ -9,8 +8,6 @@ from re import compile as re_compile
 from .abstract_router import AbstractRouter
 from .exceptions import RouteAlreadyExists, RouteNotRegistered
 from .route import NoRoute, Route, RouteGroup
-
-log = getLogger("pygrim.components.routing.router")
 
 
 class Router(AbstractRouter):

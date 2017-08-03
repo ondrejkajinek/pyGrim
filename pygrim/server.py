@@ -42,6 +42,7 @@ from .components.view import (
 from .http import Context, HeadersAlreadySent
 
 
+start_log = getLogger("pygrim_start.server")
 log = getLogger("pygrim.server")
 
 
@@ -152,7 +153,7 @@ class Server(object):
         """
         self._finalize_error_handlers()
         if not self._router.has_routes():
-            log.warning(
+            start_log.warning(
                 "No routes were registered, no requests will be handled!"
             )
 
@@ -168,11 +169,11 @@ class Server(object):
         self._enhance_controller(controller, "_model", self._model)
         self._process_decorated_methods(controller)
         self._controllers[controller_name] = controller
-        log.debug("Controller %r registered", controller_name)
+        start_log.debug("Controller %r registered", controller_name)
 
     def register_model(self, model):
         if self._model is not None:
-            log.warning(
+            start_log.warning(
                 "Model is already registered: %r",
                 get_instance_name(self._model)
             )
@@ -241,7 +242,7 @@ class Server(object):
             raise RuntimeError("Unknown session handler: %r.", storage_type)
         else:
             if storage_type == "dummy":
-                log.warning("Session is disabled!")
+                start_log.warning("Session is disabled!")
 
         return storage_class
 
@@ -249,7 +250,7 @@ class Server(object):
         view_types = self.config.getset("view:types")
         # view is disabled when only dummy view is configured
         if view_types == ("dummy",):
-            log.info("View is disabled, no output will be created!")
+            start_log.info("View is disabled, no output will be created!")
         else:
             view_types.update(("raw", "json"))
 
@@ -334,7 +335,7 @@ class Server(object):
         self._register_router()
         self._register_view()
         self._register_session_handler()
-        log.debug("Basic components initialized.")
+        start_log.debug("Basic components initialized.")
 
     def _load_config(self):
         config_path, config_class = self._find_config_class()
@@ -383,7 +384,7 @@ class Server(object):
             )
 
         self._error_handlers[key] = method
-        log.debug(
+        start_log.debug(
             "Method %r registered to handle %r for request %r.",
             get_method_name(method), get_class_name(error), prefix
         )
@@ -409,7 +410,9 @@ class Server(object):
             route = route_group + route
 
         self._router.map(route)
-        log.debug("Method %r registered to handle route %s", handle, route)
+        start_log.debug(
+            "Method %r registered to handle route %s", handle, route
+        )
 
     def _register_router(self):
         router_class = self._find_router_class()
@@ -443,7 +446,9 @@ class Server(object):
                 raise WrongViewBase(view)
 
             self._views[view_name] = view
-            log.debug("Registering view class %r.", get_instance_name(view))
+            start_log.debug(
+                "Registering view class %r.", get_instance_name(view)
+            )
 
     def _set_dump_view(self, context):
         context.set_response_content_type("application/json")
@@ -474,9 +479,9 @@ class Server(object):
         locale = self.config.get("pygrim:locale", None)
         if locale:
             setlocale(LC_ALL, str(locale))
-            log.debug("Locale 'LC_ALL' set to %r.", locale)
+            start_log.debug("Locale 'LC_ALL' set to %r.", locale)
 
-        log.debug("PyGrim environment set up.")
+        start_log.debug("PyGrim environment set up.")
 
     def _static_file_abs_path(self, static_file):
         for prefix, mapped_dir in self._static_map.iteritems():

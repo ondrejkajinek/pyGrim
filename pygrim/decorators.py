@@ -15,7 +15,7 @@ except ImportError:
 from .components.routing import RouteNotFound
 from .components.utils import ensure_tuple
 
-log = getLogger("pygrim.decorators")
+log = getLogger("pygrim_start.decorators")
 
 
 class BaseDecorator(object):

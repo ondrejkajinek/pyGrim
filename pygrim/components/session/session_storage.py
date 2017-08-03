@@ -4,6 +4,7 @@
 from logging import getLogger
 from uuid import uuid4
 
+start_log = getLogger("pygrim_start.components.session.session_storage")
 log = getLogger("pygrim.components.session.session_storage")
 
 
@@ -25,7 +26,7 @@ class SessionStorage(object):
                 ("secure", False, "bool")
             )
         }
-        log.debug("Session cookie template:%r", self._cookie)
+        start_log.debug("Session cookie template:%r", self._cookie)
 
     def delete(self, session):
         raise NotImplementedError()
