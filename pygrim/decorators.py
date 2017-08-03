@@ -137,8 +137,8 @@ class uses_data(BaseDecorator):
         super(uses_data, self).__init__()
 
     def pre_call(self, fun, args, kwargs):
-        server = args[0]
-        method = server._methods[self._method]
+        controller = args[0]
+        method = controller._methods[self._method]
         context = kwargs.get("context")
         method_returned = method(context) or {}
         context.view_data.update(method_returned.get("data", {}))
