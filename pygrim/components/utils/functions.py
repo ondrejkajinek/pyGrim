@@ -28,14 +28,14 @@ def ensure_bool(a):
         res = False
     elif isinstance(a, basestring):
         res = (
-            int(a)
+            bool(int(a))
             if a.isdigit()
             else a.lower().strip() == "true"
         )
     else:
-        res = a
+        res = bool(a)
 
-    return bool(res)
+    return res
 
 
 def ensure_string(text):
