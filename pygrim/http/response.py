@@ -1,11 +1,13 @@
 # coding: utf8
 
+# std
 from datetime import datetime, timedelta
 from inspect import isgenerator, isgeneratorfunction
 from logging import getLogger
 from os import SEEK_END
 from urllib import quote_plus as url_quoteplus
 
+# local
 from ..components.grim_dicts import NormalizedDict
 
 log = getLogger("pygrim.http.response")

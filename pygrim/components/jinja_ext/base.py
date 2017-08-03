@@ -1,10 +1,15 @@
 # coding: utf8
 
-from ..utils.json2 import dumps as json_dumps
-from jinja2.ext import Extension
+# std
 from logging import getLogger
-from re import compile as re_compile, IGNORECASE as re_IGNORECASE
 from os import path
+from re import compile as re_compile, IGNORECASE as re_IGNORECASE
+
+# non-std
+from jinja2.ext import Extension
+
+# local
+from ..utils.json2 import dumps as json_dumps
 
 log = getLogger("pygrim.components.jinja_ext.base")
 

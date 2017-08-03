@@ -1,5 +1,21 @@
 # coding: utf8
 
+# std
+from inspect import getmembers, ismethod, getmro
+from locale import LC_ALL, setlocale
+from logging import getLogger
+from os import path
+from string import strip as string_strip
+from sys import exc_info
+
+# non-std
+from jinja2 import escape, Markup
+try:
+    from uwsgi import opt as uwsgi_opt
+except ImportError:
+    uwsgi_opt = {}
+
+# local
 from .components.config import AbstractConfig, YamlConfig
 from .components.exceptions import (
     ComponentTypeAlreadyRegistered, ControllerAttributeCollision,
@@ -24,18 +40,6 @@ from .components.view import (
     AbstractView, DummyView, JsonView, JinjaView, RawView
 )
 from .http import Context, HeadersAlreadySent
-
-from inspect import getmembers, ismethod, getmro
-from jinja2 import escape, Markup
-from locale import LC_ALL, setlocale
-from logging import getLogger
-from os import path
-from string import strip as string_strip
-from sys import exc_info
-try:
-    from uwsgi import opt as uwsgi_opt
-except ImportError:
-    uwsgi_opt = {}
 
 
 log = getLogger("pygrim.server")

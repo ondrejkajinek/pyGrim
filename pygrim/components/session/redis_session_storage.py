@@ -1,15 +1,14 @@
 # coding: utf8
 
-from .session import Session
-from .session_storage import SessionStorage
-from ..connectors import connect_redis, connect_redis_sentinel
-from .session_exceptions import (
-    # SessionInitializeError,
-    SessionSaveError, SessionLoadError
-)
+# std
+import cPickle as pickle
 from logging import getLogger
 
-import cPickle as pickle
+# local
+from .session import Session
+from .session_storage import SessionStorage
+from .session_exceptions import SessionSaveError, SessionLoadError
+from ..connectors import connect_redis, connect_redis_sentinel
 
 log = getLogger("pygrim.components.session.redis_session_storage")
 

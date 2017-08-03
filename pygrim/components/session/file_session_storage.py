@@ -1,14 +1,16 @@
 # coding: utf8
 
+# std
+import cPickle as pickle
+from logging import getLogger
+from os import mkdir as os_mkdir, path as os_path, remove as os_remove
+
+# local
 from .session import Session
 from .session_storage import SessionStorage
 from .session_exceptions import (
     SessionInitializeError, SessionSaveError, SessionLoadError
 )
-from logging import getLogger
-
-import cPickle as pickle
-import os
 
 log = getLogger("pygrim.components.session.file_session_storage")
 
@@ -24,9 +26,9 @@ class FileSessionStorage(SessionStorage):
 
     def delete(self, session):
         full_path = self._get_path(session.get_id())
-        if os.path.isfile(full_path):
+        if os_path.isfile(full_path):
             try:
-                os.remove(full_path)
+                os_remove(full_path)
                 successful = True
             except OSError:
                 log.exception("Can't delete session %r", session.get_id())
@@ -43,7 +45,7 @@ class FileSessionStorage(SessionStorage):
     def load(self, request):
         session_id = self._get_id(request)
         try:
-            if os.path.isfile(self._get_path(session_id)):
+            if os_path.isfile(self._get_path(session_id)):
                 with open(self._get_path(session_id), "r") as cin:
                     session = pickle.load(cin)
             else:
@@ -64,11 +66,11 @@ class FileSessionStorage(SessionStorage):
 
     def _create_session_dir(self):
         try:
-            os.mkdir(self._session_dir, 0755)
+            os_mkdir(self._session_dir, 0755)
         except OSError as exc:
             # already exists
             if exc.errno != 17:
                 raise SessionInitializeError
 
     def _get_path(self, session_id):
-        return os.path.join(self._session_dir, session_id)
+        return os_path.join(self._session_dir, session_id)

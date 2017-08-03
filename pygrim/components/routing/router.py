@@ -1,11 +1,14 @@
 # coding: utf8
 
-from .abstract_router import AbstractRouter
-from .exceptions import RouteAlreadyExists, RouteNotRegistered
-from .route import NoRoute, Route, RouteGroup
+# std
 from logging import getLogger
 from os.path import join as path_join
 from re import compile as re_compile
+
+# local
+from .abstract_router import AbstractRouter
+from .exceptions import RouteAlreadyExists, RouteNotRegistered
+from .route import NoRoute, Route, RouteGroup
 
 log = getLogger("pygrim.components.routing.router")
 

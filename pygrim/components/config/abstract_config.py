@@ -1,10 +1,12 @@
 # coding: utf8
 
-from .default import DEFAULT_CONFIG
-from ..utils.functions import deep_update, ensure_bool, split_to_iterable
-
+# std
 from copy import deepcopy
 from logging import getLogger
+
+# local
+from .default import DEFAULT_CONFIG
+from ..utils.functions import deep_update, ensure_bool, split_to_iterable
 
 log = getLogger("pygrim.components.config.abstract_config")
 

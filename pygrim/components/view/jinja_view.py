@@ -1,8 +1,13 @@
 # coding: utf8
 
-from .abstract_view import AbstractView
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+# std
 from os import getcwd, path
+
+# non-std
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+
+# local
+from .abstract_view import AbstractView
 
 
 def _suppress_none(self, variable):

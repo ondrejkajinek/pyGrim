@@ -1,6 +1,9 @@
 # coding: utf8
 
+# std
 from datetime import date, datetime
+
+# non-std
 from dateutil.parser import parse as parse_dt
 from jinja2.ext import Extension
 

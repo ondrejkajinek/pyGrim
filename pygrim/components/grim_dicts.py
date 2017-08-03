@@ -1,8 +1,10 @@
 # coding: utf8
 
-from .utils import ensure_string
-
+# std
 from logging import getLogger
+
+# local
+from .utils import ensure_string
 
 log = getLogger("pygrim.http.grim_dicts")
 

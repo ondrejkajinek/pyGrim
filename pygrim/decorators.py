@@ -1,16 +1,19 @@
 # coding: utf8
 
+# std
 from __future__ import print_function
-
-from .components.routing import RouteNotFound
-from .components.utils import ensure_tuple
-
 from functools import wraps
 from logging import getLogger
+
+# non-std
 try:
     from uwsgi import log as uwsgi_log
 except ImportError:
     uwsgi_log = print
+
+# local
+from .components.routing import RouteNotFound
+from .components.utils import ensure_tuple
 
 log = getLogger("pygrim.decorators")
 

@@ -1,14 +1,16 @@
 # coding: utf8
 
-from ..utils import (
-    ensure_string, ensure_tuple, fix_trailing_slash, get_method_name, is_regex,
-    remove_trailing_slash
-)
-
+# std
 from logging import getLogger
 from re import compile as re_compile
 from string import upper as string_upper
 from urllib import quote_plus
+
+# local
+from ..utils import (
+    ensure_string, ensure_tuple, fix_trailing_slash, get_method_name, is_regex,
+    remove_trailing_slash
+)
 
 log = getLogger("pygrim.components.routing.route")
 

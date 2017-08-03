@@ -1,6 +1,9 @@
 # coding: utf8
 
-from logging import handlers as logging_handlers
+# std
+from logging import error as log_error, exception as log_exception
+from logging import Formatter, getLogger, handlers
+from logging import NOTSET
 from multiprocessing import Lock
 
 import logging
@@ -12,9 +15,9 @@ def initialize_loggers(config):
     try:
         level = getattr(logging, level)
     except AttributeError:
-        level = logging.NOTSET
+        level = NOTSET
 
-    logger = logging.getLogger()
+    logger = getLogger()
     logger.setLevel(level)
     while logger.handlers:
         logger.removeHandler(logger.handlers[0])
@@ -30,7 +33,7 @@ def initialize_loggers(config):
         )
 
     log_format = log_format.replace("$", "%")
-    log_formatter = logging.Formatter(log_format)
+    log_formatter = Formatter(log_format)
     handler = None
 
     if logger_type == "file":
@@ -40,13 +43,13 @@ def initialize_loggers(config):
     elif logger_type == "syslog":
         socket = config.get("logging:socket", "")
         if socket:
-            handler = logging.handlers.SysLogHandler(address=socket)
+            handler = handlers.SysLogHandler(address=socket)
         else:
             host = config.get("logging:host", "localhost")
             port = config.getint("logging:port", 514)
-            handler = logging.handlers.SysLogHandler(address=(host, port))
+            handler = handlers.SysLogHandler(address=(host, port))
     elif logger_type in ("stdout", "stderr"):
-        handler = logging.handlers.StreamHandler(
+        handler = handlers.StreamHandler(
             stream=getattr(sys, logger_type)
         )
 
@@ -58,14 +61,14 @@ def initialize_loggers(config):
 
     try:
         for logger in (config.get("logging:loggers") or {}).iterkeys():
-            l = logging.getLogger(logger)
+            l = getLogger(logger)
             l.setLevel(config.get("logging:loggers:%s" % logger))
     except KeyError:
-        logging.error(
+        log_error(
             "Missing section for detailed logger settings ([logging.loggers])"
         )
     except:
-        logging.exception("Error loading logging levels")
+        log_exception("Error loading logging levels")
 
 
 def _default_log_format(logger_type):
@@ -84,13 +87,13 @@ def _default_log_format(logger_type):
     return log_format
 
 
-class LockingFileHandler(logging_handlers.WatchedFileHandler):
+class LockingFileHandler(handlers.WatchedFileHandler):
 
     def __init__(self, *args, **kwargs):
-        logging_handlers.WatchedFileHandler.__init__(self, *args, **kwargs)
+        handlers.WatchedFileHandler.__init__(self, *args, **kwargs)
         self._lock = Lock()
 
     def emit(self, *args, **kwargs):
         self._lock.acquire()
-        logging_handlers.WatchedFileHandler.emit(self, *args, **kwargs)
+        handlers.WatchedFileHandler.emit(self, *args, **kwargs)
         self._lock.release()

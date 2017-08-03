@@ -1,5 +1,6 @@
 # coding: utf8
 
+# std
 from collections import Mapping
 from re import compile as re_compile
 from string import strip as string_strip

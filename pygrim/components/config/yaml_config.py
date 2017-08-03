@@ -1,7 +1,9 @@
 # coding: utf8
 
+# std
 from __future__ import print_function
-from .abstract_config import AbstractConfig
+
+# non-std
 try:
     from uwsgi import log as uwsgi_log
 except ImportError:
@@ -10,6 +12,9 @@ except ImportError:
 from yaml import load as yaml_load, parser as yaml_parser
 from yaml import BaseLoader, MappingNode
 from yaml.constructor import ConstructorError
+
+# local
+from .abstract_config import AbstractConfig
 
 
 class PygrimYamlLoader(BaseLoader):

@@ -1,18 +1,21 @@
 # coding: utf8
 
-from ..components.routing import StopDispatch
-from ..components.grim_dicts import ImmutableDict
-from .exceptions import HeadersAlreadySent
-from .request import Request
-from .response import Response
+# std
+from inspect import isgenerator
+from logging import getLogger
 
+# non-std
 try:
     from compatibility import http_responses
 except ImportError:
     from .codes import http_responses
 
-from inspect import isgenerator
-from logging import getLogger
+# local
+from .exceptions import HeadersAlreadySent
+from .request import Request
+from .response import Response
+from ..components.routing import StopDispatch
+from ..components.grim_dicts import ImmutableDict
 
 log = getLogger("pygrim.http.context")
 

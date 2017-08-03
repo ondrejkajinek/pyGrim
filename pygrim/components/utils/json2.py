@@ -1,7 +1,6 @@
 # coding: utf8
 
-from .functions import ensure_string
-
+# std
 from collections import Iterable
 from cStringIO import StringIO
 from datetime import date, datetime, timedelta
@@ -13,6 +12,9 @@ from uuid import UUID
 # import everything from json to current namespace,
 # redefine functions as required
 from json import *
+
+# local
+from .functions import ensure_string
 
 # JSON does not support these values, so we mark them as invalid
 InvalidJsonFloatValues = map(float, ("inf", "-inf", "NaN"))
