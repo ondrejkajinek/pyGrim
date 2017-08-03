@@ -54,9 +54,24 @@ class First(object):
 
     @route("GET", name="flash")
     def flash(self, context):
-        context.flash("info", "First flash message")
-        context.flash("info", "Second flash message")
+        context.flash("info", "First flash message.")
+        context.flash("info", "Second flash message.")
+        context.flash("layout", "This is 'layout' flash.")
         context.template = "flash.jinja"
+
+    @route("GET", name="set_flash")
+    def set_flash(self, context):
+        context.flash(
+            "info", "Current time: %s" % self._model.get_time().isoformat()
+        )
+        context.flash("layout", "This is flash with type 'layout'.")
+        context.view_data.update({
+            "text": (
+                "This page sets two flash messages, one with type 'layout', "
+                "other with type 'info'"
+            )
+        })
+        context.template = "layout.jinja"
 
     @route("GET", "/template", "template")
     @template("layout.jinja")

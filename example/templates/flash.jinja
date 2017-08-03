@@ -1,8 +1,8 @@
 {% extends "layout.jinja" %}
 
-{% block main %}
-	{{ super() }}
-	{% for type, message in flashes %}
+{% block flash %}
+	<p>This page shows all flashes.</p>
+	{% for type, message in context.get_flashes() %}
 		<p>{{ type }}: {{ message }}</p>
 	{% endfor %}
 {% endblock %}

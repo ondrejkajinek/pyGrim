@@ -6,19 +6,57 @@
 <head>
 	<meta charset="utf-8">
 	<title>pyGrim test</title>
+	{{ print_css(css) }}
+	{{ print_js(js_header_sync) }}
+	{{ print_js(js_header_async, sync=False) }}
 </head>
 
 <body>
-	<p>{{ text }}</p>
-	{% if session_text is defined %}
-		<p>Session text: {{ session_text }}</p>
-	{% endif %}
-	<a href="{{ base_url(context) }}">Home</a>
-	<a href="{{ url_for("home") }}">Home 2</a>
-	<a href="{{ url_for("home") }}?jkxd">Home dump</a>
-	<a href="{{ url_for("template_show", {"template": "test"}) }}">Template show test</a>
-	<a href="{{ url_for("template_show", {"template": "test"}) }}?jkxd">Template show test dump</a>
+	{% block main %}
+		<p>{{ text }}</p>
+		{% if session_text is defined %}
+			<p>Session text: {{ session_text }}</p>
+		{% endif %}
+
+		{% block flash %}
+			<p>This page shows only 'layout' flashes.</p>
+			{% for type, message in context.get_flashes(("layout",)) %}
+				<p>{{ type }}: {{ message }}</p>
+			{% endfor %}
+		{% endblock %}
+	{% endblock %}
+	<ul>
+		<li><a href="{{ base_url(context) }}">Home</a></li>
+		<li><a href="{{ url_for("home") }}">Home 2</a></li>
+		<li><a href="{{ url_for("home") }}?jkxd">Home dump</a></li>
+		<li><a href="{{ url_for("second_home") }}">Home (indirect call by another controller)</a></li>
+		<li><a href="{{ url_for("session") }}">Session</a></li>
+		<li><a href="{{ url_for("cookie_set") }}">Set cookie</a></li>
+		<li><a href="{{ url_for("cookie_show") }}">Show cookie</a></li>
+		<li><a href="{{ url_for("flash") }}">Flash</a></li>
+		<li><a href="{{ url_for("set_flash") }}">Set flash</a></li>
+		<li><a href="{{ url_for("template") }}">Template</a></li>
+		<li><a href="{{ url_for("template_rewrite") }}">Template rewrite</a></li>
+		<li><a href="{{ url_for("template_show", {"template": "test"}) }}">Template show test</a></li>
+		<li><a href="{{ url_for("template_show", {"template": "test"}) }}?jkxd">Template show test dump</a></li>
+		<li><a href="{{ url_for("model") }}">Model</a></li>
+		<li><a href="{{ url_for("redirect") }}">Redirect</a></li>
+		<li><a href="{{ url_for("message") }}">Message (empty)</a></li>
+		<li><a href="{{ url_for("message", {"message": "ahoj"}) }}">Message (ahoj)</a></li>
+		<li><a href="{{ url_for("generator") }}">Generator</a></li>
+		<li><a href="{{ url_for("generator_function") }}">Generator function</a></li>
+		<li><a href="{{ url_for("broken_generator_function") }}">Generator function (broken)</a></li>
+		<li><a href="{{ url_for("type_error") }}">Type Error</a></li>
+		<li><a href="{{ url_for("runtime_error") }}">Runtime Error</a></li>
+		<li><a href="/not-found">Not found - generic</a></li>
+		<li><a href="/detail/not-found">Not found - detail</a></li>
+		<li><a href="/runtime_error/not-found">Not found - Runtime Error</a></li>
+		<li><a href="/type_error/not-found">Not found - Type Error</a></li>
+	</ul>
 </body>
+
+{{ print_js(js_footer_sync) }}
+{{ print_js(js_footer_async, sync=False) }}
 
 </html>
 
