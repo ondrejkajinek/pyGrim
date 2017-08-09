@@ -82,7 +82,6 @@ class not_found_handler(error_handler):
     """
     Marks method as not-found handler.
     Such method is called when no route matches requested url.
-    Also exposes method, see method decorator.
     """
 
     def __init__(self, path=None, *args, **kwargs):
@@ -93,6 +92,10 @@ class not_found_handler(error_handler):
 
 
 class route(BaseDecorator):
+    """
+    Marks method as request handler.
+    Such method is called when request matching url and http method is called.
+    """
 
     def __init__(self, methods, pattern=None, name=None, *args, **kwargs):
         self._route = {
