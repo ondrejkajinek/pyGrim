@@ -18,6 +18,15 @@ class First(object):
         context.add_js("/tmp/added_header_async.js", sync=False)
         context.template = "layout.jinja"
 
+    @route("GET", "/double_routed", "double_routed")
+    @route("GET", "/dual_routed", "dual_routed")
+    @route("GET", name="twice_routed")
+    def twice_routed(self, context):
+        context.view_data.update({
+            "text": u"This handle can be accessed via two different routes."
+        })
+        context.template = "layout.jinja"
+
     @route("GET", "/session", "session")
     def session_text(self, context):
         context.session.setdefault("text", "")

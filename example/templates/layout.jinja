@@ -29,6 +29,9 @@
 		<li><a href="{{ base_url(context) }}">Home</a></li>
 		<li><a href="{{ url_for("home") }}">Home 2</a></li>
 		<li><a href="{{ url_for("home") }}?jkxd">Home dump</a></li>
+		<li><a href="{{ url_for("double_routed") }}">Double routed 1</a></li>
+		<li><a href="{{ url_for("dual_routed") }}">Double routed 2</a></li>
+		<li><a href="{{ url_for("twice_routed") }}">Double routed 3</a></li>
 		<li><a href="{{ url_for("second_home") }}">Home (indirect call by another controller)</a></li>
 		<li><a href="{{ url_for("session") }}">Session</a></li>
 		<li><a href="{{ url_for("cookie_set") }}">Set cookie</a></li>
