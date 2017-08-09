@@ -402,17 +402,18 @@ class Server(object):
                 self._process_route_handler(controller, member)
 
     def _process_route_handler(self, controller, handle):
-        kwargs = handle.__dict__.pop("_route")
-        kwargs["handle"] = handle
-        route = Route(**kwargs)
-        route_group = getattr(controller, "_route_group", None)
-        if route_group:
-            route = route_group + route
+        routes = handle.__dict__.pop("_route")
+        for kwargs in routes:
+            kwargs["handle"] = handle
+            route = Route(**kwargs)
+            route_group = getattr(controller, "_route_group", None)
+            if route_group:
+                route = route_group + route
 
-        self._router.map(route)
-        start_log.debug(
-            "Method %r registered to handle route %s", handle, route
-        )
+            self._router.map(route)
+            start_log.debug(
+                "Method %r registered to handle route %s", handle, route
+            )
 
     def _register_router(self):
         router_class = self._find_router_class()

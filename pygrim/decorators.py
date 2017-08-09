@@ -106,7 +106,10 @@ class route(BaseDecorator):
         if self._route["pattern"] is None:
             self._route["pattern"] = "/%s" % func.__name__
 
-        func._route = self._route
+        if hasattr(func, "_route"):
+            func._route.append(self._route)
+        else:
+            func._route = [self._route]
 
 
 class template(BaseDecorator):
