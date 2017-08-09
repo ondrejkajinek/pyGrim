@@ -21,6 +21,7 @@ log = getLogger("pygrim_start.decorators")
 class BaseDecorator(object):
 
     def __init__(self, *args, **kwargs):
+        super(BaseDecorator, self).__init__(*args, **kwargs)
         self._args = args
         self._kwargs = kwargs
 
