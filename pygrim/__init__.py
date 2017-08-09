@@ -10,3 +10,4 @@ from .decorators import (
 )
 from .server import register_session_handler, register_view_class
 from .server import Server
+from .validator import Validator
