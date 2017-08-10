@@ -3,5 +3,5 @@
 
 class DummyView(object):
 
-    def __init__(self, config, extra_functions):
+    def __init__(self, config, **kwargs):
         pass
