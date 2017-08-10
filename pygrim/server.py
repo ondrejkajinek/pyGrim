@@ -341,23 +341,29 @@ class Server(object):
             )
         }
         translations = {}
-        for lang in self.config.get("pygrim:i18n:locales", ()):
+        for lang in self.config.get("pygrim:i18n:locales"):
             i18n_kwargs["languages"] = (lang,)
             try:
                 translation = gettext_translation(**i18n_kwargs)
             except IOError:
-                log.warning(
-                    "No translation file found for language %r in domain %r",
-                    lang, i18n_kwargs["domain"]
-                )
+                msg = "No translation file found for language %r in domain %r"
+                log.error(msg, lang, i18n_kwargs["domain"])
+                raise RuntimeError(msg % (lang, i18n_kwargs["domain"]))
             else:
                 translations[lang] = translation
 
-        if translations:
-            log.debug("Loaded translations: %r", translations)
+        try:
+            default_locale = self.config.get("pygrim:i18n:default_locale")
+        except KeyError:
+            raise
         else:
-            log.warning("i18n is enabled but no valid locales are available!")
+            if default_locale not in translations:
+                msg = "Default locale %r is not enabled. Known locales: %r"
+                log.error(msg, default_locale, translations.keys())
+                raise RuntimeError(msg % (default_locale, translations.keys()))
 
+        log.debug("Loaded translations: %r", translations.keys())
+        log.debug("Default translation: %r", default_locale)
         return translations
 
     def _process_custom_error_handler(self, method, err_cls):

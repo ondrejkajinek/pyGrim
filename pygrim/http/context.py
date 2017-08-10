@@ -31,11 +31,12 @@ class Context(object):
         if self._default_headers:
             self.add_response_headers(self._default_headers)
 
-        self._initialize_localization()
         self._route_params = None
         self._session_loaded = False
 
         self.set_route_params()
+        if self.config.get("pygrim:i18n", False):
+            self._initialize_localization()
 
     def DELETE(self, key=None, fallback=None):
         return self._request_param("DELETE", key, fallback)
@@ -119,8 +120,8 @@ class Context(object):
     def get_language(self):
         return (
             self._language
-            if self._language in self.config.get("pygrim:i18n:locales", ())
-            else self.config.get("pygrim:i18n:default_locale")
+            if self._language in self._languages
+            else self._default_language()
         )
 
     def get_request_host(self):
@@ -218,7 +219,7 @@ class Context(object):
 
     def set_language(self, language):
         language = self._language_map.get(language)
-        if language in self.config.get("pygrim:i18n:locales"):
+        if language in self._languages:
             self._language = language
             self.add_cookie(self._lang_key, self._language, 3600 * 24 * 365)
         else:
@@ -237,18 +238,17 @@ class Context(object):
         self._route_params = ImmutableDict(params or {})
 
     def _default_language(self):
-        return self._language_map.get(
-            self.config.get("pygrim:i18n:default_locale")
-        )
+        return self.config.get("pygrim:i18n:default_locale")
 
     def _initialize_localization(self):
         self._lang_key = self.config.get(
             "pygrim:i18n:cookie_key", "site_language"
         )
+        self._languages = self.config.get("pygrim:i18n:locales")
         self._language_map = {
             lang: lang
             for lang
-            in self.config.get("pygrim:i18n:locales")
+            in self._languages
         }
         self._language_map.update(
             self.config.get("pygrim:i18n:locale_map", {})
