@@ -330,6 +330,36 @@ class Server(object):
 
         self.config = config
 
+    def _load_translations(self):
+        from gettext import translation as gettext_translation
+
+        i18n_kwargs = {
+            "domain": self.config.get("pygrim:i18n:lang_domain"),
+            "localedir": path.join(
+                self.config.get("uwsgi:chdir"),
+                self.config.get("pygrim:i18n:locale_path")
+            )
+        }
+        translations = {}
+        for lang in self.config.get("pygrim:i18n:locales", ()):
+            i18n_kwargs["languages"] = (lang,)
+            try:
+                translation = gettext_translation(**i18n_kwargs)
+            except IOError:
+                log.warning(
+                    "No translation file found for language %r in domain %r",
+                    lang, i18n_kwargs["domain"]
+                )
+            else:
+                translations[lang] = translation
+
+        if translations:
+            log.debug("Loaded translations: %r", translations)
+        else:
+            log.warning("i18n is enabled but no valid locales are available!")
+
+        return translations
+
     def _process_custom_error_handler(self, method, err_cls):
         if err_cls in self._custom_error_handlers:
             raise RuntimeError(
@@ -391,12 +421,17 @@ class Server(object):
     def _register_view(self):
         view_class = self._find_view_class()
 
-        extra_functions = {
-            "print_css": self._jinja_print_css,
-            "print_js": self._jinja_print_js,
-            "url_for": self._jinja_url_for,
+        view_kwargs = {
+            "extra_functions": {
+                "print_css": self._jinja_print_css,
+                "print_js": self._jinja_print_js,
+                "url_for": self._jinja_url_for,
+            }
         }
-        view = view_class(self.config, extra_functions)
+        if self.config.getboolean("pygrim:i18n", False):
+            view_kwargs["translations"] = self._load_translations()
+
+        view = view_class(self.config, **view_kwargs)
         if not isinstance(view, AbstractView):
             raise WrongViewBase(view)
 

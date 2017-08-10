@@ -1,9 +1,13 @@
 # coding: utf8
 
+from os import getcwd, path
+
+from jinja2 import Environment, FileSystemLoader, select_autoescape
+
 from .abstract_view import AbstractView
 from ..utils.json2 import dumps as json_dumps
-from jinja2 import Environment, FileSystemLoader, select_autoescape
-from os import getcwd, path
+
+I18N_EXT_NAME = "jinja2.ext.InternationalizationExtension"
 
 
 def _suppress_none(self, variable):
@@ -37,15 +41,18 @@ class JinjaView(AbstractView):
             ),
             auto_reload=config.get("jinja:environment:auto_reload", True)
         )
-        self._env.filters.update({
-            "url_for": extra_functions["url_for"]
-        })
+        self._translations = translations or {}
+
+        if "url_for" in extra_functions:
+            self._env.filters.update({
+                "url_for": extra_functions["url_for"]
+            })
+
         self._env.globals.update(extra_functions)
         if config.get("jinja:suppress_none"):
             self._env.finalize = _suppress_none
 
         self._initialize_assets(config)
-        self._initialize_extensions(config)
 
     def get_template_directory(self):
         return self._env.loader.searchpath
@@ -77,6 +84,12 @@ class JinjaView(AbstractView):
                 context.view_data.pop("extra_js_footer_async", ())
             ))
         })
+
+        if self._has_i18n() and context.get_language():
+            self._env.install_gettext_translations(
+                self._translations[context.get_language()]
+            )
+
         if self._debug and self._dump_switch in context.GET():
             result = self._handle_dump(context)
         else:
@@ -102,6 +115,9 @@ class JinjaView(AbstractView):
         context.set_response_content_type("application/json")
         return json_dumps(dump_data)
 
+    def _has_i18n(self):
+        return I18N_EXT_NAME in self._env.extensions
+
     def _get_extensions(self, config):
         extensions = set((
             "pygrim.components.jinja_ext.BaseExtension",
@@ -110,6 +126,9 @@ class JinjaView(AbstractView):
         extensions.update(
             config.get("jinja:extensions", ())
         )
+        if config.getboolean("pygrim:i18n", False):
+            extensions.update(("jinja2.ext.i18n",))
+
         return list(extensions)
 
     def _initialize_assets(self, config):
@@ -125,16 +144,3 @@ class JinjaView(AbstractView):
             }
         }
         self._js.update(config.get("assets:js", {}))
-
-    def _initialize_extensions(self, config):
-        if "jinja2.ext.i18n" in self._env.extensions:
-            self._initialize_i18n(config)
-
-    def _initialize_i18n(self, config):
-        import gettext
-        translations = gettext.translation(
-            domain=config.get("jinja:i18n:lang_domain"),
-            localedir=config.get("jinja:i18n:locale_path"),
-            languages=config.get("jinja:i18n:locales")
-        )
-        self._env.install_gettext_translations(translations)
