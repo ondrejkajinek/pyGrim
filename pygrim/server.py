@@ -72,6 +72,7 @@ class Server(object):
     }
 
     KNOWN_VIEW_CLASSES = {
+        "dummy": DummyView,
         "jinja": JinjaView
     }
 
@@ -225,7 +226,11 @@ class Server(object):
         return storage_class
 
     def _find_view_class(self):
-        view_type = self.config.get("view:type")
+        view_type = (
+            self.config.get("view:type")
+            if self.config.getboolean("view:enabled", True)
+            else DummyView
+        )
         try:
             view_class = self.KNOWN_VIEW_CLASSES[view_type]
         except KeyError:
@@ -384,10 +389,7 @@ class Server(object):
         initialize_loggers(config)
 
     def _register_view(self):
-        if self.config.get("view:enabled", True):
-            view_class = self._find_view_class()
-        else:
-            view_class = DummyView
+        view_class = self._find_view_class()
 
         extra_functions = {
             "print_css": self._jinja_print_css,
