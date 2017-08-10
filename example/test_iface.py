@@ -20,6 +20,14 @@ class Test(object):
         context.template = "layout.jinja"
         self.view.display(context)
 
+    @method()
+    def set_en(self, context):
+        self._set_lang(context, "en_GB.UTF-8")
+
+    @method()
+    def set_cs(self, context):
+        self._set_lang(context, "cs_CZ.UTF-8")
+
     @method(
         session=True
     )
@@ -175,6 +183,14 @@ class Test(object):
                 u"500: This method is used when exception is raised "
                 u"and is not handled by any custom_error_handler"
             )
+        })
+        context.template = "layout.jinja"
+        self.view.display(context)
+
+    def _set_lang(self, context, lang):
+        context.set_language(lang)
+        context.view_data.update({
+            "text": u"Setting lang to %r" % lang
         })
         context.template = "layout.jinja"
         self.view.display(context)

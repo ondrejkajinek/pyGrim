@@ -24,9 +24,22 @@ jinja:
    environment:
       autoescape:
          - jinja
-   i18n:
-      enabled: false
    template_path: templates
+
+pygrim:
+   debug: true
+   i18n:
+      default_locale: cs_CZ.UTF-8
+      lang_domain: test
+      locales:
+         - en_GB.UTF-8
+         - cs_CZ.UTF-8
+      locale_map:
+         cs: cs_CZ.UTF-8
+         cs_CZ: cs_CZ.UTF-8
+         en: en_GB.UTF-8
+         en_GB: en_GB.UTF-8
+      locale_path: locales/
 
 session:
    type: file
