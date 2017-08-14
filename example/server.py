@@ -2,7 +2,7 @@
 
 
 # uwsgi and libs
-from pygrim import Server
+from pygrim2 import Server
 from uwsgidecorators import postfork as postfork_decorator
 
 # local
@@ -18,7 +18,7 @@ from second_controller import Second
 class MySessionClass(SessionStorage):
     pass
 
-from pygrim import register_session_handler
+from pygrim2 import register_session_handler
 register_session_handler("myhandler", MySessionClass)
 """
 

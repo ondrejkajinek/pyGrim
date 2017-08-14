@@ -10,7 +10,7 @@ try:
 except ImportError:
     from checkers import StrChkr, IntChkr
 
-from pygrim import route, template, Validator
+from pygrim2 import route, template, Validator
 
 log = getLogger(__file__)
 

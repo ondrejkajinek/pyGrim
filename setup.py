@@ -7,7 +7,8 @@ import os
 from sys import argv, stderr, exit
 
 
-name = "pygrim"
+
+name = "pygrim2"
 desc = "lightweight python frontend framework"
 FAIL = '\033[91m'
 ENDC = '\033[0m'

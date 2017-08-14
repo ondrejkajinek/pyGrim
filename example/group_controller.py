@@ -1,7 +1,7 @@
 # coding: utf8
 
-from pygrim import RouteGroup
-from pygrim import route, template
+from pygrim2 import RouteGroup
+from pygrim2 import route, template
 
 
 class Group(object):

@@ -2,8 +2,8 @@
 
 from re import compile as re_compile
 
-from pygrim import RouteGroup, RoutePassed
-from pygrim import route, template
+from pygrim2 import RouteGroup, RoutePassed
+from pygrim2 import route, template
 from group_controller import Group
 
 

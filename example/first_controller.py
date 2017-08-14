@@ -1,7 +1,7 @@
 # coding: utf8
 
 from logging import getLogger
-from pygrim import error_handler, not_found_handler, route, template
+from pygrim2 import error_handler, not_found_handler, route, template
 from re import compile as re_compile
 from time import time
 
