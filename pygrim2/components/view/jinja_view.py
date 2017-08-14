@@ -7,7 +7,7 @@ from os import getcwd, path
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 # local
-from .abstract_view import AbstractView
+from .abstract_view import BaseView
 
 
 def _suppress_none(self, variable):
@@ -20,7 +20,7 @@ def _suppress_none(self, variable):
 _suppress_none.contextfunction = True
 
 
-class JinjaView(AbstractView):
+class JinjaView(BaseView):
 
     def __init__(self, config, extra_functions):
         self._debug = config.get("jinja:debug", False)
@@ -76,7 +76,7 @@ class JinjaView(AbstractView):
         )
         self._env.install_gettext_translations(translations)
 
-    def _render(self, context):
+    def _render_template(self, context):
         template = self._env.get_template(context.template)
         context.view_data.update({
             "context": context

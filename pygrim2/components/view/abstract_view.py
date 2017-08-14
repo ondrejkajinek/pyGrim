@@ -9,16 +9,16 @@ class AbstractView(object):
         )
 
     def display(self, context):
-        context.set_response_body(self.render(context))
+        context.set_response_body(self._render(context))
 
     def get_template_directory(self):
         return ()
 
-    def render(self, context):
-        self._pre_render(context)
-        result = self._render(context)
-        self._post_render(context)
-        return result
+    def _render(self, context):
+        raise NotImplementedError()
+
+
+class BaseView(AbstractView):
 
     def _initialize_assets(self, config):
         self._css = set(config.get("assets:css", ()))
@@ -63,7 +63,13 @@ class AbstractView(object):
         pass
 
     def _render(self, context):
-        return ""
+        self._pre_render(context)
+        result = self._render_template(context)
+        self._post_render(context)
+        return result
+
+    def _render_template(self, context):
+        raise NotImplementedError()
 
     def _template_check(self, context):
         if not context.template:
