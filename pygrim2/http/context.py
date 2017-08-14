@@ -22,9 +22,10 @@ log = getLogger("pygrim.http.context")
 
 class Context(object):
 
-    def __init__(self, environment, config, model, session_handler):
+    def __init__(self, environment, config, model, session_handler, l10n):
         self.config = config
         self.current_route = None
+        self.l10n = l10n
         self.model = model
         self.template = None
         self.view_data = {}
@@ -40,6 +41,7 @@ class Context(object):
         self._view = None
 
         self.add_response_headers(config.get("context:default_headers", {}))
+        self._initialize_localization()
         self.set_route_params()
 
     def __getattr__(self, key):
@@ -157,6 +159,9 @@ class Context(object):
             else:
                 index += 1
 
+    def get_language(self):
+        return self._language
+
     def get_request_host(self):
         return self._request.environment["host"]
 
@@ -250,6 +255,17 @@ class Context(object):
     def session_loaded(self):
         return self._session_loaded
 
+    def set_language(self, language):
+        if self._check_language(language):
+            self._language = language
+            self.add_cookie(
+                self.l10n.lang_key(), self._language, 3600 * 24 * 365, path="/"
+            )
+
+    def set_temp_language(self, language):
+        if self._check_language(language):
+            self._language = language
+
     def set_response_body(self, body):
         self._response.set_body(body)
 
@@ -264,6 +280,22 @@ class Context(object):
 
     def set_view(self, view):
         self._view = view
+
+    def _check_language(self, language):
+        res = self.l10n.has(language)
+        if res is False:
+            log.warning(
+                "Language %r is not supported, supported languages: %r",
+                language, self.l10n.translations().keys()
+            )
+
+        return res
+
+    def _initialize_localization(self):
+        self._language = self.l10n.select_language(
+            self._request.cookies.copy(),
+            self._request.environment["accept_language"]
+        )
 
     def _request_param(self, method, key=None, fallback=None):
         try:

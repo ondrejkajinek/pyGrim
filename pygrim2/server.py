@@ -20,9 +20,11 @@ from .components.config import AbstractConfig, YamlConfig
 from .components.exceptions import (
     ComponentTypeAlreadyRegistered, ControllerAttributeCollision,
     DuplicateContoller, UnknownView,
-    WrongConfigBase, WrongRouterBase, WrongSessionHandlerBase, WrongViewBase
+    WrongConfigBase, WrongL10nBase, WrongRouterBase, WrongSessionHandlerBase,
+    WrongViewBase
 )
 from .components.grim_dicts import AttributeDict
+from .components.l10n import AbstractL10n, DummyL10n, GettextL10n
 from .components.log import initialize_loggers
 from .components.routing import AbstractRouter, NoRoute, Route, Router
 from .components.routing import (
@@ -83,6 +85,11 @@ class Server(object):
         "yaml": YamlConfig
     }
 
+    KNONW_L10N_CLASSES = {
+        "dummy": DummyL10n,
+        "gettext": GettextL10n
+    }
+
     KNOWN_SESSION_HANDLERS = {
         "dummy": DummySession,
         "file": FileSessionStorage,
@@ -108,7 +115,11 @@ class Server(object):
     def __call__(self, environment, start_response):
         start_response = ResponseWrap(start_response)
         context = Context(
-            environment, self.config, self._model, self._session_handler
+            environment,
+            self.config,
+            self._model,
+            self._session_handler,
+            self._l10n
         )
         context.set_view(self._default_view)
 
@@ -231,6 +242,15 @@ class Server(object):
         else:
             raise RuntimeError("No known config format used to start uwsgi!")
 
+    def _find_l10n_class(self):
+        l10n_type = self.config.get("pygrim:l10n:type", "dummy")
+        try:
+            l10n_class = self.KNONW_L10N_CLASSES[l10n_type]
+        except KeyError:
+            raise RuntimeError("Unknown l10n class: %r.", l10n_type)
+
+        return l10n_class
+
     def _find_router_class(self):
         return Router
 
@@ -333,6 +353,7 @@ class Server(object):
         self._load_config()
         self._register_logger(self.config)
         self._register_router()
+        self._register_l10n()
         self._register_view()
         self._register_session_handler()
         start_log.debug("Basic components initialized.")
@@ -360,6 +381,8 @@ class Server(object):
         except KeyError:
             raise UnknownView(context.get_view())
         else:
+            view.use_translation(self._l10n.get(context.get_language()))
+
             try:
                 view.display(context)
             except:
@@ -415,6 +438,15 @@ class Server(object):
                 "Method %r registered to handle route %s", handle, route
             )
 
+    def _register_l10n(self):
+        l10n_class = self._find_l10n_class()
+        l10n = l10n_class(self.config)
+        if not isinstance(l10n, AbstractL10n):
+            raise WrongL10nBase(l10n)
+
+        self._l10n = l10n
+        start_log.debug("Registered L10n class: %r", self._l10n)
+
     def _register_router(self):
         router_class = self._find_router_class()
         router = router_class()
@@ -442,6 +474,9 @@ class Server(object):
                 "url_for": self._view_url_for,
             }
         }
+        if self.config.getbool("pygrim:l10n", False):
+            view_kwargs["translations"] = self._l10n.translations()
+
         self._views = {}
         for view_name, view_class in self._find_view_classes():
             view = view_class(self.config, **view_kwargs)
