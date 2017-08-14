@@ -31,18 +31,19 @@ buildDeb: sdist gitCheck
 	&& python setup.py changelog \
 	&& cp -r debian build/${VERSIONED_NAME} \
 	&& cd build/${VERSIONED_NAME} \
-	&& $(ENV) debuild -us -uc \
-	&& cd ../.. && python setup.py create_tag
+	&& $(ENV) debuild -us -uc
 
 pkg: deb
 
 debtest: deb
-	scp build/${FULL_PKG_NAME} debian.ats:${PACKAGES_REMOTE_DIR} && \
-		ssh aptly@debian.ats bash pkg-to-testing ${PACKAGES_REMOTE_DIR}${FULL_PKG_NAME} jessie
+	python setup.py create_tag \
+	&& scp build/${FULL_PKG_NAME} debian.ats:${PACKAGES_REMOTE_DIR} \
+	&& ssh aptly@debian.ats bash pkg-to-testing ${PACKAGES_REMOTE_DIR}${FULL_PKG_NAME} jessie
 
 debprod: deb
-	scp build/${FULL_PKG_NAME} debian.ats:${PACKAGES_REMOTE_DIR} && \
-		ssh aptly@debian.ats bash pkg-to-stable ${PACKAGES_REMOTE_DIR}${FULL_PKG_NAME} jessie
+	python setup.py create_tag \
+	&& scp build/${FULL_PKG_NAME} debian.ats:${PACKAGES_REMOTE_DIR} \
+	&& ssh aptly@debian.ats bash pkg-to-stable ${PACKAGES_REMOTE_DIR}${FULL_PKG_NAME} jessie
 
 clean:
 	rm -rf dist
