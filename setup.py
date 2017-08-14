@@ -2,48 +2,74 @@
 # coding: utf8
 
 from setuptools import setup, find_packages
-import subprocess
-import os
-from sys import argv, stderr, exit
+from shlex import split as shlex_split
+from subprocess import call, check_output, CalledProcessError
+from sys import argv, exit, stderr, stdout
 
+ENDC = '\033[0m'
+FAIL = '\033[91m'
+INFO = "\033[34m"
+SUCCESS = "\033[0m"
 
 
 name = "pygrim2"
 desc = "lightweight python frontend framework"
-FAIL = '\033[91m'
-ENDC = '\033[0m'
 
 
-def find_files(where, suffixes=("py",), links=True):
-    files = []
+def changelog():
+    fill_changelog()
+
+
+def check():
+    _need_push_pull()
+    _edit_version()
+    _check_repo()
+
+
+def create_tag():
+    tag = "%s-%s" % (name, get_version())
+    _call_cmd("git reset HEAD")
+    _call_cmd("git add debian/version debian/changelog")
+    _call_cmd('git commit -m "version %s"' % tag)
+    # This will put one commit message per annotation line
+    annotate = """git tag "%s" --annotate -m "$( echo -e "%s" )" """ % (
+        tag, "\n".join(_commit_messages(name))
+    )
+    _call_cmd(annotate, shell=True, split=False)
+    _call_cmd("git push --follow-tags")
+    _info("git tag created")
+
+
+def fill_changelog():
+    write_version_to_changelog = (
+        "%s dch -v %s --distribution testing COMMIT MESSASGES"
+    ) % (_dch_base(), get_version())
+    _call_cmd(write_version_to_changelog, shell=True, split=False)
+    last_tag = _get_last_tag()
+    _info("Last tag: %s" % last_tag)
+
     try:
-        for f in os.listdir(where):
-            full_path = os.path.join(where, f)
-
-            if not os.path.isfile(full_path):
-                stderr.write("not file %r\n" % (f,))
-                continue
-            # endif
-            if not links and os.path.islink(full_path):
-                stderr.write("link %r\n" % (f,))
-                continue
-            # endif
-            if f.rsplit(".", 1)[-1] not in suffixes:
-                stderr.write("not suffix %r\n" % (f,))
-                continue
-            # endif
-            stderr.write("!add %r\n" % (f,))
-            files.append(full_path)
-        # endif
-    except OSError:
-        stderr.write(
-            FAIL + "Err on dir %s/%s" % (os.getcwd(), where) + ENDC + "\n")
-        raise
-    return files
+        for message in _commit_messages():
+            _write_message(message)
+    except CalledProcessError as ex:
+        res = _question(
+            """[?]\tIt seems no commit happened since last tag.
+            Continue anyway? [y]es, [n]o (default)"""
+        )
+        if res.lower() not in ("y", "yes"):
+            raise ex
 
 
-def get_git_val(*val):
-    return subprocess.check_output(["git"] + list(val)).strip()
+def get_author():
+    return _check_cmd("git config user.name")
+
+
+def get_author_email():
+    return _check_cmd("git config user.email")
+
+
+def get_package_name():
+    return name
 
 
 def get_version():
@@ -53,120 +79,118 @@ def get_version():
     return version
 
 
-def get_package_name():
-    return name
+def _call_cmd(cmd, shell=False, split=True):
+    call(shlex_split(cmd) if split else cmd, shell=shell)
 
 
-def call_cmd(cmd):
-    subprocess.call([cmd], shell=True)
+def _check_cmd(cmd, shell=False):
+    return check_output(shlex_split(cmd), shell=shell).strip()
 
 
-def check_cmd(cmd):
-    return subprocess.check_output([cmd], shell=True).strip()
-
-
-def current_branch():
-    return check_cmd('git name-rev --name-only HEAD')
-
-
-def need_push_pull():
-    call_cmd("git fetch")
-    behind = check_cmd("git rev-list HEAD..origin/{}".format(current_branch()))
-    ahead = check_cmd("git rev-list origin/{}..HEAD".format(current_branch()))
-    if ahead:
-        print "[E]\t nemas pushnuto"
-        raise Exception('je treba pushnout')
-    if behind:
-        print "[E]\t nemas pulnuto"
-        raise Exception('je treba pullnout')
-
-
-def edit_version():
-    call_cmd('${EDITOR} debian/version')
-
-
-def check_repo():
+def _check_repo():
     version = get_version()
-    cmd = """ssh debian.ats "aptly package search \\
-            \'{pkg_name}, \$Version ({operator}{version})\'" """
-    current = cmd.format(
-        pkg_name=name, version=version, operator="="
-    )
-    is_current = check_cmd(current)
+    cmd = """ssh debian.ats "aptly package search '%s (%s%s)'" """
+    current = cmd % (name, "=", version)
+    is_current = _check_cmd(current)
     if is_current:
-        print "[E]\ttato verze uz v repu je"
-        raise Exception("tato verze uz v repu je")
+        _error("This version is already in repository!")
+        raise RuntimeError("This version is already in repo!")
     else:
-        print "[OK]\ttato verze v repu neni, muzu pokracovat"
+        _success("This version is not in repository, proceeding.")
 
     newer = cmd.format(
         pkg_name=name, version=version, operator=">"
     )
-    is_newer = check_cmd(newer)
+    is_newer = _check_cmd(newer)
     if is_newer:
-        text = """[?]\tv repu jsou uz novejsi verze nez {version}\n {newer},
-        pokracovat? [a]no, [n]e - vychozi """.format(
-            version=version, newer=is_newer)
-        r = raw_input(text)
-        if r != "a":
-            raise Exception('odmitnuto pridani starsi verze')
-    else:
-        print "[OK]\tnovejsi verze v repu neni, pokracuju"
-
-
-def fill_changelog():
-    write_version_to_changelog = \
-        "DEBFULLNAME='{author}' dch -v {version} --distribution testing COMMIT MESSASGES".format(
-            author=get_git_val('config', 'user.name'), version=get_version()
-        )
-    call_cmd(write_version_to_changelog)
-    tag_cmd = "git describe --tags --match '{pkg_name}*' --abbrev=0".format(
-        pkg_name=name)
-    last_tag = check_cmd(tag_cmd)
-    last_tag = last_tag.strip()
-    print "[I]\tlast tag " + last_tag
-
-    try:
-        messages_cmd = "git log {last_tag}..HEAD --format='%s' . |\
-            grep -v 'Merge branch' | \
-            grep -v 'version {pkg}'".format(last_tag=last_tag, pkg=name)
-        commit_messages = check_cmd(messages_cmd)
-        commit_messages = commit_messages.strip()
-        messages_list = commit_messages.split('\n')
-        for message in messages_list:
-            print "[I]\t zapisuju commit message {} do changelogu".format(
-                message)
-            call_cmd("DEBFULLNAME='{author}' dch -a '{message}'".format(
-                message=message, author=get_git_val('config', 'user.name')
-                )
+        r = _question(
+            """There are newer version than %s in repository (%s),
+            do you wish to proceed? [y]es, [n]o (default)""" % (
+                version, is_newer
             )
-    except subprocess.CalledProcessError as ex:
-        res = raw_input("""[?]\tzda se, ze od posledniho tagu nejsou zandne commity
-            presto pokracovat [a]no, [n]e default
-        """)
-        if res != "a":
-            raise ex
-        return
+        )
+        if r.lower() not in ("y", "yes"):
+            raise RuntimeError("Old verion upload was canceled by user.")
+    else:
+        _success("This would be the latest version in repo, proceeding.")
 
 
-def create_tag():
-    tag = "{}-{}".format(name, get_version())
-    call_cmd("git reset HEAD")
-    call_cmd("git add debian/version debian/changelog")
-    call_cmd('git commit -m "version {tag}"'.format(tag=tag))
-    call_cmd('git tag "{tag}"'.format(tag=tag))
-    # TODO: when we annotate tags, use --follow-tags prior to push origin <tag>
-    # call_cmd("git push --follow-tags")
-    call_cmd("git push origin {tag}".format(tag=tag))
-    print "tag done"
+def _commit_messages():
+    messages_cmd = """git log {}..HEAD --format="%s" .""".format(
+        _get_last_tag()
+    )
+    for message in _check_cmd(messages_cmd).split("\n"):
+        if not (
+            "Merge branch" in message or
+            "version %s" % name in message
+        ):
+            yield message
+
+
+def _current_branch():
+    return _check_cmd('git name-rev --name-only HEAD')
+
+
+def _dch_base():
+    return """DEBFULLNAME="{author}" DEBEMAIL="{email}" """.format(
+        author=get_author(), email=get_author_email()
+    )
+
+
+def _edit_version():
+    _call_cmd("${EDITOR} debian/version", shell=True, split=False)
+
+
+def _error(msg):
+    stderr.write("%s%s%s\n" % (FAIL, msg, ENDC))
+
+
+def _get_last_tag():
+    has_tag = bool(_check_cmd("git tag -l %s*" % name))
+    if has_tag is False:
+        _call_cmd("git tag %s__preinitial__" % name)
+
+    return _check_cmd("git describe --tags --match '%s*' --abbrev=0" % name)
+
+
+def _info(msg):
+    stdout.write("%s%s%s\n" % (INFO, msg, ENDC))
+
+
+def _need_push_pull():
+    _call_cmd("git fetch")
+    behind = _check_cmd("git rev-list HEAD..origin/%s" % _current_branch())
+    ahead = _check_cmd("git rev-list origin/%s..HEAD" % _current_branch())
+    if ahead:
+        _error("You haven't `git push`ed!")
+        raise RuntimeError("`git push` required")
+    if behind:
+        _error("You haven't `git pull`ed!")
+        raise RuntimeError("`git pull` required")
+
+
+def _question(msg):
+    _info("[?]\t" + msg)
+    return raw_input()
+
+
+def _success(msg):
+    stdout.write("%s%s%s\n" % (SUCCESS, msg, ENDC))
+
+
+def _write_message(message):
+    _info("Writing commit message '%s' to changelog" % message)
+    dch = """%s dch -a "%s" """ % (_dch_base(), message)
+    _call_cmd(dch, shell=True, split=False)
 
 
 # # # start of specific part
 # # # end of specific part
 methods = {
+    "check": (check, (), {}),
     "version": (get_version, (), {}),
-    "author": (get_git_val, ('config', 'user.name'), {}),
-    "author_email": (get_git_val, ('config', 'user.email'), {}),
+    "author": (get_author, (), {}),
+    "author_email": (get_author_email, (), {}),
     "name": (get_package_name, (), {}),
     "create_tag": (create_tag, (), {}),
     "fill_changelog": (fill_changelog, (), {}),
@@ -176,20 +200,13 @@ if __name__ == "__main__":
         method, args, kwargs = methods[argv[1]]
         print method(*args, **kwargs)
         exit(0)
-    elif argv[1] == "check":
-        need_push_pull()
-        edit_version()
-        check_repo()
-        fill_changelog()
-        create_tag()
-        exit(0)
     else:
         args = {
             "name": name,
             "version": get_version(),
             "description": desc,
-            "author": get_git_val("config", "user.name"),
-            "author_email": get_git_val("config", "user.email"),
+            "author": get_author(),
+            "author_email": get_author_email(),
             "url": "http://www.grandit.cz/",
             "packages": find_packages(),
             "install_requires": (
