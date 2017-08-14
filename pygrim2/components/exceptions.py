@@ -2,6 +2,7 @@
 
 # local
 from .config import AbstractConfig
+from .l10n import AbstractL10n
 from .routing.router import AbstractRouter
 from .session.session_storage import SessionStorage
 from .utils import get_class_name, get_instance_name
@@ -66,6 +67,12 @@ class WrongConfigBase(WrongComponentBase):
 
     def __init__(self, instance):
         super(WrongConfigBase, self).__init__(instance, AbstractConfig)
+
+
+class WrongL10nBase(WrongComponentBase):
+
+    def __init__(self, instance):
+        super(WrongL10nBase, self).__init__(instance, AbstractL10n)
 
 
 class WrongRouterBase(WrongComponentBase):

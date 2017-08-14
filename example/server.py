@@ -10,6 +10,7 @@ from model import Model
 from first_controller import First
 from group_controller import Group
 from inner_group_controller import InnerGroup
+from locale_controller import LocaleController
 from second_controller import Second
 
 
@@ -27,7 +28,8 @@ controllers = (
     First,
     Second,
     Group,
-    InnerGroup
+    InnerGroup,
+    LocaleController
 )
 
 
