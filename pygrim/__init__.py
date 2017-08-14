@@ -1,10 +1,6 @@
 # coding: utf8
 
-from . import decorators, server
-
-# compat, remove asap
-from .components.routing import Route, RouteGroup, RoutePassed
-from .components import session
+from .components.routing import RouteGroup, RoutePassed
 from .decorators import (
     error_handler, not_found_handler, route, template, uses_data
 )
