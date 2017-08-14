@@ -24,7 +24,6 @@ class JinjaView(AbstractView):
 
     def __init__(self, config, extra_functions):
         self._debug = config.get("jinja:debug", False)
-        auto_reload = config.get("jinja:environment:auto_reload", True)
         self._env = Environment(
             extensions=self._get_extensions(config),
             loader=FileSystemLoader(
@@ -39,7 +38,7 @@ class JinjaView(AbstractView):
                     ("jinja",)
                 )
             ),
-            auto_reload=auto_reload,
+            auto_reload=config.get("jinja:environment:auto_reload", True),
         )
         self._env.filters.update({
             "url_for": extra_functions["url_for"]
