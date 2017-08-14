@@ -33,7 +33,7 @@ def create_tag():
     _call_cmd('git commit -m "version %s"' % tag)
     # This will put one commit message per annotation line
     annotate = """git tag "%s" --annotate -m "$( echo -e "%s" )" """ % (
-        tag, "\n".join(_commit_messages(name))
+        tag, "\n".join(_commit_messages())
     )
     _call_cmd(annotate, shell=True, split=False)
     _call_cmd("git push --follow-tags")
