@@ -58,7 +58,7 @@ install:
 
 linkItems:
 	( \
-		ln -sf `pwd`/pygrim /usr/local/lib/python${PY_VERSION}/dist-packages/pygrim  \
+		ln -sf `pwd`/pygrim2 /usr/local/lib/python${PY_VERSION}/dist-packages/pygrim2  \
     )
 
 postinstall:
