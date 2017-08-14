@@ -17,12 +17,13 @@ desc = "lightweight python frontend framework"
 
 
 def changelog():
-    fill_changelog()
+    _fill_changelog()
+    _edit_file("debian/changelog")
 
 
 def check():
     _need_push_pull()
-    _edit_version()
+    _edit_file("debian/version")
     _check_repo()
 
 
@@ -38,26 +39,6 @@ def create_tag():
     _call_cmd(annotate, shell=True, split=False)
     _call_cmd("git push --follow-tags")
     _info("git tag created")
-
-
-def fill_changelog():
-    write_version_to_changelog = (
-        "%s dch -v %s --distribution testing COMMIT MESSASGES"
-    ) % (_dch_base(), get_version())
-    _call_cmd(write_version_to_changelog, shell=True, split=False)
-    last_tag = _get_last_tag()
-    _info("Last tag: %s" % last_tag)
-
-    try:
-        for message in _commit_messages():
-            _write_message(message)
-    except CalledProcessError as ex:
-        res = _question(
-            """[?]\tIt seems no commit happened since last tag.
-            Continue anyway? [y]es, [n]o (default)"""
-        )
-        if res.lower() not in ("y", "yes"):
-            raise ex
 
 
 def get_author():
@@ -98,9 +79,7 @@ def _check_repo():
     else:
         _success("This version is not in repository, proceeding.")
 
-    newer = cmd.format(
-        pkg_name=name, version=version, operator=">"
-    )
+    newer = cmd % (name, ">", version)
     is_newer = _check_cmd(newer)
     if is_newer:
         r = _question(
@@ -137,12 +116,32 @@ def _dch_base():
     )
 
 
-def _edit_version():
-    _call_cmd("${EDITOR} debian/version", shell=True, split=False)
+def _edit_file(filename):
+    _call_cmd("${EDITOR} %s" % filename, shell=True, split=False)
 
 
 def _error(msg):
     stderr.write("%s%s%s\n" % (FAIL, msg, ENDC))
+
+
+def _fill_changelog():
+    write_version_to_changelog = (
+        "%s dch -v %s --distribution testing COMMIT MESSASGES"
+    ) % (_dch_base(), get_version())
+    _call_cmd(write_version_to_changelog, shell=True, split=False)
+    last_tag = _get_last_tag()
+    _info("Last tag: %s" % last_tag)
+
+    try:
+        for message in _commit_messages():
+            _write_message(message)
+    except CalledProcessError as ex:
+        res = _question(
+            """[?]\tIt seems no commit happened since last tag.
+            Continue anyway? [y]es, [n]o (default)"""
+        )
+        if res.lower() not in ("y", "yes"):
+            raise ex
 
 
 def _get_last_tag():
@@ -193,12 +192,12 @@ methods = {
     "author_email": (get_author_email, (), {}),
     "name": (get_package_name, (), {}),
     "create_tag": (create_tag, (), {}),
-    "fill_changelog": (fill_changelog, (), {}),
+    "changelog": (changelog, (), {}),
 }
 if __name__ == "__main__":
     if argv[1] in methods.keys():
         method, args, kwargs = methods[argv[1]]
-        print method(*args, **kwargs)
+        method(*args, **kwargs)
         exit(0)
     else:
         args = {

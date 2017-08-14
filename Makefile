@@ -24,7 +24,7 @@ deb: prePackCheck clean buildDeb
 gitCheck:
 	python setup.py check
 
-buildDeb: sdist gitCheck
+buildDeb: gitCheck sdist
 	mkdir build \
 	&& cp dist/${ARCHIVE} build/${ORIG_ARCHIVE} \
 	&& tar -xf build/${ORIG_ARCHIVE} -C build/ \
@@ -50,7 +50,7 @@ clean:
 	rm -rf build
 	rm -rf *.egg-info
 
-sdist:
+sdist: gitCheck
 	python setup.py sdist
 
 install:
