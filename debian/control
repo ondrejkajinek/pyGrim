@@ -1,12 +1,12 @@
-Source: pygrim
-Maintainer: Lukoko <lukoko@lukoko.name>
+Source: pygrim2
+Maintainer: OndraK <ondrej.kajinek@gmail.com>
 Section: python
 Priority: optional
 Build-Depends: python-setuptools (>= 0.6b3), python-all (>= 2.6.6-3), debhelper (>= 7)
 Standards-Version: 3.9.4
 X-Python-Version: >= 2.7
 
-Package: pygrim
+Package: pygrim2
 Architecture: all
 Depends: ${misc:Depends}, ${python:Depends}, python-dev, python-pip
 X-Python-Version: >= 2.7
