@@ -503,7 +503,7 @@ class Server(object):
         )
 
     def _view_disabled(self):
-        # it is a bit faster than self._views == ["dummy"]
+        # it is a bit faster than self._views.keys() == ["dummy"]
         return len(self._views) == 1 and "dummy" in self._views
 
     # jinja extra methods
