@@ -1,3 +1,64 @@
+pygrim (2.0.0) testing; urgency=medium
+
+  * COMMIT MESSASGES
+
+ -- OndraK <ondrej.kajinek@gmail.com>  Mon, 14 Aug 2017 15:41:20 +0200
+
+pygrim (2.0.0) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * Controllers implemented -- instead of inheriting from server, logic is
+    done in controllers that are injected to server instance. There are
+    several attributes, that are reserved and cannot be used in controller
+    class: _controllers (reference to stack of registered controllers),
+    _router, _model.
+  * HEAD requests are now implemented not to send any data. However, it will
+    still do all operations that would lead to obtaining full set of data that
+    would be used for GET request -- thus it will lead to a state that is as
+    close as possible
+  * Request handling now only needs to set data for view, calling
+    view.render() is done by server. RawView class can be used to provide "no
+    render". Original server methods display() and redirect() are now removed
+    -- server is not accessible in request handling any more.
+  * Different handles can use different view instances.
+  * Request handles are no longer exposed with @method decorator (or its
+    children).
+  * Routes are now registered with @route decorator. Its parameters are passed
+    to Route. Multiple @route decorators can be used to handle multiple
+    different requests with a single handle.
+  * Decorators reworked: @error_handler now catches specified exception
+    (defaults to BaseException); @not_found_handler is a special case of
+    @error_handler that catches pygrim's NotFound; @method and all @*_method
+    decorators are removed as it is no longer required to expose handles.
+    @template_display renamed to @template.
+  * RouteGroups are registered via controllers' (optional) static attribute
+    _route_group.
+  * Implemented model support -- model can be registered to server instance
+    and is passed to Context. There are no requirements or restrictions laid
+    upon the structure or interface of model.
+  * Session is now loaded when it is accessed for the first time. Passing
+    'session=True' to any decorator is now gone.
+  * Flash messages interface is moved to context. Flash messages are removed
+    when they are read from session. Since session is saved only when no error
+    occurs, then old messages are removed and new ones are saved when request
+    handling runs without any error.
+  * Events from server start are now logged on level 'pygrim_start' instead of
+    'pygrim' (which is used for runtime logging).
+  * Validators interface implemented -- simple interface to register which
+    variables to obtain from method parameters and which validator should be
+    called upon them. Validators themselves are not part of PyGrim. Validator
+    should implement __call__(value, variable_name, history) to validate a
+    value. 'history' is used for nested validators (e.g. dict validator), it
+    becames a part of error message when input is invalid and should specify
+    which variable is not valid.
+  * Proper support for l10n implemented, with tools to simply switch language
+  	 and load previously selected language.
+  * Exception 'DispatchFinished' renamed to 'StopDispatch'. It is raised by
+    context.redirect()
+  * Example updated.
+
+ -- OndraK <ondrej.kajinek@gmail.com>  Mon, 14 Aug 2017 10:11:55 +0200
+
 pygrim (0.1.22) testing; urgency=medium
 
   * COMMIT MESSASGES
