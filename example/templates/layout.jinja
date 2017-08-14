@@ -46,6 +46,9 @@
 		<li><a href="{{ url_for("redirect") }}">Redirect</a></li>
 		<li><a href="{{ url_for("message") }}">Message (empty)</a></li>
 		<li><a href="{{ url_for("message", {"message": "ahoj"}) }}">Message (ahoj)</a></li>
+		<li><a href="{{ url_for("validated") }}?first=hello&second=10">Validated (ok)</a></li>
+		<li><a href="{{ url_for("validated") }}?first=hello">Validated (ok 2)</a></li>
+		<li><a href="{{ url_for("validated") }}?first=hello&second=world">Validated (ko)</a></li>
 		<li><a href="{{ url_for("generator") }}">Generator</a></li>
 		<li><a href="{{ url_for("generator_function") }}">Generator function</a></li>
 		<li><a href="{{ url_for("broken_generator_function") }}">Generator function (broken)</a></li>

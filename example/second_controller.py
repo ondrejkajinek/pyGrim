@@ -1,10 +1,16 @@
 # coding: utf8
 
-
 from logging import getLogger
-from pygrim import route, template
 from re import compile as re_compile
 from time import sleep
+from sys import exc_info
+
+try:
+    from checkerslib import StrChkr, IntChkr
+except ImportError:
+    from checkers import StrChkr, IntChkr
+
+from pygrim import route, template, Validator
 
 log = getLogger(__file__)
 
@@ -76,3 +82,26 @@ class Second(object):
 
         context.set_view("raw")
         context.set_response_body(fction)
+
+    @route("GET", name="validated")
+    @template("layout.jinja")
+    def validated(self, context):
+        validator = Validator(
+            context.GET,
+            (
+                ("first", StrChkr()),
+                ("second", IntChkr(optional=True))
+            )
+        )
+        try:
+            output = "VALID INPUT: %r" % validator.validate()
+        except:
+            log.exception("Validation error: %s", exc_info()[1])
+            output = "INVALID INPUT: %r" % {
+                "first": context.GET("first"),
+                "second": context.GET("second")
+            }
+
+        return {
+            "text": output
+        }
