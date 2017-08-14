@@ -6,7 +6,7 @@ from .abstract_view import BaseView
 
 class RawView(BaseView):
 
-    def __init__(self, config, extra_functions):
+    def __init__(self, config, **kwargs):
         self._initialize_view(config)
 
     def _render_template(self, context):

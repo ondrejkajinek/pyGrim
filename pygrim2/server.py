@@ -435,14 +435,16 @@ class Server(object):
         initialize_loggers(config)
 
     def _register_view(self):
-        extra_functions = {
-            "print_css": self._view_print_css,
-            "print_js": self._view_print_js,
-            "url_for": self._view_url_for,
+        view_kwargs = {
+            "extra_functions": {
+                "print_css": self._view_print_css,
+                "print_js": self._view_print_js,
+                "url_for": self._view_url_for,
+            }
         }
         self._views = {}
         for view_name, view_class in self._find_view_classes():
-            view = view_class(self.config, extra_functions)
+            view = view_class(self.config, **view_kwargs)
             if not isinstance(view, AbstractView):
                 raise WrongViewBase(view)
 

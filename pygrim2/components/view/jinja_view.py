@@ -22,7 +22,7 @@ _suppress_none.contextfunction = True
 
 class JinjaView(BaseView):
 
-    def __init__(self, config, extra_functions):
+    def __init__(self, config, extra_functions, **kwargs):
         self._debug = config.get("jinja:debug", False)
         self._env = Environment(
             extensions=self._get_extensions(config),

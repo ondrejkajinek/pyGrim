@@ -7,7 +7,7 @@ from ..utils.json2 import dumps as json_dumps
 
 class JsonView(BaseView):
 
-    def __init__(self, config, _unused):
+    def __init__(self, config, **kwargs):
         self._initialize_view(config)
 
     def _render_template(self, context):
