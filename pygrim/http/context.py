@@ -221,7 +221,9 @@ class Context(object):
         language = self._language_map.get(language)
         if language in self._languages:
             self._language = language
-            self.add_cookie(self._lang_key, self._language, 3600 * 24 * 365)
+            self.add_cookie(
+                self._lang_key, self._language, 3600 * 24 * 365, path="/"
+            )
         else:
             log.warning("Language %r is not supported", language)
 
