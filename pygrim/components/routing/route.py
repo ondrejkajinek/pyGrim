@@ -77,7 +77,7 @@ class Route(RouteObject):
         )
 
     def requires_session(self):
-        return self._handle._session
+        return getattr(self._handle, "_session", False)
 
     def set_pattern(self, pattern):
         self._pattern = pattern
