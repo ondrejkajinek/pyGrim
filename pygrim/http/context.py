@@ -273,9 +273,15 @@ class Context(object):
         return value
 
     def _select_language(self):
-        language = self._language_map.get(self._request.cookies.get(
-            self._lang_key
-        ))
+        cookieval = self._request.cookies.get(self._lang_key)
+        if isinstance(cookieval, list):
+            if cookieval:
+                cookieval = cookieval[-1]
+            else:
+                cookieval = None
+            # endif
+        # endif
+        language = self._language_map.get(cookieval)
         if language is None:
             try:
                 accept_languages = (
