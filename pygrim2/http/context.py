@@ -23,7 +23,6 @@ log = getLogger("pygrim.http.context")
 class Context(object):
 
     def __init__(self, environment, config, model, session_handler, l10n):
-        self.config = config
         self.current_route = None
         self.l10n = l10n
         self.model = model
@@ -38,6 +37,7 @@ class Context(object):
         self._session_handler = session_handler
         super(Context, self).__setattr__("_session_loaded", False)
         self._suppress_port = config.getbool("context:suppress_port", False)
+        self._uses_flash = config.getbool("session:flash", True)
         self._view = None
 
         self.add_response_headers(config.get("context:default_headers", {}))
@@ -238,10 +238,7 @@ class Context(object):
                 "Session handler: %r loaded session: %r",
                 type(self._session_handler), self.session
             )
-            if (
-                self.config.getbool("session:flash", True) and
-                "_flash" not in self.session
-            ):
+            if self._uses_flash and "_flash" not in self.session:
                 self.session["_flash"] = []
 
     def redirect(self, url, status=302):
