@@ -30,4 +30,12 @@ class Session(dict):
         self['_flashes'] = []
 
     def need_cookie(self):
-        return self._new
+        # if there will be "return self._new" than cookie is only created and
+        #   expire is not extended so the cookie lives only the time given
+        #   in initialization. AND THATS BAD!!!
+
+        # if we want something better we should provide some more time
+        #   information about creation and changes but we need to store
+        #   it localy in the session, because HTPP cookies are sent from
+        #   browser stripped only to value
+        return True
