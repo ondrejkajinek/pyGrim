@@ -72,6 +72,7 @@ class Server(object):
     }
 
     KNOWN_VIEW_CLASSES = {
+        "dummy": DummyView,
         "jinja": JinjaView
     }
 
@@ -225,7 +226,11 @@ class Server(object):
         return storage_class
 
     def _find_view_class(self):
-        view_type = self.config.get("view:type")
+        view_type = (
+            self.config.get("view:type")
+            if self.config.getboolean("view:enabled", True)
+            else DummyView
+        )
         try:
             view_class = self.KNOWN_VIEW_CLASSES[view_type]
         except KeyError:
@@ -325,6 +330,42 @@ class Server(object):
 
         self.config = config
 
+    def _load_translations(self):
+        from gettext import translation as gettext_translation
+
+        i18n_kwargs = {
+            "domain": self.config.get("pygrim:i18n:lang_domain"),
+            "localedir": path.join(
+                self.config.get("uwsgi:chdir"),
+                self.config.get("pygrim:i18n:locale_path")
+            )
+        }
+        translations = {}
+        for lang in self.config.get("pygrim:i18n:locales"):
+            i18n_kwargs["languages"] = (lang,)
+            try:
+                translation = gettext_translation(**i18n_kwargs)
+            except IOError:
+                msg = "No translation file found for language %r in domain %r"
+                log.error(msg, lang, i18n_kwargs["domain"])
+                raise RuntimeError(msg % (lang, i18n_kwargs["domain"]))
+            else:
+                translations[lang] = translation
+
+        try:
+            default_locale = self.config.get("pygrim:i18n:default_locale")
+        except KeyError:
+            raise
+        else:
+            if default_locale not in translations:
+                msg = "Default locale %r is not enabled. Known locales: %r"
+                log.error(msg, default_locale, translations.keys())
+                raise RuntimeError(msg % (default_locale, translations.keys()))
+
+        log.debug("Loaded translations: %r", translations.keys())
+        log.debug("Default translation: %r", default_locale)
+        return translations
+
     def _process_custom_error_handler(self, method, err_cls):
         if err_cls in self._custom_error_handlers:
             raise RuntimeError(
@@ -384,17 +425,19 @@ class Server(object):
         initialize_loggers(config)
 
     def _register_view(self):
-        if self.config.get("view:enabled", True):
-            view_class = self._find_view_class()
-        else:
-            view_class = DummyView
+        view_class = self._find_view_class()
 
-        extra_functions = {
-            "print_css": self._jinja_print_css,
-            "print_js": self._jinja_print_js,
-            "url_for": self._jinja_url_for,
+        view_kwargs = {
+            "extra_functions": {
+                "print_css": self._jinja_print_css,
+                "print_js": self._jinja_print_js,
+                "url_for": self._jinja_url_for,
+            }
         }
-        view = view_class(self.config, extra_functions)
+        if self.config.getboolean("pygrim:i18n", False):
+            view_kwargs["translations"] = self._load_translations()
+
+        view = view_class(self.config, **view_kwargs)
         if not isinstance(view, AbstractView):
             raise WrongViewBase(view)
 

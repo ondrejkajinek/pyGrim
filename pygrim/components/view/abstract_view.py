@@ -3,7 +3,7 @@
 
 class AbstractView(object):
 
-    def __init__(self, config, extra_functions):
+    def __init__(self, config, **kwargs):
         raise NotImplementedError(
             "Can't instantiate View interface, use its implementation"
         )

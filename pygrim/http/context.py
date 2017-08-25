@@ -30,10 +30,13 @@ class Context(object):
         self._response = Response()
         if self._default_headers:
             self.add_response_headers(self._default_headers)
+
         self._route_params = None
         self._session_loaded = False
 
         self.set_route_params()
+        if self.config.get("pygrim:i18n", False):
+            self._initialize_localization()
 
     def DELETE(self, key=None, fallback=None):
         return self._request_param("DELETE", key, fallback)
@@ -113,6 +116,13 @@ class Context(object):
 
     def get_cookies(self):
         return self._request.cookies.copy()
+
+    def get_language(self):
+        return (
+            self._language
+            if self._language in self._languages
+            else self._default_language()
+        )
 
     def get_request_host(self):
         return self._request.environment["host"]
@@ -207,6 +217,16 @@ class Context(object):
     def session_loaded(self):
         return self._session_loaded
 
+    def set_language(self, language):
+        language = self._language_map.get(language)
+        if language in self._languages:
+            self._language = language
+            self.add_cookie(
+                self._lang_key, self._language, 3600 * 24 * 365, path="/"
+            )
+        else:
+            log.warning("Language %r is not supported", language)
+
     def set_response_body(self, body):
         self._response.body = body
 
@@ -218,6 +238,24 @@ class Context(object):
 
     def set_route_params(self, params=None):
         self._route_params = ImmutableDict(params or {})
+
+    def _default_language(self):
+        return self.config.get("pygrim:i18n:default_locale")
+
+    def _initialize_localization(self):
+        self._lang_key = self.config.get(
+            "pygrim:i18n:cookie_key", "site_language"
+        )
+        self._languages = self.config.get("pygrim:i18n:locales")
+        self._language_map = {
+            lang: lang
+            for lang
+            in self._languages
+        }
+        self._language_map.update(
+            self.config.get("pygrim:i18n:locale_map", {})
+        )
+        self._language = self._select_language()
 
     def _request_param(self, method, key=None, fallback=None):
         try:
@@ -233,3 +271,30 @@ class Context(object):
             value = None
 
         return value
+
+    def _select_language(self):
+        cookieval = self._request.cookies.get(self._lang_key)
+        if isinstance(cookieval, list):
+            if cookieval:
+                cookieval = cookieval[-1]
+            else:
+                cookieval = None
+            # endif
+        # endif
+        language = self._language_map.get(cookieval)
+        if language is None:
+            try:
+                accept_languages = (
+                    self._language_map.get(lang.split(";")[0])
+                    for lang
+                    in self._request.environment["accept_language"].split(",")
+                )
+            except KeyError:
+                language = self._default_language()
+            else:
+                language = (
+                    next((lang for lang in accept_languages if lang), None) or
+                    self._default_language()
+                )
+
+        return language

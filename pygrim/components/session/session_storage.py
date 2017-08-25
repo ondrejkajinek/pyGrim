@@ -15,7 +15,7 @@ class SessionStorage(object):
                 "session:cookie:" + k, default)
             for k, default, t in (
                 ("name", "SESS_ID", ""),
-                ("lifetime", 3600, "int"),
+                ("lifetime", 3600 * 24 * 7, "int"),
                 ("domain", "", ""),
                 ("path", "/", ""),
                 ("http_only", False, "bool"),

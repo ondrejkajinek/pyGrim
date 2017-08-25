@@ -30,8 +30,10 @@ def ensure_bool(a):
             if a.isdigit()
             else a.lower().strip() == "true"
         )
+    else:
+        res = bool(a)
 
-    return bool(res)
+    return res
 
 
 def ensure_string(text):
