@@ -54,11 +54,11 @@ class BaseL10n(AbstractL10n):
                     if lang.split(";")[0] in self._translations
                 )
             except KeyError:
-                language = self.default_locale
+                language = self._default_locale
             else:
                 language = (
                     next((lang for lang in accept_languages if lang), None) or
-                    self.default_locale
+                    self._default_locale
                 )
 
         return language
