@@ -50,7 +50,7 @@ class BaseL10n(AbstractL10n):
                 accept_languages = (
                     lang.split(";")[0]
                     for lang
-                    in accept_language.split(",")
+                    in context._request.environment["accept_language"]
                     if lang.split(";")[0] in self._translations
                 )
             except KeyError:

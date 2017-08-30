@@ -72,6 +72,9 @@ class Request(object):
         except KeyError:
             return True
 
+    def _accept_language(self, env):
+        return env.pop("ACCEPT_LANGUAGE", "").split(",")
+
     def _get_host(self, env):
         try:
             matches = self.HOST_REGEXP.match(self._headers["host"])
@@ -145,4 +148,5 @@ class Request(object):
         env["path_info"] = env.pop("PATH_INFO").rstrip("/") + "/"
         env["request_method"] = method
         env["server_port"] = self._get_port(env)
+        env["accept_language"] = self._accept_language(env)
         self.environment = NormalizedImmutableDict(**env)
