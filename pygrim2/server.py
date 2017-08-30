@@ -199,12 +199,12 @@ class Server(object):
         log.exception(exc.message)
         context.set_response_body("Internal Server Error")
         context.set_response_status(500)
-        context.set_view("raw")
+        self._set_fallback_view(context)
 
     def _default_not_found_handler(self, context):
         context.set_response_body("Not found")
         context.set_response_status(404)
-        context.set_view("raw")
+        self._set_fallback_view(context)
 
     def _enhance_controller(self, controller, attr_name, attribute):
         try:
@@ -496,6 +496,9 @@ class Server(object):
             in ("current_route", "session", "template", "_route_params")
         )
         context.set_view("json")
+
+    def _set_fallback_view(self, context):
+        context.set_view("dummy" if self._view_disabled() else "raw")
 
     def _setup_env(self):
         self._debug = self.config.getbool("pygrim:debug", True)
