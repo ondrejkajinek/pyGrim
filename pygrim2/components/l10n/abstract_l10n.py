@@ -17,7 +17,7 @@ class AbstractL10n(object):
     def has(self, translation):
         raise NotImplementedError()
 
-    def select_language(self, cookies, accept_language):
+    def select_language(self, context):
         raise NotImplementedError()
 
     def translations(self):
@@ -28,6 +28,7 @@ class BaseL10n(AbstractL10n):
 
     def __init__(self, config, *args, **kwargs):
         self._lang_key = config.get("pygrim:l10n:cookie_key", "site_language")
+        self._lang_switch = config.get("pygrim:l10n:locale_switch", "lang")
         self._load_translations(config)
         self._load_locale_map(config)
         self._set_default_locale(config)
@@ -43,8 +44,11 @@ class BaseL10n(AbstractL10n):
     def lang_key(self):
         return self._lang_key
 
-    def select_language(self, cookies, accept_language):
-        language = cookies.get(self._lang_key)
+    def select_language(self, context):
+        language = context.GET(self._lang_switch)
+        if language not in self._translations:
+            language = context._request.cookies.get(self._lang_key)
+
         if language not in self._translations:
             try:
                 accept_languages = (

@@ -292,10 +292,7 @@ class Context(object):
         return res
 
     def _initialize_localization(self):
-        self._language = self.l10n.select_language(
-            self._request.cookies.copy(),
-            self._request.environment["accept_language"]
-        )
+        self._language = self.l10n.select_language(self)
 
     def _request_param(self, method, key=None, fallback=None):
         try:

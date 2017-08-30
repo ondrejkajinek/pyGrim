@@ -14,7 +14,7 @@ class DummyL10n(AbstractL10n):
     def has(self, translation):
         return True
 
-    def select_language(self, cookies, accept_language):
+    def select_language(self, context):
         pass
 
     def translations(self):
