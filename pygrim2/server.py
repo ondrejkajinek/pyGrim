@@ -113,7 +113,6 @@ class Server(object):
         self._model = None
 
     def __call__(self, environment, start_response):
-        start_response = ResponseWrap(start_response)
         context = Context(
             environment,
             self.config,
@@ -126,36 +125,19 @@ class Server(object):
         try:
             self._handle_request(context=context)
         except:
-            start_response("500: Fatal Server Error", [])
-            yield "Fatal Server Error"
+            context.set_response_body("Fatal Server Error")
+            context.set_response_status(500)
+            context.delete_response_headers()
+            self._set_fallback_view(context)
         else:
             context.finalize_response()
-            start_response(
-                context.get_response_status_code(),
-                context.get_response_headers()
-            )
-            is_head = context.is_request_head()
-            if is_head:
-                log.debug("This is HEAD request, not returning body.")
 
-            try:
-                if context.generates_response():
-                    for part in context.get_response_body():
-                        if not is_head:
-                            yield part
-                elif not is_head:
-                    yield context.get_response_body()
-            except HeadersAlreadySent as exc:
-                yield "CRITICAL ERROR WHEN SENDING RESPONSE: %s" % exc
-                for key, value in context.get_response_headers():
-                    if key == "content-length":
-                        yield " " * int(value)
-                        break
-            else:
-                # We want to save session only when request was handled with
-                # route handle -- current_route is set
-                if context.current_route and context.session_loaded():
-                    context.save_session()
+        start_response = ResponseWrap(start_response)
+        start_response(
+            context.get_response_status_code(),
+            context.get_response_headers()
+        )
+        return self._send_response(context)
 
     def do_postfork(self):
         """
@@ -487,6 +469,30 @@ class Server(object):
             start_log.debug(
                 "Registering view class %r.", get_instance_name(view)
             )
+
+    def _send_response(self, context):
+        is_head = context.is_request_head()
+        if is_head:
+            log.debug("This is HEAD request, not returning body.")
+
+        try:
+            if context.generates_response():
+                for part in context.get_response_body():
+                    if not is_head:
+                        yield part
+            elif not is_head:
+                yield context.get_response_body()
+        except HeadersAlreadySent as exc:
+            yield "CRITICAL ERROR WHEN SENDING RESPONSE: %s" % exc
+            for key, value in context.get_response_headers():
+                if key == "content-length":
+                    yield " " * int(value)
+                    break
+        else:
+            # We want to save session only when request was handled with
+            # route handle -- current_route is set
+            if context.current_route and context.session_loaded():
+                context.save_session()
 
     def _set_dump_view(self, context):
         context.set_response_content_type("application/json")

@@ -15,7 +15,7 @@ from .exceptions import HeadersAlreadySent
 from .request import Request
 from .response import Response
 from ..components.routing import StopDispatch
-from ..components.grim_dicts import ImmutableDict
+from ..components.grim_dicts import ImmutableDict, NormalizedDict
 
 log = getLogger("pygrim.http.context")
 
@@ -133,6 +133,9 @@ class Context(object):
                 "value": None
             }
 
+    def delete_response_headers(self):
+        self._response.headers = NormalizedDict()
+
     def finalize_response(self):
         self._response.finalize(is_head=self.is_request_head())
         super(Context, self).__setattr__("_can_create_session", False)
@@ -205,7 +208,7 @@ class Context(object):
         return self._response.body
 
     def get_response_headers(self):
-        return self._response.headers
+        return self._response.serialized_headers()
 
     def get_response_status_code(self):
         return "%d %s" % (

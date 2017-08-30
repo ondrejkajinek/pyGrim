@@ -77,14 +77,18 @@ class Response(object):
                         log.critical("Can't read read response body content!")
                         log.exception("Can't read read response body content!")
 
-        self.headers = [
+    def serialized_headers(self):
+        serialized = [
             (key, str(value))
             for key, value
             in self.headers.iteritems()
         ]
-
-        for cookie in self._serialized_cookies():
-            self.headers.append(("Set-Cookie", cookie))
+        serialized.extend((
+            ("Set-Cookie", cookie)
+            for cookie
+            in self._serialized_cookies()
+        ))
+        return serialized
 
     def set_body(self, body):
         if isgeneratorfunction(body):
