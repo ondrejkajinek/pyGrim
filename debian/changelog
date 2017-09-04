@@ -1,10 +1,4 @@
-pygrim (2.0.0) testing; urgency=medium
-
-  * COMMIT MESSASGES
-
- -- OndraK <ondrej.kajinek@gmail.com>  Mon, 14 Aug 2017 15:41:20 +0200
-
-pygrim (2.0.0) testing; urgency=medium
+pygrim2 (2.0.0) testing; urgency=medium
 
   * COMMIT MESSASGES
   * Controllers implemented -- instead of inheriting from server, logic is
