@@ -9,6 +9,7 @@ from re import compile as re_compile, IGNORECASE as re_IGNORECASE
 from jinja2.ext import Extension
 
 # local
+from ..utils.functions import strip_accent
 from ..utils.json2 import dumps as json_dumps
 
 log = getLogger("pygrim.components.jinja_ext.base")
@@ -58,6 +59,15 @@ class BaseExtension(Extension):
 
         return ("%%0.%df %%sB" % precision) % (size, self.SIZE_PREFIXES[index])
 
+    def safe_title(self, text):
+        res = "".join(
+            c
+            for c
+            in strip_accent(text).replace(" ", "_")
+            if c.isalnum() or c in "_-.:"
+        )
+        return res or "_"
+
     def seo(self, text):
         return self.DASH_SQUEEZER.sub(
             "-", self._seo_dashize(self._seo_remove(text))
@@ -76,6 +86,7 @@ class BaseExtension(Extension):
             "fit_image": self.fit_image,
             "mins_from_secs": self.minutes_from_seconds,
             "readable_size": self.readable_size,
+            "safe_title": self.safe_title,
             "seo": self.seo,
             "site_url": self.site_url,
             # override Jinja builtin with json2.dumps

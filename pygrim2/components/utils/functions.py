@@ -4,6 +4,7 @@
 from collections import Mapping
 from re import compile as re_compile
 from string import strip as string_strip
+from unicodedata import normalize as unicodedata_normalize
 
 REGEXP_TYPE = type(re_compile(r""))
 TRAILING_SLASH_REGEXP = re_compile("/\??\$?$|\$?$")
@@ -90,4 +91,13 @@ def split_to_iterable(value, separator=","):
         map(string_strip, value.split(separator))
         if isinstance(value, basestring)
         else value
+    )
+
+
+def strip_accent(text):
+    if isinstance(text, str):
+        text = unicode(text, "utf8")
+
+    return "".join(
+        c for c in unicodedata_normalize("NFKD", text) if ord(c) < 127
     )
