@@ -2,6 +2,7 @@
 
 from collections import Mapping
 from re import compile as re_compile
+from unicodedata import normalize as unicodedata_normalize
 
 REGEXP_TYPE = type(re_compile(r""))
 TRAILING_SLASH_REGEXP = re_compile("/\??\$?$|\$?$")
@@ -61,4 +62,13 @@ def remove_trailing_slah(pattern):
         re_compile(TRAILING_SLASH_REGEXP.sub("", pattern.pattern))
         if is_regex(pattern)
         else TRAILING_SLASH_REGEXP.sub("", pattern)
+    )
+
+
+def strip_accent(text):
+    if isinstance(text, str):
+        text = unicode(text, "utf8")
+
+    return "".join(
+        c for c in unicodedata_normalize("NFKD", text) if ord(c) < 127
     )
