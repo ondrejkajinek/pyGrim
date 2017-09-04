@@ -7,7 +7,7 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from .abstract_view import AbstractView
 from ..utils.json2 import dumps as json_dumps
 
-I18N_EXT_NAME = "jinja2.ext.InternationalizationExtension"
+I18N_EXT_NAME = "pygrim.components.jinja_ext.i18n.I18NExtension"
 
 
 def _suppress_none(self, variable):
@@ -127,7 +127,7 @@ class JinjaView(AbstractView):
             config.get("jinja:extensions", ())
         )
         if config.getboolean("pygrim:i18n", False):
-            extensions.update(("jinja2.ext.i18n",))
+            extensions.update(("pygrim.components.jinja_ext.i18n",))
 
         return list(extensions)
 
