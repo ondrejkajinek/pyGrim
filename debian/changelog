@@ -1,3 +1,33 @@
+pygrim (0.1.30) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * Server can return its config dir
+  * Added i18n extension for jinja -- wrapper around Jinja2 I18N. The
+    wrapper supports fallback msgid to be given to gettext methods
+  * query_string is now safely obtained
+  * Added safe_title filter for jinja
+  * fixed state when duplicate cookie for language received (for example
+    Chrome creates such state when the same cookie is set for whole
+    domain and for specific path)
+  * changed path for language cookie to / because previous setup leeds
+    to setting cookie separately for each page
+  * default session lifetime extended to 7 days
+  * BUGFIX session lifetime was never extended
+  * fixed possible getattr bug in route
+  * Added example for localization
+  * Better implementation of i18n, more view friendly, with tools to
+    simply switch language and load previously selected language
+  * refactor of _find_view_class and _register_view methods
+  * refactor
+  * Fixed DummyView inheritance
+  * Changed signature of view classes contructors
+  * Fixed ensure_bool
+  * Time functions and filters for Jinja2 moved to separate extensions;
+    added functions date_now and datetime_now; as_dict fixed
+  * Fixed kwargs handling in server.rediret
+
+ -- OndraK <root@ondrak>  Wed, 06 Sep 2017 11:39:28 +0200
+
 pygrim (0.1.29) testing; urgency=medium
 
   * COMMIT MESSASGES
