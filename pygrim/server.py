@@ -121,6 +121,9 @@ class Server(object):
         self.view.display(*args, **kwargs)
         raise DispatchFinished()
 
+    def get_config_dir(self):
+        return self._config_dir
+
     def redirect(self, context, **kwargs):
         if "route_name" in kwargs:
             url = "".join((
@@ -209,6 +212,7 @@ class Server(object):
     def _find_config_class(self):
         for key in self.KNOWN_CONFIG_FORMATS:
             if key in uwsgi_opt:
+                self._config_dir = path.dirname(uwsgi_opt[key])
                 return uwsgi_opt[key], self.KNOWN_CONFIG_FORMATS[key]
         else:
             raise RuntimeError("No known config format used to start uwsgi!")
