@@ -129,7 +129,7 @@ class JinjaView(AbstractView):
         if config.getboolean("pygrim:i18n", False):
             extensions.update(("pygrim.components.jinja_ext.i18n",))
 
-        return list(extensions)
+        return map(str, extensions)
 
     def _initialize_assets(self, config):
         self._css = set(config.get("assets:css", ()))
