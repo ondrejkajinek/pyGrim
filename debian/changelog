@@ -1,3 +1,12 @@
+pygrim (0.1.31) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * yaml config can be serialized into json using json2
+  * Config can now specify its default part, which is merged with loaded
+    data
+
+ -- Václav Pokluda <root@darky>  Tue, 12 Sep 2017 12:11:24 +0200
+
 pygrim (0.1.30) testing; urgency=medium
 
   * COMMIT MESSASGES
