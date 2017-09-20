@@ -5,7 +5,6 @@ from ..utils.json2 import dumps as json_dumps
 from jinja2.ext import Extension
 from logging import getLogger
 from re import compile as re_compile, IGNORECASE as re_IGNORECASE
-from os import path
 
 log = getLogger("pygrim.components.jinja_ext.base")
 
@@ -29,11 +28,6 @@ class BaseExtension(Extension):
     def as_json(self, data):
         log.warning("Filter `as_json` is deprecated and will be removed soon.")
         return self.to_json(data)
-
-    def base_url(self, context):
-        return "%s%s" % (
-            context.get_request_url(), context.get_request_root_uri()
-        )
 
     def fit_image(self, path, size=160):
         if not path.startswith("/"):
@@ -66,29 +60,21 @@ class BaseExtension(Extension):
             self._seo_dashize(self._seo_remove(text))
         )
 
-    def site_url(self, context, site):
-        return path.join(self.base_url(context), site)
-
     def to_json(self, value, indent=None):
         return json_dumps(value)
 
     def _get_filters(self):
         return {
             "as_json": self.as_json,
-            "base_url": self.base_url,
             "fit_image": self.fit_image,
             "readable_size": self.readable_size,
             "safe_title": self.safe_title,
             "seo": self.seo,
-            "site_url": self.site_url,
             "tojson": self.to_json
         }
 
     def _get_functions(self):
-        return {
-            "base_url": self.base_url,
-            "site_url": self.site_url
-        }
+        return {}
 
     def _seo_dashize(self, text):
         return "".join("-" if c in self.SEO_DASHED else c for c in text)

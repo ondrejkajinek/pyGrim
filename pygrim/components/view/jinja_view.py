@@ -122,6 +122,7 @@ class JinjaView(AbstractView):
         extensions = set((
             "pygrim.components.jinja_ext.BaseExtension",
             "pygrim.components.jinja_ext.TimeExtension",
+            "pygrim.components.jinja_ext.UrlExtension"
         ))
         extensions.update(
             config.get("jinja:extensions", ())
