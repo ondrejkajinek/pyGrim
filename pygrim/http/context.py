@@ -29,9 +29,7 @@ class Context(object):
         if self._default_headers:
             self.add_response_headers(self._default_headers)
 
-        self._route_params = None
         self._session_loaded = False
-
         self.set_route_params()
         if self.config.get("pygrim:i18n", False):
             self._initialize_localization()
