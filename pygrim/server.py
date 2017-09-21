@@ -436,6 +436,7 @@ class Server(object):
             "extra_functions": {
                 "print_css": self._jinja_print_css,
                 "print_js": self._jinja_print_js,
+                "static_file": self._jinja_static_file,
                 "url_for": self._jinja_url_for,
             }
         }
@@ -509,6 +510,28 @@ class Server(object):
             for js
             in js_list
         ))
+
+    def _jinja_static_file(self, filename, prefixes):
+        filename = filename.lstrip("/")
+        file_path = next(
+            (
+                path.join(dir_prefix, static_relpath)
+                for prefix in prefixes
+                for dir_prefix, static_relpath in self._static_file_info(
+                    path.join(prefix, filename)
+                )
+            ),
+            None
+        )
+        if not file_path:
+            if self._debug:
+                file_path = ""
+            else:
+                raise RuntimeError("File %r could not be found in %r" % (
+                    filename, prefixes
+                ))
+
+        return file_path
 
     def _jinja_url_for(self, route, params=None):
         params = params or {}
