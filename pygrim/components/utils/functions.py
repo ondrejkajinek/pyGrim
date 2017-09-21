@@ -45,6 +45,17 @@ def ensure_string(text):
     )
 
 
+def ensure_tuple(variable):
+    if isinstance(variable, tuple):
+        res = variable
+    elif isinstance(variable, (list, set, buffer, xrange)):
+        res = tuple(variable)
+    else:
+        res = (variable,)
+
+    return res
+
+
 def fix_trailing_slash(pattern):
     return (
         re_compile(TRAILING_SLASH_REGEXP.sub("/?$", pattern.pattern))

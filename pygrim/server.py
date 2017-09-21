@@ -13,6 +13,7 @@ from .components.session import (
     DummySession, FileSessionStorage, RedisSessionStorage,
     RedisSentinelSessionStorage, SessionStorage
 )
+from .components.utils import ensure_tuple, fix_trailing_slash
 from .components.view import AbstractView, DummyView, JinjaView
 from .http import Context
 
@@ -448,31 +449,45 @@ class Server(object):
         self.view = view
 
     def _setup_env(self):
+        self._debug = self.config.getbool("pygrim:debug", True)
+        self._static_map = {
+            fix_trailing_slash(prefix): mapped_dir
+            for prefix, mapped_dir
+            in (
+                map(string_strip, mapping.split("=", 1))
+                for mapping
+                in ensure_tuple(self.config.get("uwsgi:static-map", ()))
+                if "=" in mapping
+            )
+        }
         locale = self.config.get("pygrim:locale", None)
         if locale:
             log.debug("Setting locale 'LC_ALL' to %r", locale)
             setlocale(LC_ALL, str(locale))
 
+    def _static_file_info(self, static_path):
+        static_normpath = path.normpath(static_path)
+        for dir_prefix, dir_abs_path in self._static_map.iteritems():
+            if static_normpath.startswith(dir_prefix):
+                static_relpath = path.relpath(static_normpath, dir_prefix)
+                if path.isfile(path.join(dir_abs_path, static_relpath)):
+                    yield dir_prefix, static_relpath
+
+    def _static_file_abs_path(self, static_file):
+        dir_prefix, static_relpath = next(
+            self._static_file_info(static_file), (None, None)
+        )
+        return (
+            path.join(self._static_map[dir_prefix], static_relpath)
+            if not (dir_prefix is None or static_relpath is None)
+            else None
+        )
+
     def _static_file_mtime(self, static_file):
-
-        def get_static_file_abs_path(static_file):
-            static_map = self.config.get("uwsgi:static-map", ())
-            if isinstance(static_map, basestring):
-                static_map = (static_map, )
-
-            for mapping in static_map:
-                prefix, mapped_dir = map(string_strip, mapping.split("="))
-                if static_file.startswith(prefix):
-                    return path.join(
-                        mapped_dir, path.relpath(static_file, prefix)
-                    )
-            else:
-                return ""
-
-        abs_path = get_static_file_abs_path(static_file)
+        abs_path = self._static_file_abs_path(static_file)
         return (
             "v=%d" % int(path.getmtime(abs_path))
-            if path.isfile(abs_path)
+            if abs_path
             else ""
         )
 
@@ -500,7 +515,7 @@ class Server(object):
         try:
             url = self.router.url_for(route, params)
         except RouteNotRegistered:
-            if self.config.getbool("pygrim:debug", True) is False:
+            if self._debug:
                 url = "#"
             else:
                 raise
