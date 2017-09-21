@@ -13,9 +13,9 @@ from .components.session import (
     DummySession, FileSessionStorage, RedisSessionStorage,
     RedisSentinelSessionStorage, SessionStorage
 )
-from .components.utils import ensure_tuple, fix_trailing_slash
+from .components.utils import ensure_tuple, fix_trailing_slash, get_class_name
 from .components.view import AbstractView, DummyView, JinjaView
-from .http import Context
+from .http import Context, Request, Response
 
 from inspect import getmembers, ismethod, getmro
 from jinja2 import escape, Markup
@@ -87,10 +87,14 @@ class Server(object):
         self._not_found_methods = {}
         self._error_method = self._default_error_method
         self._custom_error_handlers = {}
+        self._requst_class = Request
+        self._response_class = Response
 
     def __call__(self, environment, start_response):
         start_response = ResponseWrap(start_response)
-        context = Context(environment, self.config)
+        context = Context(
+            environment, self.config, self._requst_class, self._response_class
+        )
         try:
             self._handle_request(context=context)
         except:
@@ -167,6 +171,12 @@ class Server(object):
             "server.render", "server.display"
         )
         return self.display(*args, **kwargs)
+
+    def set_request_class(self, new_class):
+        self._set_internal_class("_requst_class", new_class, Request)
+
+    def set_response_class(self, new_class):
+        self._set_internal_class("_response_class", new_class, Response)
 
     def _collect_exposed_methods(self):
         for unused_, member in getmembers(self, predicate=ismethod):
@@ -465,6 +475,15 @@ class Server(object):
         if locale:
             log.debug("Setting locale 'LC_ALL' to %r", locale)
             setlocale(LC_ALL, str(locale))
+
+    def _set_internal_class(self, attr_name, new_class, required_parent):
+        if issubclass(new_class, required_parent):
+            setattr(self, attr_name, new_class)
+        else:
+            log.warning(
+                "Given class %r is not subclass of %r",
+                get_class_name(new_class), get_class_name(required_parent)
+            )
 
     def _static_file_info(self, static_path):
         static_normpath = path.normpath(static_path)

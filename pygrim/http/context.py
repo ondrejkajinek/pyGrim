@@ -1,8 +1,6 @@
 # coding: utf8
 
 from .grim_dicts import ImmutableDict
-from .request import Request
-from .response import Response
 from logging import getLogger
 
 try:
@@ -15,7 +13,7 @@ log = getLogger("pygrim.http.context")
 
 class Context(object):
 
-    def __init__(self, environment, config):
+    def __init__(self, environment, config, request_class, response_class):
         self.config = config
         self._suppress_port = config.getbool("context:suppress_port", False)
         self._force_https = config.getbool("context:force_https", False)
@@ -26,8 +24,8 @@ class Context(object):
         self.template = None
         self.view_data = {}
 
-        self._request = Request(environment)
-        self._response = Response()
+        self._request = request_class(environment)
+        self._response = response_class()
         if self._default_headers:
             self.add_response_headers(self._default_headers)
 
