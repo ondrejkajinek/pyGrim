@@ -42,7 +42,7 @@ class JinjaView(BaseView):
                     ("jinja",)
                 )
             ),
-            auto_reload=config.get("jinja:environment:auto_reload", True),
+            auto_reload=config.getbool("jinja:environment:auto_reload", True),
         )
         self._translations = translations or {}
 
