@@ -9,6 +9,7 @@ from .session import Session
 from .session_storage import SessionStorage
 from .session_exceptions import SessionSaveError, SessionLoadError
 from ..connectors import connect_redis, connect_redis_sentinel
+from ..decorators import c_locale
 
 log = getLogger("pygrim.components.session.redis_session_storage")
 
@@ -21,10 +22,12 @@ class RedisSessionStorageBase(SessionStorage):
         super(RedisSessionStorageBase, self).__init__(config)
         self.redis = None
 
+    @c_locale
     def delete(self, session):
         self.redis.delete(session.get_id())
         return True
 
+    @c_locale
     def load(self, request):
         session_id = self._get_id(request)
         try:
@@ -39,6 +42,7 @@ class RedisSessionStorageBase(SessionStorage):
         else:
             return Session(session_id, session)
 
+    @c_locale
     def save(self, session):
         try:
             ret = self.redis.setex(
