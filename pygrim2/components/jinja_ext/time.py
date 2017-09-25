@@ -51,10 +51,14 @@ class TimeExtension(Extension):
     def datetime_now(self):
         return datetime.now()
 
+    def minutes_from_seconds(self, seconds):
+        return "%d:%d" % (seconds // 60, seconds % 60)
+
     def _get_filters(self):
         return {
             "as_date": self.as_date,
             "date_format": self.date_format,
+            "mins_from_secs": self.minutes_from_seconds
         }
 
     def _get_functions(self):

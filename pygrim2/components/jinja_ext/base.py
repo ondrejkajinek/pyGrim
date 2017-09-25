@@ -48,9 +48,6 @@ class BaseExtension(Extension):
 
         return path
 
-    def minutes_from_seconds(self, seconds):
-        return "%d:%d" % (seconds // 60, seconds % 60)
-
     def readable_size(self, size, precision=0):
         index = 0
         while size >= 1024:
@@ -84,7 +81,6 @@ class BaseExtension(Extension):
             "as_json": self.as_json,
             "base_url": self.base_url,
             "fit_image": self.fit_image,
-            "mins_from_secs": self.minutes_from_seconds,
             "readable_size": self.readable_size,
             "safe_title": self.safe_title,
             "seo": self.seo,
