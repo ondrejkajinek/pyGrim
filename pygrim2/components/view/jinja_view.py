@@ -78,7 +78,7 @@ class JinjaView(BaseView):
         ):
             extensions.update(("pygrim2.components.jinja_ext.i18n",))
 
-        return list(extensions)
+        return map(str, extensions)
 
     def _has_i18n(self):
         return I18N_EXT_NAME in self._env.extensions
