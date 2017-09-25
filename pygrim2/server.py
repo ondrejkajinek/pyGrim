@@ -496,6 +496,9 @@ class Server(object):
 
     def _set_dump_view(self, context):
         context.set_response_content_type("application/json")
+        context.view_data["content_type"] = context._response.headers.get(
+            "Content-Type"
+        )
         context.view_data.update(
             (key, getattr(context, key))
             for key
