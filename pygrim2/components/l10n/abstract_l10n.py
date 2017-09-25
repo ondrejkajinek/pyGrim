@@ -48,6 +48,9 @@ class BaseL10n(AbstractL10n):
         language = context.GET(self._lang_switch)
         if language not in self._translations:
             language = context._request.cookies.get(self._lang_key)
+            # fix for situation with multiple lang cookies
+            if isinstance(language, list):
+                language = language[-1] if language else None
 
         if language not in self._translations:
             try:
