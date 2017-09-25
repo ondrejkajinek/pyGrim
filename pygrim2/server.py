@@ -150,6 +150,9 @@ class Server(object):
                 "No routes were registered, no requests will be handled!"
             )
 
+    def get_config_dir(self):
+        return self._config_dir
+
     def register_controller(self, controller):
         # Do not use get_instance_name,
         # since it would append file name to controller class name
@@ -220,6 +223,7 @@ class Server(object):
     def _find_config_class(self):
         for key in self.KNOWN_CONFIG_FORMATS:
             if key in uwsgi_opt:
+                self._config_dir = path.dirname(uwsgi_opt[key])
                 return uwsgi_opt[key], self.KNOWN_CONFIG_FORMATS[key]
         else:
             raise RuntimeError("No known config format used to start uwsgi!")
