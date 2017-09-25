@@ -4,7 +4,6 @@
 from copy import deepcopy
 
 # local
-from .default import DEFAULT_CONFIG
 from ..utils.functions import deep_update, ensure_bool, split_to_iterable
 
 
@@ -16,10 +15,12 @@ class AbstractConfig(object):
 
     SEPARATOR = None
 
-    def __init__(self, path):
-        self.config = deep_update(
-            deepcopy(DEFAULT_CONFIG), self._load_config(path)
-        )
+    def __init__(self, path, default=None):
+        if default is None:
+            from .default import DEFAULT_CONFIG
+            default = DEFAULT_CONFIG
+
+        self.config = deep_update(deepcopy(default), self._load_config(path))
 
     def get(self, key, *args, **kwargs):
         try:
