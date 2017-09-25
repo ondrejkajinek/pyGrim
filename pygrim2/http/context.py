@@ -33,7 +33,6 @@ class Context(object):
         self._force_https = config.getbool("context:force_https", False)
         self._request = Request(environment)
         self._response = Response()
-        self._route_params = None
         self._session_handler = session_handler
         super(Context, self).__setattr__("_session_loaded", False)
         self._suppress_port = config.getbool("context:suppress_port", False)
