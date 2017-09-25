@@ -62,6 +62,9 @@ class YamlConfig(AbstractConfig):
 
     SEPARATOR = ":"
 
+    def _asdict(self):
+        return self.config
+
     def _load_config(self, path):
         try:
             with open(path, "rb") as conf_in:
