@@ -538,14 +538,24 @@ class Server(object):
 
         start_log.debug("PyGrim environment set up.")
 
+    def _static_file_info(self, static_path):
+        static_normpath = path.normpath(static_path)
+        for dir_prefix, dir_abs_path in self._static_map.iteritems():
+            if static_normpath.startswith(dir_prefix):
+                static_relpath = path.relpath(static_normpath, dir_prefix)
+                if path.isfile(path.join(dir_abs_path, static_relpath)):
+                    yield dir_prefix, static_relpath
+
     def _static_file_abs_path(self, static_file):
-        for prefix, mapped_dir in self._static_map.iteritems():
-            if static_file.startswith(prefix):
-                return path.join(
-                    mapped_dir, path.relpath(static_file, prefix)
-                )
-        else:
-            return ""
+        try:
+            dir_prefix, static_relpath = next(
+                self._static_file_info(static_file)
+            )
+            abs_path = path.join(self._static_map[dir_prefix], static_relpath)
+        except StopIteration:
+            abs_path = None
+
+        return abs_path
 
     def _versioned_file(self, static_file):
         abs_path = self._static_file_abs_path(static_file)
@@ -577,6 +587,28 @@ class Server(object):
             for js
             in js_list
         ))
+
+    def _view_static_file(self, filename, prefixes):
+        filename = filename.lstrip("/")
+        try:
+            file_path = next(
+                (
+                    path.join(dir_prefix, static_relpath)
+                    for prefix in prefixes
+                    for dir_prefix, static_relpath in self._static_file_info(
+                        path.join(prefix, filename)
+                    )
+                )
+            )
+        except StopIteration:
+            if self._debug:
+                raise RuntimeError("File %r could not be found in %r" % (
+                    filename, prefixes
+                ))
+            else:
+                file_path = ""
+
+        return file_path
 
     def _view_url_for(self, route, params=None):
         params = params or {}
