@@ -580,7 +580,7 @@ class Server(object):
         abs_path = self._static_file_abs_path(static_file)
         return (
             "%s?v=%d" % (escape(static_file), int(path.getmtime(abs_path)))
-            if path.isfile(abs_path)
+            if abs_path and path.isfile(abs_path)
             else escape(static_file)
         )
 
