@@ -3,7 +3,7 @@
 from gettext import translation as gettext_translation
 
 # local
-from .abstract_l10n import BaseL10n
+from .base_l10n import BaseL10n
 
 
 class GettextL10n(BaseL10n):
