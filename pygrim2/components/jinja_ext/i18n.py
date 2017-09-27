@@ -22,7 +22,8 @@ def ngettext_factory(method):
         message = singular if number == 1 else plural
         if (
             result == message and
-            fallbacks is not None and len(fallbacks) == 2
+            fallbacks is not None and
+            len(fallbacks) == 2
         ):
             result = method(fallbacks[0], fallbacks[1], number)
 
