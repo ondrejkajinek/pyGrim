@@ -41,7 +41,7 @@ from .components.utils import (
 from .components.view import (
     AbstractView, DummyView, JsonView, JinjaView, RawView
 )
-from .http import Context, HeadersAlreadySent
+from .http import Context, HeadersAlreadySent, Request, Response
 
 
 start_log = getLogger("pygrim_start.server")
@@ -111,6 +111,8 @@ class Server(object):
         self._controllers = AttributeDict()
         self._error_handlers = {}
         self._model = None
+        self._request_class = Request
+        self._response_class = Response
 
     def __call__(self, environment, start_response):
         context = Context(
@@ -118,7 +120,9 @@ class Server(object):
             self.config,
             self._model,
             self._session_handler,
-            self._l10n
+            self._l10n,
+            self._request_class,
+            self._response_class
         )
         context.set_view(self._default_view)
 
@@ -152,6 +156,12 @@ class Server(object):
 
     def get_config_dir(self):
         return self._config_dir
+
+    def set_request_class(self, new_class):
+        self._set_internal_class("_requst_class", new_class, Request)
+
+    def set_response_class(self, new_class):
+        self._set_internal_class("_response_class", new_class, Response)
 
     def register_controller(self, controller):
         # Do not use get_instance_name,
@@ -537,6 +547,15 @@ class Server(object):
             start_log.debug("Locale 'LC_ALL' set to %r.", locale)
 
         start_log.debug("PyGrim environment set up.")
+
+    def _set_internal_class(self, attr_name, new_class, required_parent):
+        if issubclass(new_class, required_parent):
+            setattr(self, attr_name, new_class)
+        else:
+            log.warning(
+                "Given class %r is not subclass of %r",
+                get_class_name(new_class), get_class_name(required_parent)
+            )
 
     def _static_file_info(self, static_path):
         static_normpath = path.normpath(static_path)

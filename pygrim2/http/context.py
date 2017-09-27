@@ -12,8 +12,6 @@ except ImportError:
 
 # local
 from .exceptions import HeadersAlreadySent
-from .request import Request
-from .response import Response
 from ..components.routing import StopDispatch
 from ..components.grim_dicts import ImmutableDict, NormalizedDict
 
@@ -22,7 +20,16 @@ log = getLogger("pygrim.http.context")
 
 class Context(object):
 
-    def __init__(self, environment, config, model, session_handler, l10n):
+    def __init__(
+        self,
+        environment,
+        config,
+        model,
+        session_handler,
+        l10n,
+        request_class,
+        response_class
+    ):
         self.current_route = None
         self.l10n = l10n
         self.model = model
@@ -31,8 +38,8 @@ class Context(object):
 
         super(Context, self).__setattr__("_can_create_session", True)
         self._force_https = config.getbool("context:force_https", False)
-        self._request = Request(environment)
-        self._response = Response()
+        self._request = request_class(environment)
+        self._response = response_class()
         self._session_handler = session_handler
         super(Context, self).__setattr__("_session_loaded", False)
         self._suppress_port = config.getbool("context:suppress_port", False)
