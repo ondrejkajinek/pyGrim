@@ -558,8 +558,8 @@ class Server(object):
             url = self.router.url_for(route, params)
         except RouteNotRegistered:
             if self._debug:
-                url = "#"
-            else:
                 raise
+            else:
+                url = "#"
 
         return url
