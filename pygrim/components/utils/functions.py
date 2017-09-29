@@ -2,6 +2,7 @@
 
 from collections import Mapping
 from re import compile as re_compile
+from unicodedata import normalize as unicodedata_normalize
 
 REGEXP_TYPE = type(re_compile(r""))
 TRAILING_SLASH_REGEXP = re_compile("/\??\$?$|\$?$")
@@ -44,12 +45,31 @@ def ensure_string(text):
     )
 
 
+def ensure_tuple(variable):
+    if isinstance(variable, tuple):
+        res = variable
+    elif isinstance(variable, (list, set, buffer, xrange)):
+        res = tuple(variable)
+    else:
+        res = (variable,)
+
+    return res
+
+
 def fix_trailing_slash(pattern):
     return (
         re_compile(TRAILING_SLASH_REGEXP.sub("/?$", pattern.pattern))
         if is_regex(pattern)
         else "%s/" % pattern.rstrip("/")
     )
+
+
+def get_instance_name(instance):
+    return get_class_name(instance.__class__)
+
+
+def get_class_name(cls):
+    return "%s.%s" % (cls.__module__, cls.__name__)
 
 
 def is_regex(pattern):
@@ -61,4 +81,13 @@ def remove_trailing_slah(pattern):
         re_compile(TRAILING_SLASH_REGEXP.sub("", pattern.pattern))
         if is_regex(pattern)
         else TRAILING_SLASH_REGEXP.sub("", pattern)
+    )
+
+
+def strip_accent(text):
+    if isinstance(text, str):
+        text = unicode(text, "utf8")
+
+    return "".join(
+        c for c in unicodedata_normalize("NFKD", text) if ord(c) < 127
     )

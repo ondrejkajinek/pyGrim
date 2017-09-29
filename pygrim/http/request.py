@@ -45,7 +45,7 @@ class Request(object):
                 part for part in self.environment["wsgi.input"]
             )
         elif attr in ("GET", "DELETE"):
-            data = self._parse_string(self.environment["query_string"])
+            data = self._parse_string(self.environment.get("query_string"))
         elif attr in ("POST", "PUT"):
             if self._headers.get("content_type") in (
                 None, "application/x-www-form-urlencoded"

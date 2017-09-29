@@ -1,10 +1,10 @@
 # coding: utf8
 
+from ..utils.functions import strip_accent
 from ..utils.json2 import dumps as json_dumps
 from jinja2.ext import Extension
 from logging import getLogger
 from re import compile as re_compile, IGNORECASE as re_IGNORECASE
-from os import path
 
 log = getLogger("pygrim.components.jinja_ext.base")
 
@@ -29,11 +29,6 @@ class BaseExtension(Extension):
         log.warning("Filter `as_json` is deprecated and will be removed soon.")
         return self.to_json(data)
 
-    def base_url(self, context):
-        return "%s%s" % (
-            context.get_request_url(), context.get_request_root_uri()
-        )
-
     def fit_image(self, path, size=160):
         if not path.startswith("/"):
             path = "//img.mopa.cz/fit,img,%s,;%s" % size, path
@@ -41,9 +36,6 @@ class BaseExtension(Extension):
             path = self.ENVELOPE_FORMATTER.sub("%s/\g<0>" % size, path)
 
         return path
-
-    def minutes_from_seconds(self, seconds):
-        return "%d:%d" % (seconds // 60, seconds % 60)
 
     def readable_size(self, size, precision=0):
         index = 0
@@ -53,14 +45,20 @@ class BaseExtension(Extension):
 
         return ("%%0.%df %%sB" % precision) % (size, self.SIZE_PREFIXES[index])
 
+    def safe_title(self, text):
+        res = "".join(
+            c
+            for c
+            in strip_accent(text).replace(" ", "_")
+            if c.isalnum() or c in "_-.:"
+        )
+        return res or "_"
+
     def seo(self, text):
         return self.DASH_SQUEEZER.sub(
             "-",
             self._seo_dashize(self._seo_remove(text))
         )
-
-    def site_url(self, context, site):
-        return path.join(self.base_url(context), site)
 
     def to_json(self, value, indent=None):
         return json_dumps(value)
@@ -68,20 +66,15 @@ class BaseExtension(Extension):
     def _get_filters(self):
         return {
             "as_json": self.as_json,
-            "base_url": self.base_url,
             "fit_image": self.fit_image,
-            "mins_from_secs": self.minutes_from_seconds,
             "readable_size": self.readable_size,
+            "safe_title": self.safe_title,
             "seo": self.seo,
-            "site_url": self.site_url,
             "tojson": self.to_json
         }
 
     def _get_functions(self):
-        return {
-            "base_url": self.base_url,
-            "site_url": self.site_url
-        }
+        return {}
 
     def _seo_dashize(self, text):
         return "".join("-" if c in self.SEO_DASHED else c for c in text)

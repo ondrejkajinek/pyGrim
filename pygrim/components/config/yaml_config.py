@@ -70,3 +70,6 @@ class YamlConfig(AbstractConfig):
             config = {}
 
         return config
+
+    def _asdict(self):
+        return self.config

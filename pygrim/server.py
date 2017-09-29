@@ -13,8 +13,9 @@ from .components.session import (
     DummySession, FileSessionStorage, RedisSessionStorage,
     RedisSentinelSessionStorage, SessionStorage
 )
+from .components.utils import ensure_tuple, fix_trailing_slash, get_class_name
 from .components.view import AbstractView, DummyView, JinjaView
-from .http import Context
+from .http import Context, Request, Response
 
 from inspect import getmembers, ismethod, getmro
 from jinja2 import escape, Markup
@@ -86,10 +87,14 @@ class Server(object):
         self._not_found_methods = {}
         self._error_method = self._default_error_method
         self._custom_error_handlers = {}
+        self._requst_class = Request
+        self._response_class = Response
 
     def __call__(self, environment, start_response):
         start_response = ResponseWrap(start_response)
-        context = Context(environment, self.config)
+        context = Context(
+            environment, self.config, self._requst_class, self._response_class
+        )
         try:
             self._handle_request(context=context)
         except:
@@ -120,6 +125,9 @@ class Server(object):
     def display(self, *args, **kwargs):
         self.view.display(*args, **kwargs)
         raise DispatchFinished()
+
+    def get_config_dir(self):
+        return self._config_dir
 
     def redirect(self, context, **kwargs):
         if "route_name" in kwargs:
@@ -163,6 +171,12 @@ class Server(object):
             "server.render", "server.display"
         )
         return self.display(*args, **kwargs)
+
+    def set_request_class(self, new_class):
+        self._set_internal_class("_requst_class", new_class, Request)
+
+    def set_response_class(self, new_class):
+        self._set_internal_class("_response_class", new_class, Response)
 
     def _collect_exposed_methods(self):
         for unused_, member in getmembers(self, predicate=ismethod):
@@ -209,6 +223,7 @@ class Server(object):
     def _find_config_class(self):
         for key in self.KNOWN_CONFIG_FORMATS:
             if key in uwsgi_opt:
+                self._config_dir = path.dirname(uwsgi_opt[key])
                 return uwsgi_opt[key], self.KNOWN_CONFIG_FORMATS[key]
         else:
             raise RuntimeError("No known config format used to start uwsgi!")
@@ -431,6 +446,7 @@ class Server(object):
             "extra_functions": {
                 "print_css": self._jinja_print_css,
                 "print_js": self._jinja_print_js,
+                "static_file": self._jinja_static_file,
                 "url_for": self._jinja_url_for,
             }
         }
@@ -444,31 +460,54 @@ class Server(object):
         self.view = view
 
     def _setup_env(self):
+        self._debug = self.config.getbool("pygrim:debug", True)
+        self._static_map = {
+            fix_trailing_slash(prefix): mapped_dir
+            for prefix, mapped_dir
+            in (
+                map(string_strip, mapping.split("=", 1))
+                for mapping
+                in ensure_tuple(self.config.get("uwsgi:static-map", ()))
+                if "=" in mapping
+            )
+        }
         locale = self.config.get("pygrim:locale", None)
         if locale:
             log.debug("Setting locale 'LC_ALL' to %r", locale)
             setlocale(LC_ALL, str(locale))
 
+    def _set_internal_class(self, attr_name, new_class, required_parent):
+        if issubclass(new_class, required_parent):
+            setattr(self, attr_name, new_class)
+        else:
+            log.warning(
+                "Given class %r is not subclass of %r",
+                get_class_name(new_class), get_class_name(required_parent)
+            )
+
+    def _static_file_info(self, static_path):
+        static_normpath = path.normpath(static_path)
+        for dir_prefix, dir_abs_path in self._static_map.iteritems():
+            if static_normpath.startswith(dir_prefix):
+                static_relpath = path.relpath(static_normpath, dir_prefix)
+                if path.isfile(path.join(dir_abs_path, static_relpath)):
+                    yield dir_prefix, static_relpath
+
+    def _static_file_abs_path(self, static_file):
+        dir_prefix, static_relpath = next(
+            self._static_file_info(static_file), (None, None)
+        )
+        return (
+            path.join(self._static_map[dir_prefix], static_relpath)
+            if not (dir_prefix is None or static_relpath is None)
+            else None
+        )
+
     def _static_file_mtime(self, static_file):
-
-        def get_static_file_abs_path(static_file):
-            static_map = self.config.get("uwsgi:static-map", ())
-            if isinstance(static_map, basestring):
-                static_map = (static_map, )
-
-            for mapping in static_map:
-                prefix, mapped_dir = map(string_strip, mapping.split("="))
-                if static_file.startswith(prefix):
-                    return path.join(
-                        mapped_dir, path.relpath(static_file, prefix)
-                    )
-            else:
-                return ""
-
-        abs_path = get_static_file_abs_path(static_file)
+        abs_path = self._static_file_abs_path(static_file)
         return (
             "v=%d" % int(path.getmtime(abs_path))
-            if path.isfile(abs_path)
+            if abs_path
             else ""
         )
 
@@ -491,12 +530,34 @@ class Server(object):
             in js_list
         ))
 
+    def _jinja_static_file(self, filename, prefixes):
+        filename = filename.lstrip("/")
+        file_path = next(
+            (
+                path.join(dir_prefix, static_relpath)
+                for prefix in prefixes
+                for dir_prefix, static_relpath in self._static_file_info(
+                    path.join(prefix, filename)
+                )
+            ),
+            None
+        )
+        if not file_path:
+            if self._debug:
+                file_path = ""
+            else:
+                raise RuntimeError("File %r could not be found in %r" % (
+                    filename, prefixes
+                ))
+
+        return file_path
+
     def _jinja_url_for(self, route, params=None):
         params = params or {}
         try:
             url = self.router.url_for(route, params)
         except RouteNotRegistered:
-            if self.config.getbool("pygrim:debug", True) is False:
+            if self._debug:
                 url = "#"
             else:
                 raise
