@@ -512,19 +512,32 @@ class Server(object):
         )
 
     # jinja extra methods
-    def _jinja_print_css(self, css_list):
+    def _jinja_print_css(self, css_list, **kwargs):
         return Markup("\n".join(
-            """<link href="%s?%s" rel="stylesheet" type="text/css" />""" % (
-                escape(css), self._static_file_mtime(css)
+            """<link href="%s?%s" rel="stylesheet" type="text/css" %s/>""" % (
+                escape(css),
+                self._static_file_mtime(css),
+                " ".join(
+                    """%s="%s\"""" % (key, value)
+                    for key, value
+                    in kwargs.iteritems()
+                )
             )
             for css
             in css_list
         ))
 
-    def _jinja_print_js(self, js_list, sync=True):
+    def _jinja_print_js(self, js_list, sync=True, **kwargs):
         return Markup("\n".join(
-            """<script %ssrc="%s?%s"></script>""" % (
-                "" if sync else "async ", js, self._static_file_mtime(js)
+            """<script %ssrc="%s?%s" %s></script>""" % (
+                "" if sync else "async ",
+                js,
+                self._static_file_mtime(js),
+                " ".join(
+                    """%s="%s\"""" % (key, value)
+                    for key, value
+                    in kwargs.iteritems()
+                )
             )
             for js
             in js_list
