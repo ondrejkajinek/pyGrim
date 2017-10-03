@@ -503,20 +503,11 @@ class Server(object):
             else None
         )
 
-    def _static_file_mtime(self, static_file):
-        abs_path = self._static_file_abs_path(static_file)
-        return (
-            "v=%d" % int(path.getmtime(abs_path))
-            if abs_path
-            else ""
-        )
-
     # jinja extra methods
     def _jinja_print_css(self, css_list, **kwargs):
         return Markup("\n".join(
-            """<link href="%s?%s" rel="stylesheet" type="text/css" %s/>""" % (
-                escape(css),
-                self._static_file_mtime(css),
+            """<link href="%s" rel="stylesheet" type="text/css" %s/>""" % (
+                self._versioned_file(css),
                 " ".join(
                     """%s="%s\"""" % (key, value)
                     for key, value
@@ -529,10 +520,9 @@ class Server(object):
 
     def _jinja_print_js(self, js_list, sync=True, **kwargs):
         return Markup("\n".join(
-            """<script %ssrc="%s?%s" %s></script>""" % (
+            """<script %ssrc="%s" %s></script>""" % (
                 "" if sync else "async ",
-                js,
-                self._static_file_mtime(js),
+                self._versioned_file(js),
                 " ".join(
                     """%s="%s\"""" % (key, value)
                     for key, value
@@ -576,3 +566,11 @@ class Server(object):
                 raise
 
         return url
+
+    def _versioned_file(self, static_file):
+        abs_path = self._static_file_abs_path(static_file)
+        return (
+            "%s?v=%d" % (escape(static_file), int(path.getmtime(abs_path)))
+            if abs_path and path.isfile(abs_path)
+            else escape(static_file)
+        )
