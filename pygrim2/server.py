@@ -601,19 +601,30 @@ class Server(object):
         return len(self._views) == 1 and "dummy" in self._views
 
     # jinja extra methods
-    def _view_print_css(self, css_list):
+    def _view_print_css(self, css_list, **kwargs):
         return Markup("\n".join(
-            """<link href="%s" rel="stylesheet" type="text/css" />""" % (
-                self._versioned_file(css)
+            """<link href="%s" rel="stylesheet" type="text/css" %s/>""" % (
+                self._versioned_file(css),
+                " ".join(
+                    """%s="%s\"""" % (key, value)
+                    for key, value
+                    in kwargs.iteritems()
+                )
             )
             for css
             in css_list
         ))
 
-    def _view_print_js(self, js_list, sync=True):
+    def _view_print_js(self, js_list, sync=True, **kwargs):
         return Markup("\n".join(
-            """<script src="%s"%s></script>""" % (
-                self._versioned_file(js), "" if sync else " async"
+            """<script src="%s"%s %s></script>""" % (
+                self._versioned_file(js),
+                "" if sync else " async",
+                " ".join(
+                    """%s="%s\"""" % (key, value)
+                    for key, value
+                    in kwargs.iteritems()
+                )
             )
             for js
             in js_list
