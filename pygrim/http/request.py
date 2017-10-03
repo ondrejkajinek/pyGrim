@@ -144,7 +144,7 @@ class Request(object):
 
         env["host"] = self._get_host(env)
         env["ip"] = self._get_ip(env)
-        env["path_info"] = env.pop("PATH_INFO").rstrip("/") + "/"
+        env["path_info"] = env.pop("PATH_INFO").rstrip("/") or "/"
         env["request_method"] = method
         env["server_port"] = self._get_port(env)
         self.environment = NormalizedImmutableDict(env)

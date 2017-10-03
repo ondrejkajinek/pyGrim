@@ -80,7 +80,7 @@ class Route(RouteObject):
         return getattr(self._handle, "_session", False)
 
     def set_pattern(self, pattern):
-        self._pattern = pattern
+        self._pattern = fix_trailing_slash(pattern)
 
     def url_for(self, params):
         if self.is_regex():

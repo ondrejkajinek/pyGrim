@@ -28,7 +28,7 @@ class Router(AbstractRouter):
             route.set_pattern(
                 re_compile("^" + full_pattern.lstrip("^"))
                 if route.is_regex() or self._is_group_regular()
-                else full_pattern.rstrip("/") + "/"
+                else full_pattern
             )
             self._routes.append(route)
         elif isinstance(route, RouteGroup):

@@ -60,7 +60,7 @@ def fix_trailing_slash(pattern):
     return (
         re_compile(TRAILING_SLASH_REGEXP.sub("/?$", pattern.pattern))
         if is_regex(pattern)
-        else "%s/" % pattern.rstrip("/")
+        else pattern.rstrip("/") or "/"
     )
 
 
