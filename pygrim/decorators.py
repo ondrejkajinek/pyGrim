@@ -2,6 +2,7 @@
 
 from __future__ import print_function
 from functools import wraps
+import simplejson as json
 try:
     from uwsgi import log as uwsgi_log
 except ImportError:
@@ -130,6 +131,22 @@ class not_found_method(method):
     def prepare_func(self, func):
         func._not_found = self._not_found_prefixes
         super(not_found_method, self).prepare_func(func)
+
+
+class json_method(method):
+    """
+    Takes result of decorated method, puts it to context, sets response type to
+    json and displays it.
+    """
+
+    def post_call(self, fun, args, kwargs, res):
+        context = kwargs.get("context")
+        if context:
+            json_res = json.dumps(res)
+            context.set_response_body(json_res)
+            context.set_response_content_type('application/json')
+
+        return super(json_method, self).post_call(fun, args, kwargs, res)
 
 
 class template_display(BaseDecorator):
