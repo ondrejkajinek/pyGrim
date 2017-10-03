@@ -328,7 +328,13 @@ class Server(object):
             try:
                 self._handle_by_route(context=context)
             except RouteNotFound as exc:
-                self._handle_not_found(context=context, exc=exc)
+                request_suffix = path.splitext(
+                    context.get_request_uri()
+                )[1]
+                if request_suffix in self._plain_not_found_suffixes:
+                    self._default_not_found_handler(context)
+                else:
+                    self._handle_not_found(context=context, exc=exc)
         except StopDispatch:
             pass
         except:
@@ -532,6 +538,11 @@ class Server(object):
             else self.config.get("view:default", "raw")
         )
         self._dump_switch = self.config.get("pygrim:dump_switch", "jkxd")
+        self._plain_not_found_suffixes = set(
+            "." + suffix.lstrip(".")
+            for suffix
+            in self.config.get("pygrim:plain_not_found", ())
+        )
         self._static_map = OrderedDict(
             (remove_trailing_slash(prefix) + "/", mapped_dir)
             for prefix, mapped_dir
