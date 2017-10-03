@@ -1,6 +1,7 @@
 # coding: utf8
 
 # std
+from collections import OrderedDict
 from inspect import getmembers, ismethod, getmro
 from locale import LC_ALL, setlocale
 from logging import getLogger
@@ -531,8 +532,8 @@ class Server(object):
             else self.config.get("view:default", "raw")
         )
         self._dump_switch = self.config.get("pygrim:dump_switch", "jkxd")
-        self._static_map = {
-            fix_trailing_slash(prefix): mapped_dir
+        self._static_map = OrderedDict(
+            (fix_trailing_slash(prefix), mapped_dir)
             for prefix, mapped_dir
             in (
                 map(string_strip, mapping.split("=", 1))
@@ -540,7 +541,7 @@ class Server(object):
                 in ensure_tuple(self.config.get("uwsgi:static-map", ()))
                 if "=" in mapping
             )
-        }
+        )
         locale = self.config.get("pygrim:locale", None)
         if locale:
             setlocale(LC_ALL, str(locale))
