@@ -13,7 +13,7 @@ from .components.session import (
     DummySession, FileSessionStorage, RedisSessionStorage,
     RedisSentinelSessionStorage, SessionStorage
 )
-from .components.utils import ensure_tuple, fix_trailing_slash, get_class_name
+from .components.utils import ensure_tuple, get_class_name, remove_trailing_slash
 from .components.view import AbstractView, DummyView, JinjaView
 from .http import Context, Request, Response
 
@@ -307,10 +307,14 @@ class Server(object):
         )
         try:
             request_uri = context.get_request_uri()
-            for prefix, handle in self._not_found_methods:
-                if request_uri.startswith(prefix):
-                    handle(context=context)
-                    break
+            request_suffix = path.splitext(request_uri)[1]
+            if request_suffix in self._plain_not_found_suffixes:
+                self._default_not_found_handler(context)
+            else:
+                for prefix, handle in self._not_found_methods:
+                    if request_uri.startswith(prefix):
+                        handle(context=context)
+                        break
         except DispatchFinished:
             pass
 
@@ -461,8 +465,13 @@ class Server(object):
 
     def _setup_env(self):
         self._debug = self.config.getbool("pygrim:debug", True)
+        self._plain_not_found_suffixes = set(
+            "." + suffix.lstrip(".")
+            for suffix
+            in self.config.get("pygrim:plain_not_found", ())
+        )
         self._static_map = {
-            fix_trailing_slash(prefix): mapped_dir
+            remove_trailing_slash(prefix) + "/": mapped_dir
             for prefix, mapped_dir
             in (
                 map(string_strip, mapping.split("=", 1))

@@ -12,8 +12,10 @@ class SessionStorage(object):
         self._config = config
         self._cookie = {
             str(k): getattr(self._config, "get" + t)(
-                "session:cookie:" + k, default)
-            for k, default, t in (
+                "session:cookie:" + k, default
+            )
+            for k, default, t
+            in (
                 ("name", "SESS_ID", ""),
                 ("lifetime", 3600 * 24 * 7, "int"),
                 ("domain", "", ""),
