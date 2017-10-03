@@ -36,8 +36,8 @@ from .components.session import (
     RedisSentinelSessionStorage, SessionStorage
 )
 from .components.utils import (
-    ensure_tuple, fix_trailing_slash, get_instance_name, get_class_name,
-    get_method_name
+    ensure_tuple, get_instance_name, get_class_name, get_method_name,
+    remove_trailing_slash
 )
 from .components.view import (
     AbstractView, DummyView, JsonView, JinjaView, RawView
@@ -533,7 +533,7 @@ class Server(object):
         )
         self._dump_switch = self.config.get("pygrim:dump_switch", "jkxd")
         self._static_map = OrderedDict(
-            (fix_trailing_slash(prefix), mapped_dir)
+            (remove_trailing_slash(prefix) + "/", mapped_dir)
             for prefix, mapped_dir
             in (
                 map(string_strip, mapping.split("=", 1))

@@ -32,7 +32,7 @@ class RouteObject(object):
         return is_regex(self._pattern)
 
     def set_pattern(self, pattern):
-        self._pattern = pattern
+        self._pattern = fix_trailing_slash(pattern)
 
 
 class RouteGroup(RouteObject):
