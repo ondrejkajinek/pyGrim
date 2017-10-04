@@ -1,3 +1,53 @@
+pygrim (0.1.33) testing; urgency=low
+
+  * COMMIT MESSASGES
+  * fix formatovani data v unicodu v jinje
+
+ -- Miroslav Čech <root@cech>  Wed, 04 Oct 2017 14:01:07 +0200
+
+pygrim (0.1.32) testing; urgency=low
+
+  * COMMIT MESSASGES
+  * fixed state when multiple session cookies are received
+  * format
+  * Path info (request uri) is now stored without trailing slash,
+    routing is modified to handle this change; Added availability to
+    specify file suffixes (via pygrim:plain_not_found) that use default
+    not found handler when they are not handled by any route (so that
+    missing files are handled as 404: Not Found without consuming time
+  * Fixed typo in method name -- only cosmetic
+  * Added server private _versioned_file method, which takes care of
+    proper filename escaping (thus fixing an error in code with
+    print_js) and does what _static_file_mtime did -- _static_file_mtime
+    is now removed
+  * Methods for printing JS and CSS can now accept extra kwargs, which
+    are used as attributes for <script> and <link> tags
+  * decorator json_method vracejici json_data z metody
+  * Obsolete assignment removed
+  * pyGrim can now use custom Request and Response classes. They have to
+    inherit from original pygrim classes and are registered with
+    server.set_{request,response}_class
+  * get_{class,instance}_name used in exceptions
+  * Added methods for printing full class or instance name
+  * static_file (jinja) view function implemented -- it traverses
+    static_maps and searches for all specified files, returns the first
+    that is found
+  * _static_file_mtime reworked; ensure_tuple added to components.utils
+  * URL functions and filters for jinja moved to separate file.
+  * Jinja filter minutes_from_seconds moved to time extension
+  * Jinja prefix_extends implemented -- it beheves similarly to
+    prefix_includes, but extends
+  * Prefix_include tag simplified and optimized
+  * Jinja extension PrefixStatements implemented -- it will allow to
+    pick first subtemplate by its name and directory. Template name has
+    a prio over directory, so each template name is seached in all
+    directories, then another directory is searched
+  * Fixed an error with custom jinja extensions in config -- path was
+    unicode instead of str, caused a TypeError
+  * upraveno README v testu
+
+ -- Miroslav Čech <root@cech>  Wed, 04 Oct 2017 10:32:37 +0200
+
 pygrim (0.1.31) testing; urgency=medium
 
   * COMMIT MESSASGES
