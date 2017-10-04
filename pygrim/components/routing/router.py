@@ -106,4 +106,5 @@ class Router(AbstractRouter):
             part if part.lstrip("(").startswith("/") else "/" + part
             for part
             in args
+            if part
         )
