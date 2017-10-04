@@ -25,7 +25,10 @@ class TimeExtension(Extension):
         if isinstance(date_, basestring):
             date_ = parse_dt(date_)
 
-        return date_.strftime(format_str) if format_str else date_.isoformat()
+        text = date_.strftime(format_str) if format_str else date_.isoformat()
+        if isinstance(text, str):
+            text = unicode(text, "utf8")
+        return text
 
     def date_format(self, source, format_str):
         if isinstance(source, basestring):
