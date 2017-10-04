@@ -1,3 +1,11 @@
+pygrim (0.1.34) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * Fix for bug introduced with change of route -- removing trailing
+    slash from route and path_info. Regular routes were broken
+
+ -- Václav Pokluda <root@darky>  Wed, 04 Oct 2017 15:04:20 +0200
+
 pygrim (0.1.33) testing; urgency=low
 
   * COMMIT MESSASGES
