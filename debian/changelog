@@ -1,3 +1,10 @@
+pygrim (0.1.33) testing; urgency=low
+
+  * COMMIT MESSASGES
+  * fix formatovani data v unicodu v jinje
+
+ -- Miroslav Čech <root@cech>  Wed, 04 Oct 2017 14:01:07 +0200
+
 pygrim (0.1.32) testing; urgency=low
 
   * COMMIT MESSASGES
