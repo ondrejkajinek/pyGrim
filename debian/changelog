@@ -1,3 +1,11 @@
+pygrim (0.1.36) testing; urgency=low
+
+  * COMMIT MESSASGES
+  * fix serializace response cookies; padalo pokud cas expirace byl v
+    locale, ktery vratilo unicode znak
+
+ -- Miroslav Čech <root@cech>  Fri, 06 Oct 2017 10:11:26 +0200
+
 pygrim (0.1.35) testing; urgency=medium
 
   * COMMIT MESSASGES
