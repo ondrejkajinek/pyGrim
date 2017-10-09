@@ -2,7 +2,8 @@
 
 from __future__ import print_function
 from functools import wraps
-import simplejson as json
+from components.utils import json2 as json
+
 try:
     from uwsgi import log as uwsgi_log
 except ImportError:
