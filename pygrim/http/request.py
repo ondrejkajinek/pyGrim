@@ -105,7 +105,8 @@ class Request(object):
             upper_key = key.upper()
             if (
                 upper_key.startswith("X_") or
-                upper_key.startswith("HTTP_")
+                upper_key.startswith("HTTP_") or
+                upper_key == "CONTENT_TYPE"
             ):
                 headers[key] = environment.get(key)
 
