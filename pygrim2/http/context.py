@@ -64,7 +64,7 @@ class Context(object):
         raise AttributeError(key)
 
     def __setattr__(self, key, value):
-        if key == ("_can_create_session", "_session_loaded"):
+        if key in ("_can_create_session", "_session_loaded"):
             raise RuntimeError("%r is read-only!" % key)
 
         super(Context, self).__setattr__(key, value)
