@@ -21,14 +21,7 @@ log = getLogger("pygrim.http.context")
 class Context(object):
 
     def __init__(
-        self,
-        environment,
-        config,
-        model,
-        session_handler,
-        l10n,
-        request_class,
-        response_class
+        self, config, model, session_handler, l10n, request, response
     ):
         self.current_route = None
         self.l10n = l10n
@@ -38,8 +31,8 @@ class Context(object):
 
         super(Context, self).__setattr__("_can_create_session", True)
         self._force_https = config.getbool("context:force_https", False)
-        self._request = request_class(environment)
-        self._response = response_class()
+        self._request = request
+        self._response = response
         self._session_handler = session_handler
         super(Context, self).__setattr__("_session_loaded", False)
         self._suppress_port = config.getbool("context:suppress_port", False)

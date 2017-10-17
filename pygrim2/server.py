@@ -117,13 +117,12 @@ class Server(object):
 
     def __call__(self, environment, start_response):
         context = Context(
-            environment,
             self.config,
             self._model,
             self._session_handler,
             self._l10n,
-            self._request_class,
-            self._response_class
+            self._request_class(environment),
+            self._response_class()
         )
         context.set_view(self._default_view)
 
