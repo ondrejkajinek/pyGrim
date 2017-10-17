@@ -12,8 +12,10 @@ class SessionStorage(object):
         self._config = config
         self._cookie = {
             str(k): getattr(self._config, "get" + t)(
-                "session:cookie:" + k, default)
-            for k, default, t in (
+                "session:cookie:" + k, default
+            )
+            for k, default, t
+            in (
                 ("name", "SESS_ID", ""),
                 ("lifetime", 3600 * 24 * 7, "int"),
                 ("domain", "", ""),
@@ -41,6 +43,8 @@ class SessionStorage(object):
     def _get_id(self, request):
         cookie = request.cookies.get(self._cookie["name"])
         if cookie:
+            if isinstance(cookie, (list, tuple)):
+                cookie = cookie[-1]
             session_id = cookie
             session_new = False
             log.debug("will be loading session:%r", session_id)

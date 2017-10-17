@@ -13,7 +13,7 @@ from .components.session import (
     DummySession, FileSessionStorage, RedisSessionStorage,
     RedisSentinelSessionStorage, SessionStorage
 )
-from .components.utils import ensure_tuple, fix_trailing_slash, get_class_name
+from .components.utils import ensure_tuple, get_class_name, remove_trailing_slash
 from .components.view import AbstractView, DummyView, JinjaView
 from .http import Context, Request, Response
 
@@ -307,10 +307,14 @@ class Server(object):
         )
         try:
             request_uri = context.get_request_uri()
-            for prefix, handle in self._not_found_methods:
-                if request_uri.startswith(prefix):
-                    handle(context=context)
-                    break
+            request_suffix = path.splitext(request_uri)[1]
+            if request_suffix in self._plain_not_found_suffixes:
+                self._default_not_found_handler(context)
+            else:
+                for prefix, handle in self._not_found_methods:
+                    if request_uri.startswith(prefix):
+                        handle(context=context)
+                        break
         except DispatchFinished:
             pass
 
@@ -461,8 +465,13 @@ class Server(object):
 
     def _setup_env(self):
         self._debug = self.config.getbool("pygrim:debug", True)
+        self._plain_not_found_suffixes = set(
+            "." + suffix.lstrip(".")
+            for suffix
+            in self.config.get("pygrim:plain_not_found", ())
+        )
         self._static_map = {
-            fix_trailing_slash(prefix): mapped_dir
+            remove_trailing_slash(prefix) + "/": mapped_dir
             for prefix, mapped_dir
             in (
                 map(string_strip, mapping.split("=", 1))
@@ -504,28 +513,31 @@ class Server(object):
 
         return abs_path
 
-    def _static_file_mtime(self, static_file):
-        abs_path = self._static_file_abs_path(static_file)
-        return (
-            "v=%d" % int(path.getmtime(abs_path))
-            if abs_path
-            else ""
-        )
-
     # jinja extra methods
-    def _jinja_print_css(self, css_list):
+    def _jinja_print_css(self, css_list, **kwargs):
         return Markup("\n".join(
-            """<link href="%s?%s" rel="stylesheet" type="text/css" />""" % (
-                escape(css), self._static_file_mtime(css)
+            """<link href="%s" rel="stylesheet" type="text/css" %s/>""" % (
+                self._versioned_file(css),
+                " ".join(
+                    """%s="%s\"""" % (key, value)
+                    for key, value
+                    in kwargs.iteritems()
+                )
             )
             for css
             in css_list
         ))
 
-    def _jinja_print_js(self, js_list, sync=True):
+    def _jinja_print_js(self, js_list, sync=True, **kwargs):
         return Markup("\n".join(
-            """<script %ssrc="%s?%s"></script>""" % (
-                "" if sync else "async ", js, self._static_file_mtime(js)
+            """<script %ssrc="%s" %s></script>""" % (
+                "" if sync else "async ",
+                self._versioned_file(js),
+                " ".join(
+                    """%s="%s\"""" % (key, value)
+                    for key, value
+                    in kwargs.iteritems()
+                )
             )
             for js
             in js_list
@@ -564,3 +576,11 @@ class Server(object):
                 url = "#"
 
         return url
+
+    def _versioned_file(self, static_file):
+        abs_path = self._static_file_abs_path(static_file)
+        return (
+            "%s?v=%d" % (escape(static_file), int(path.getmtime(abs_path)))
+            if abs_path and path.isfile(abs_path)
+            else escape(static_file)
+        )

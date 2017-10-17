@@ -2,7 +2,7 @@
 
 ## Zakladni fukcionalita
 
-| Co se testuje | url | ocekavany vystup |
+^ Co se testuje ^ url ^ ocekavany vystup ^
 | dekorator method exponuje| /method_decorator | http 200 |
 | dekorator template_method exponuje| /template_method_decorator | http 200; text "static_page" |
 | dekorator uses_data dava do kontextu data | /uses_data_decorator | text "hodnota z dekorátoru" |
@@ -13,16 +13,21 @@
 
 ## Redirecty
 
+^ Co se testuje ^ url ^ ocekavany vystup ^
 | redirect na url | /redirect_url | redirectne na / |
 | redirect na route_name s parametrem | /redirect_with_param | redirectne na /hitparady/999 |
 | flashes prezije redirect | /flashes | redirectne na /; text "Flash1" a text "Flash2" |
 
 ## Context dostupny v sablone
+
+^ Co se testuje ^ url ^ ocekavany vystup ^
 |  v sablone je dostupne aktualni url | /moc/dlouhej/part | text "/moc/dlouhej/part" |
 |  v sablone je dostupne jmeno aktualni routy | /moc/dlouhej/part | text "/moc/dlouhej/part" a "context" |
 
 
 ## Routing chytani parametru
+
+^ Co se testuje ^ url ^ ocekavany vystup ^
 | test nevyplnene optional zachycovaci groupy | /hitparady | text "Kategorie Prázdná" |
 | test vyplnene optional zachycovaci groupy | /hitparady/66 | text "66" |
 | test chytani vice parametru | /world/disco/42/finalize | text "disco#" a "42#" |
@@ -31,11 +36,8 @@
 url for s nepovinym parametrem, kterej neni v pojemnovany grupe (voilitelny .pdf nakonci)
 
 ## Routing url_for
+
+^ Co se testuje ^ url ^ ocekavany vystup ^
 | url_for umi dat url dle jmena routy | /url_for | text "/#" a "/hitparady#" |
 | url_for umi dat url dle jmena routy a parametru | /url_for | text "/hitparady/66" a "/world/disco/42/finalize" |
 | url_for vyplni nepovinnou cast url | /url_for | text "/order/42.pdf" | 
-
-
-
-
-

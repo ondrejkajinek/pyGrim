@@ -5,6 +5,7 @@ from inspect import isgeneratorfunction
 from logging import getLogger
 from os import SEEK_END
 from urllib import quote_plus as url_quoteplus
+from locale import getlocale, LC_ALL
 
 log = getLogger("pygrim.http.response")
 
@@ -17,6 +18,7 @@ class Response(object):
             if c.get("domain")
             else None
         ),
+        lambda c: "Lang=%s" % (getlocale(LC_ALL)[0] or "",),
         lambda c: (
             "Expires=%s" % (
                 (datetime.utcnow() + timedelta(seconds=c["lifetime"]))
@@ -84,22 +86,28 @@ class Response(object):
             for cookie in self._serialized_cookies():
                 self.headers.append(("Set-Cookie", cookie))
 
+    def _to_str(self, value):
+        if not value:
+            ret = value
+        elif not isinstance(value, unicode):
+            ret = str(value)
+        else:
+            ret = value.encode('utf8')
+        return ret
+
     def _serialize_cookie(self, name, cookie):
         params = (
-            part_formatter(cookie)
+            self._to_str(part_formatter(cookie))
             for part_formatter
             in self.COOKIE_PARTS
         )
         cookie_params = "; ".join(filter(None, params))
-        return str("%s=%s%s" % (
-            url_quoteplus(name),
-            url_quoteplus(str(cookie["value"])),
-            (
-                "; %s" % cookie_params
-                if cookie_params
-                else ""
-            )
-        ))
+
+        name_part = url_quoteplus(name)
+        value_part = url_quoteplus(str(cookie["value"]))
+        params_part = "; {}".format(cookie_params)
+        ret = "{}={}{}".format(name_part, value_part, params_part)
+        return ret
 
     def _serialized_cookies(self):
         for name, cookie in self.cookies.iteritems():

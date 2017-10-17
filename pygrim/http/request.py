@@ -28,11 +28,17 @@ class Request(object):
         self._save_environment(environment)
         self.cookies = self._parse_string(self._headers.get("cookie", ""), ";")
 
+    def get_content_type(self):
+        c_type = self._headers.get("content_type")
+        if c_type:
+            c_type = c_type.split(";", 1)[0].strip()
+        return c_type
+
     def __getattr__(self, attr):
         save = True
         if (
             attr == "JSON" and
-            self._headers.get("content_type") == "application/json"
+            self.get_content_type() == "application/json"
         ):
             try:
                 data = json.loads(self.RAW_POST)
@@ -47,7 +53,8 @@ class Request(object):
         elif attr in ("GET", "DELETE"):
             data = self._parse_string(self.environment.get("query_string"))
         elif attr in ("POST", "PUT"):
-            if self._headers.get("content_type") in (
+
+            if self.get_content_type() in (
                 None, "application/x-www-form-urlencoded"
             ):
                 data = self._parse_string(self.RAW_POST)
@@ -105,7 +112,8 @@ class Request(object):
             upper_key = key.upper()
             if (
                 upper_key.startswith("X_") or
-                upper_key.startswith("HTTP_")
+                upper_key.startswith("HTTP_") or
+                upper_key == "CONTENT_TYPE"
             ):
                 headers[key] = environment.get(key)
 
@@ -144,7 +152,7 @@ class Request(object):
 
         env["host"] = self._get_host(env)
         env["ip"] = self._get_ip(env)
-        env["path_info"] = env.pop("PATH_INFO").rstrip("/") + "/"
+        env["path_info"] = env.pop("PATH_INFO").rstrip("/") or "/"
         env["request_method"] = method
         env["server_port"] = self._get_port(env)
         self.environment = NormalizedImmutableDict(env)

@@ -3,6 +3,7 @@
 from datetime import date, datetime
 from dateutil.parser import parse as parse_dt
 from jinja2.ext import Extension
+from time import gmtime, strftime
 
 
 DTS = (
@@ -24,7 +25,10 @@ class TimeExtension(Extension):
         if isinstance(date_, basestring):
             date_ = parse_dt(date_)
 
-        return date_.strftime(format_str) if format_str else date_.isoformat()
+        text = date_.strftime(format_str) if format_str else date_.isoformat()
+        if isinstance(text, str):
+            text = unicode(text, "utf8")
+        return text
 
     def date_format(self, source, format_str):
         if isinstance(source, basestring):
@@ -51,11 +55,15 @@ class TimeExtension(Extension):
     def minutes_from_seconds(self, seconds):
         return "%d:%d" % (seconds // 60, seconds % 60)
 
+    def time_from_seconds(self, seconds):
+        return strftime("%H:%M:%S", gmtime(seconds))
+
     def _get_filters(self):
         return {
             "as_date": self.as_date,
             "date_format": self.date_format,
             "mins_from_secs": self.minutes_from_seconds,
+            "time_from_secs": self.time_from_seconds
         }
 
     def _get_functions(self):

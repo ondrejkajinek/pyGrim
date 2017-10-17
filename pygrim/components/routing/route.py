@@ -1,7 +1,7 @@
 # coding: utf8
 
 from ..utils import (
-    ensure_string, fix_trailing_slash, is_regex, remove_trailing_slah
+    ensure_string, fix_trailing_slash, is_regex, remove_trailing_slash
 )
 from logging import getLogger
 from re import compile as re_compile
@@ -80,7 +80,7 @@ class Route(RouteObject):
         return getattr(self._handle, "_session", False)
 
     def set_pattern(self, pattern):
-        self._pattern = pattern
+        self._pattern = fix_trailing_slash(pattern)
 
     def url_for(self, params):
         if self.is_regex():
@@ -121,7 +121,7 @@ class Route(RouteObject):
             )
 
         readable = self.URL_OPTIONAL_REGEXP.sub(r"\1\2\3", readable)
-        readable = remove_trailing_slah(readable).lstrip("^")
+        readable = remove_trailing_slash(readable).lstrip("^")
         mandatory_names = set(param_names) - set(optional_names)
         if len(mandatory_names) + len(optional_names) < len(param_names):
             raise RuntimeError(
