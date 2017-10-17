@@ -494,14 +494,15 @@ class Server(object):
                     yield dir_prefix, static_relpath
 
     def _static_file_abs_path(self, static_file):
-        dir_prefix, static_relpath = next(
-            self._static_file_info(static_file), (None, None)
-        )
-        return (
-            path.join(self._static_map[dir_prefix], static_relpath)
-            if not (dir_prefix is None or static_relpath is None)
-            else None
-        )
+        try:
+            dir_prefix, static_relpath = next(
+                self._static_file_info(static_file)
+            )
+            abs_path = path.join(self._static_map[dir_prefix], static_relpath)
+        except StopIteration:
+            abs_path = None
+
+        return abs_path
 
     def _static_file_mtime(self, static_file):
         abs_path = self._static_file_abs_path(static_file)
