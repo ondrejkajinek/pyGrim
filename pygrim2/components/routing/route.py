@@ -77,7 +77,7 @@ class Route(RouteObject):
         self._name = name
 
     def __str__(self):
-        return "ROUTE: %r" % self._asdict()
+        return repr(self._asdict())
 
     def dispatch(self, context):
         self._handle(context=context, **context.get_route_params())

@@ -490,6 +490,16 @@ class Server(object):
                 "Registering view class %r.", get_instance_name(view)
             )
 
+    def _route_dump(self, context):
+        self._set_json_view(context)
+        context.view_data = {
+            "routes": [
+                route._asdict()
+                for route
+                in self._router.get_routes()
+            ]
+        }
+
     def _send_response(self, context):
         is_head = context.is_request_head()
         if is_head:
@@ -515,7 +525,6 @@ class Server(object):
                 context.save_session()
 
     def _set_dump_view(self, context):
-        context.set_response_content_type("application/json")
         context.view_data["content_type"] = context._response.headers.get(
             "Content-Type"
         )
@@ -524,10 +533,14 @@ class Server(object):
             for key
             in ("current_route", "session", "template", "_route_params")
         )
-        context.set_view("json")
+        self._set_json_view(context)
 
     def _set_fallback_view(self, context):
         context.set_view("dummy" if self._view_disabled() else "raw")
+
+    def _set_json_view(self, context):
+        context.set_response_content_type("application/json")
+        context.set_view("json")
 
     def _setup_env(self):
         self._debug = self.config.getbool("pygrim:debug", True)
@@ -556,6 +569,12 @@ class Server(object):
         if locale:
             setlocale(LC_ALL, str(locale))
             start_log.debug("Locale 'LC_ALL' set to %r.", locale)
+
+        route_dump = self.config.get("pygrim:route_dump", None)
+        if route_dump and self._debug:
+            self._router.map(Route(
+                ("GET", "POST"), "/" + route_dump.lstrip("/"), self._route_dump
+            ))
 
         start_log.debug("PyGrim environment set up.")
 

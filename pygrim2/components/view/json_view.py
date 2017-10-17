@@ -12,3 +12,6 @@ class JsonView(BaseView):
 
     def _render_template(self, context):
         return json_dumps(context.view_data)
+
+    def _template_check(self, context):
+        return
