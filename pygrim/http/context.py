@@ -121,6 +121,9 @@ class Context(object):
             else self._default_language()
         )
 
+    def get_request_content_type(self):
+        return self._request.environment["content_type"]
+
     def get_request_host(self):
         return self._request.environment["host"]
 
