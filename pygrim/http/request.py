@@ -32,7 +32,7 @@ class Request(object):
         save = True
         if (
             attr == "JSON" and
-            self._headers.get("content_type") == "application/json"
+            self.environment.get("content_type") == "application/json"
         ):
             try:
                 data = json.loads(self.RAW_POST)
