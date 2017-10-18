@@ -67,22 +67,26 @@ class JinjaView(AbstractView):
             context.view_data["flashes"] = context.session.get_flashes()
 
         context.view_data.update({
-            "css": tuple(self._css | set(
-                set(context.view_data.pop("extra_css", ()))
-            )),
+            "css": self._merge_assets(
+                self._css, context.view_data.pop("extra_css", [])
+            ),
             "debug": self._debug,
-            "js_header_sync": tuple(self._js["header"]["sync"] | set(
-                context.view_data.pop("extra_js_header_sync", ())
-            )),
-            "js_header_async": tuple(self._js["header"]["async"] | set(
-                context.view_data.pop("extra_js_header_async", ())
-            )),
-            "js_footer_sync": tuple(self._js["footer"]["sync"] | set(
-                context.view_data.pop("extra_js_footer_sync", ())
-            )),
-            "js_footer_async": tuple(self._js["footer"]["async"] | set(
-                context.view_data.pop("extra_js_footer_async", ())
-            ))
+            "js_header_sync": self._merge_assets(
+                self._js["header"]["sync"],
+                context.view_data.pop("extra_js_header_sync", [])
+            ),
+            "js_header_async": self._merge_assets(
+                self._js["header"]["async"],
+                context.view_data.pop("extra_js_header_async", [])
+            ),
+            "js_footer_sync": self._merge_assets(
+                self._js["footer"]["sync"],
+                context.view_data.pop("extra_js_footer_sync", [])
+            ),
+            "js_footer_async": self._merge_assets(
+                self._js["footer"]["async"],
+                context.view_data.pop("extra_js_footer_async", [])
+            )
         })
 
         if self._has_i18n() and context.get_language():
@@ -133,15 +137,25 @@ class JinjaView(AbstractView):
         return map(str, extensions)
 
     def _initialize_assets(self, config):
-        self._css = set(config.get("assets:css", ()))
+        self._css = config.get("assets:css", [])
+        js_assets = config.get("assets:js", {})
         self._js = {
             "header": {
-                "async": set(),
-                "sync": set()
+                "async": js_assets.get("header", {}).get("async", []),
+                "sync": js_assets.get("header", {}).get("sync", [])
             },
             "footer": {
-                "async": set(),
-                "sync": set()
+                "async": js_assets.get("footer", {}).get("async", []),
+                "sync": js_assets.get("footer", {}).get("sync", [])
             }
         }
-        self._js.update(config.get("assets:js", {}))
+
+    def _merge_assets(self, first, second):
+        merged = []
+        seen = {}
+        for item in first + second:
+            if item not in seen:
+                seen[item] = True
+                merged.append(item)
+
+        return merged
