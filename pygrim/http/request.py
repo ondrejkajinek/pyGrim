@@ -47,7 +47,7 @@ class Request(object):
         elif attr in ("GET", "DELETE"):
             data = self._parse_string(self.environment.get("query_string"))
         elif attr in ("POST", "PUT"):
-            if self._headers.get("content_type") in (
+            if self.environment["content_type"] in (
                 None, "application/x-www-form-urlencoded"
             ):
                 data = self._parse_string(self.RAW_POST)
@@ -67,6 +67,14 @@ class Request(object):
             return self.DEFAULT_SCHEME_PORTS[scheme] != port
         except KeyError:
             return True
+
+    def _get_content_type(self, env):
+        try:
+            content_type = env["CONTENT_TYPE"].split(";", 1)[0].strip()
+        except:
+            content_type = None
+
+        return content_type
 
     def _get_host(self, env):
         try:
@@ -147,4 +155,5 @@ class Request(object):
         env["path_info"] = env.pop("PATH_INFO").rstrip("/") or "/"
         env["request_method"] = method
         env["server_port"] = self._get_port(env)
+        env["content_type"] = self._get_content_type(env)
         self.environment = NormalizedImmutableDict(env)
