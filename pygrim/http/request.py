@@ -155,5 +155,5 @@ class Request(object):
         env["path_info"] = env.pop("PATH_INFO").rstrip("/") or "/"
         env["request_method"] = method
         env["server_port"] = self._get_port(env)
-        env["content_type"] = self._get_content_type(env)
+        env["CONTENT_TYPE"] = self._get_content_type(env)
         self.environment = NormalizedImmutableDict(env)
