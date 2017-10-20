@@ -1,3 +1,10 @@
+pygrim (0.1.39) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * bugfix working with content_type
+
+ -- Václav Pokluda <root@darky>  Fri, 20 Oct 2017 10:21:42 +0200
+
 pygrim (0.1.38) testing; urgency=medium
 
   * COMMIT MESSASGES
