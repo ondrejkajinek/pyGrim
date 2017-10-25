@@ -68,13 +68,21 @@ class Request(object):
         except KeyError:
             return True
 
-    def _get_content_type(self, env):
-        try:
-            content_type = env["CONTENT_TYPE"].split(";", 1)[0].strip()
-        except:
-            content_type = None
-
-        return content_type
+    def _set_content_type_from_env(self, env):
+        content_type = None
+        for k in ("CONTENT_TYPE", "HTTP_CONTENT_TYPE"):
+            c_t = env.pop(k, None)
+            if c_t:
+                c_t = c_t.split(";", 1)[0].strip()
+            if c_t:
+                if content_type and c_t != content_type:
+                    log.error(
+                        "Received multiple different content_types:%r/%r",
+                        c_t, content_type
+                    )
+                else:
+                    content_type = c_t
+        env["CONTENT_TYPE"] = content_type
 
     def _get_host(self, env):
         try:
@@ -155,5 +163,5 @@ class Request(object):
         env["path_info"] = env.pop("PATH_INFO").rstrip("/") or "/"
         env["request_method"] = method
         env["server_port"] = self._get_port(env)
-        env["CONTENT_TYPE"] = self._get_content_type(env)
+        self._set_content_type_from_env(env)
         self.environment = NormalizedImmutableDict(env)
