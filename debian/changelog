@@ -1,3 +1,10 @@
+pygrim (0.1.40) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * fix content-type logiky kvůli kolizi klíču content type
+
+ -- Václav Pokluda <root@darky>  Wed, 25 Oct 2017 11:00:32 +0200
+
 pygrim (0.1.39) testing; urgency=medium
 
   * COMMIT MESSASGES
