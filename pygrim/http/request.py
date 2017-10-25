@@ -28,11 +28,24 @@ class Request(object):
         self._save_environment(environment)
         self.cookies = self._parse_string(self._headers.get("cookie", ""), ";")
 
+    def _get_content_type(self):
+        c_t = self._normalize_content_type(
+            self._headers.get("content_type")
+        )
+        if not c_t:
+            # fallback for some special cases when content type is not present
+            #   in headers but can be found in environment without HTTP_ prefix
+            c_t = self._normalize_content_type(
+                self.environment.get("content_type")
+            )
+        # endif
+        return c_t or None
+
     def __getattr__(self, attr):
         save = True
         if (
             attr == "JSON" and
-            self.environment.get("content_type") == "application/json"
+            self.content_type == "application/json"
         ):
             try:
                 data = json.loads(self.RAW_POST)
@@ -47,12 +60,14 @@ class Request(object):
         elif attr in ("GET", "DELETE"):
             data = self._parse_string(self.environment.get("query_string"))
         elif attr in ("POST", "PUT"):
-            if self.environment["content_type"] in (
+            if self.content_type in (
                 None, "application/x-www-form-urlencoded"
             ):
                 data = self._parse_string(self.RAW_POST)
             else:
                 data = {}
+        elif attr == 'content_type':
+            data = self._get_content_type()
         else:
             raise AttributeError("%r object has no attribute %r" % (
                 self.__class__.__name__, attr
@@ -68,21 +83,10 @@ class Request(object):
         except KeyError:
             return True
 
-    def _set_content_type_from_env(self, env):
-        content_type = None
-        for k in ("CONTENT_TYPE", "HTTP_CONTENT_TYPE"):
-            c_t = env.pop(k, None)
-            if c_t:
-                c_t = c_t.split(";", 1)[0].strip()
-            if c_t:
-                if content_type and c_t != content_type:
-                    log.error(
-                        "Received multiple different content_types:%r/%r",
-                        c_t, content_type
-                    )
-                else:
-                    content_type = c_t
-        env["CONTENT_TYPE"] = content_type
+    def _normalize_content_type(self, c_t):
+        if c_t:
+            c_t = c_t.split(";", 1)[0].strip().lower()
+        return c_t or None
 
     def _get_host(self, env):
         try:
@@ -163,5 +167,4 @@ class Request(object):
         env["path_info"] = env.pop("PATH_INFO").rstrip("/") or "/"
         env["request_method"] = method
         env["server_port"] = self._get_port(env)
-        self._set_content_type_from_env(env)
         self.environment = NormalizedImmutableDict(env)
