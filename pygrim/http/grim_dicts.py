@@ -48,5 +48,7 @@ class NormalizedImmutableDict(ImmutableDict):
         normalized = key.lower().replace("-", "_")
         if normalized.startswith("http_"):
             normalized = normalized[5:]
+        elif normalized.startswith("x_"):
+            normalized = normalized[2:]
 
         return normalized
