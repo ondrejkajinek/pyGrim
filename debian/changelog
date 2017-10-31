@@ -1,3 +1,37 @@
+pygrim (0.1.41) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * fix content-type logic
+
+ -- Václav Pokluda <root@darky>  Wed, 25 Oct 2017 13:22:19 +0200
+
+pygrim (0.1.40) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * fix content-type logiky kvůli kolizi klíču content type
+
+ -- Václav Pokluda <root@darky>  Wed, 25 Oct 2017 11:00:32 +0200
+
+pygrim (0.1.39) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * bugfix working with content_type
+
+ -- Václav Pokluda <root@darky>  Fri, 20 Oct 2017 10:21:42 +0200
+
+pygrim (0.1.38) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * Fixed request.JSON method
+  * Implemented context.get_reqeust_content_type
+  * reformat
+  * Fixed order of assets loaded from config and added through
+    context.add_{js,css}
+  * fixed content-type checks in request
+  * fixed wired uwsgi change of content_type header locatin in env
+
+ -- Václav Pokluda <root@darky>  Fri, 20 Oct 2017 09:09:27 +0200
+
 pygrim (0.1.37) testing; urgency=low
 
   * COMMIT MESSASGES
