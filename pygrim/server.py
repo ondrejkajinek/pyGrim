@@ -253,9 +253,12 @@ class Server(object):
 
         return view_class
 
+    def load_session(self, context):
+        context.load_session(self.session_handler)
+
     def _handle_by_route(self, route, context):
         if route.requires_session():
-            context.load_session(self.session_handler)
+            self.load_session(context)
 
         try:
             route.dispatch(context=context)
