@@ -285,7 +285,14 @@ class Server(object):
             for one in getmro(exc.__class__):
                 log.debug("Looking up error handler for %r.", one)
                 if one in self._custom_error_handlers:
-                    self._custom_error_handlers[one](context=context, exc=exc)
+                    log.debug("Found error handler for %r.", one)
+                    handle = self._custom_error_handlers[one]
+                    try:
+                        handle(context=context, exc=exc)
+                    except DispatchFinished:
+                        pass
+                    if getattr(handle, "_save_session", False):
+                        context.save_session(self.session_handler)
                     raise DispatchFinished()
             self._error_method(context=context, exc=exc)
             raise DispatchFinished()

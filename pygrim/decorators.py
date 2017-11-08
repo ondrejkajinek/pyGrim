@@ -81,6 +81,7 @@ class error_handler(method):
 
     def __init__(self, *args, **kwargs):
         self._error_status = kwargs.pop("status", 500)
+        self._save_session = kwargs.pop("save_session", False)
         super(error_handler, self).__init__(**kwargs)
         for one in args:
             if not issubclass(one, BaseException):
@@ -95,6 +96,7 @@ class error_handler(method):
 
     def prepare_func(self, func):
         func._custom_error = self.err_classes
+        func._save_session = self._save_session
         super(error_handler, self).prepare_func(func)
 
 
