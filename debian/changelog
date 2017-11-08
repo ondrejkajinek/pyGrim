@@ -1,3 +1,12 @@
+pygrim (0.1.42) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * divide server method to allow inherinting part of functionality
+  * NormalizedImmutableDict fix for key normalization
+  * Jinja method for seo fixed
+
+ -- Václav Pokluda <root@darky>  Wed, 08 Nov 2017 09:22:35 +0100
+
 pygrim (0.1.41) testing; urgency=medium
 
   * COMMIT MESSASGES
