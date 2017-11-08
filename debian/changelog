@@ -1,3 +1,10 @@
+pygrim (0.1.43) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * error handler can work with session
+
+ -- Václav Pokluda <root@darky>  Wed, 08 Nov 2017 09:43:55 +0100
+
 pygrim (0.1.42) testing; urgency=medium
 
   * COMMIT MESSASGES
