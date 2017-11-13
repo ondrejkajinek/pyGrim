@@ -1,3 +1,12 @@
+pygrim (0.1.44) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * Fixes in error states of jinja methods url_for and static_file: when
+    pygrim is in debug mode, raise, otherwise log and silently return
+    empty string
+
+ -- OndraK <root@ondrak>  Mon, 13 Nov 2017 16:32:15 +0100
+
 pygrim (0.1.43) testing; urgency=medium
 
   * COMMIT MESSASGES
