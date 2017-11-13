@@ -566,11 +566,14 @@ class Server(object):
         )
         if not file_path:
             if self._debug:
-                file_path = ""
-            else:
                 raise RuntimeError("File %r could not be found in %r" % (
                     filename, prefixes
                 ))
+            else:
+                log.error(
+                    "File %r not present in static-map: %r", filename, prefixes
+                )
+                file_path = ""
 
         return file_path
 
@@ -580,9 +583,10 @@ class Server(object):
             url = self.router.url_for(route, params)
         except RouteNotRegistered:
             if self._debug:
-                url = "#"
-            else:
                 raise
+            else:
+                log.error("Route not registered: %r", route)
+                url = "#"
 
         return url
 
