@@ -1,3 +1,12 @@
+pygrim (0.1.45) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * _asdict added to AbstractConfig, all subclasses need to implement it
+  * Yaml loader inherits from SafeLoader -- correctly casts config
+    values
+
+ -- OndraK <root@ondrak>  Wed, 15 Nov 2017 10:24:35 +0100
+
 pygrim (0.1.44) testing; urgency=medium
 
   * COMMIT MESSASGES
