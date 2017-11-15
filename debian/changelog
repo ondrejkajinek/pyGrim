@@ -1,3 +1,10 @@
+pygrim (0.1.46) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * pyYaml __getitem__ method implemented
+
+ -- Václav Pokluda <root@darky>  Wed, 15 Nov 2017 12:55:59 +0100
+
 pygrim (0.1.45) testing; urgency=medium
 
   * COMMIT MESSASGES
