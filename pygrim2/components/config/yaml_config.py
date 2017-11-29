@@ -10,14 +10,14 @@ except ImportError:
     uwsgi_log = print
 
 from yaml import load as yaml_load, parser as yaml_parser
-from yaml import BaseLoader, MappingNode
+from yaml import SafeLoader, MappingNode
 from yaml.constructor import ConstructorError
 
 # local
 from .abstract_config import AbstractConfig
 
 
-class PygrimYamlLoader(BaseLoader):
+class PygrimYamlLoader(SafeLoader):
 
     """
     This reimplements PyYAML loader
@@ -27,6 +27,10 @@ class PygrimYamlLoader(BaseLoader):
     """
 
     def construct_mapping(self, node, deep=False):
+        if isinstance(node, MappingNode):
+            self.flatten_mapping(node)
+
+        # TODO: can this be just turned into else: ?
         if not isinstance(node, MappingNode):
             raise ConstructorError(
                 None,
@@ -35,6 +39,7 @@ class PygrimYamlLoader(BaseLoader):
                     node.id, node.start_mark
                 )
             )
+
         mapping = {}
         for key_node, value_node in node.value:
             key = self.construct_object(key_node, deep=deep)
