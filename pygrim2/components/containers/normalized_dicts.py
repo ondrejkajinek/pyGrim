@@ -1,39 +1,8 @@
 # coding: utf8
 
 # local
-from .utils import ensure_string
-
-
-class AttributeDict(dict):
-
-    def __init__(self, *args, **kwargs):
-        super(AttributeDict, self).__init__(*args, **kwargs)
-
-    def __getattr__(self, key):
-        try:
-            return self.__getitem__(key)
-        except KeyError as exc:
-            raise AttributeError(exc)
-
-
-class ImmutableDict(dict):
-
-    def __init__(self, *args, **kwargs):
-        super(ImmutableDict, self).__init__(*args, **kwargs)
-
-    def __hash__(self):
-        return id(self)
-
-    def _immutable(self, *args, **kwargs):
-        raise TypeError("object is immutable")
-
-    __setitem__ = _immutable
-    __delitem__ = _immutable
-    clear = _immutable
-    update = _immutable
-    setdefault = _immutable
-    pop = _immutable
-    popitem = _immutable
+from .immutable_dict import ImmutableDict
+from ..utils import ensure_string
 
 
 class NormalizedDict(dict):
@@ -99,6 +68,8 @@ class NormalizedDict(dict):
         normalized = ensure_string(key).lower().replace("_", "-")
         if normalized.startswith("http-"):
             normalized = normalized[5:]
+        elif normalized.startswith("x-"):
+            normalized = normalized[2:]
 
         return normalized
 

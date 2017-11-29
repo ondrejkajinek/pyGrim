@@ -7,7 +7,7 @@ from string import strip as string_strip
 from urllib import unquote_plus
 
 # local
-from ..components.grim_dicts import ImmutableDict, NormalizedImmutableDict
+from ..components.containers import ImmutableDict, NormalizedImmutableDict
 from ..components.utils import get_instance_name
 from ..components.utils.json2 import loads as json_loads
 

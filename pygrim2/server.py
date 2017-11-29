@@ -24,7 +24,7 @@ from .components.exceptions import (
     WrongConfigBase, WrongL10nBase, WrongRouterBase, WrongSessionHandlerBase,
     WrongViewBase
 )
-from .components.grim_dicts import AttributeDict
+from .components.containers import AttributeDict
 from .components.l10n import AbstractL10n, DummyL10n, GettextL10n
 from .components.log import initialize_loggers
 from .components.routing import AbstractRouter, NoRoute, Route, Router

@@ -13,7 +13,7 @@ except ImportError:
 # local
 from .exceptions import HeadersAlreadySent
 from ..components.routing import StopDispatch
-from ..components.grim_dicts import ImmutableDict, NormalizedDict
+from ..components.containers import ImmutableDict, NormalizedDict
 
 log = getLogger("pygrim.http.context")
 

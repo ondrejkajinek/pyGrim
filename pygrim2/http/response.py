@@ -8,7 +8,7 @@ from os import SEEK_END
 from urllib import quote_plus as url_quoteplus
 
 # local
-from ..components.grim_dicts import NormalizedDict
+from ..components.containers import NormalizedDict
 
 log = getLogger("pygrim.http.response")
 
