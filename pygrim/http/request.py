@@ -28,17 +28,24 @@ class Request(object):
         self._save_environment(environment)
         self.cookies = self._parse_string(self._headers.get("cookie", ""), ";")
 
-    def get_content_type(self):
-        c_type = self._headers.get("content_type")
-        if c_type:
-            c_type = c_type.split(";", 1)[0].strip()
-        return c_type
+    def _get_content_type(self):
+        c_t = self._normalize_content_type(
+            self._headers.get("content_type")
+        )
+        if not c_t:
+            # fallback for some special cases when content type is not present
+            #   in headers but can be found in environment without HTTP_ prefix
+            c_t = self._normalize_content_type(
+                self.environment.get("content_type")
+            )
+        # endif
+        return c_t or None
 
     def __getattr__(self, attr):
         save = True
         if (
             attr == "JSON" and
-            self.get_content_type() == "application/json"
+            self.content_type == "application/json"
         ):
             try:
                 data = json.loads(self.RAW_POST)
@@ -53,13 +60,14 @@ class Request(object):
         elif attr in ("GET", "DELETE"):
             data = self._parse_string(self.environment.get("query_string"))
         elif attr in ("POST", "PUT"):
-
-            if self.get_content_type() in (
+            if self.content_type in (
                 None, "application/x-www-form-urlencoded"
             ):
                 data = self._parse_string(self.RAW_POST)
             else:
                 data = {}
+        elif attr == 'content_type':
+            data = self._get_content_type()
         else:
             raise AttributeError("%r object has no attribute %r" % (
                 self.__class__.__name__, attr
@@ -74,6 +82,11 @@ class Request(object):
             return self.DEFAULT_SCHEME_PORTS[scheme] != port
         except KeyError:
             return True
+
+    def _normalize_content_type(self, c_t):
+        if c_t:
+            c_t = c_t.split(";", 1)[0].strip().lower()
+        return c_t or None
 
     def _get_host(self, env):
         try:
@@ -112,8 +125,7 @@ class Request(object):
             upper_key = key.upper()
             if (
                 upper_key.startswith("X_") or
-                upper_key.startswith("HTTP_") or
-                upper_key == "CONTENT_TYPE"
+                upper_key.startswith("HTTP_")
             ):
                 headers[key] = environment.get(key)
 

@@ -69,21 +69,22 @@ class Context(object):
         }
 
     def add_css(self, *args):
-        extra = self.view_data.setdefault("extra_css", set())
-        extra.update(set(args))
+        extra = self.view_data.setdefault("extra_css", [])
+        extra.extend(args)
 
     def add_js(self, *args, **kwargs):
         location_path = "header" if kwargs.get("header", True) else "footer"
         sync_path = "sync" if kwargs.get("sync", True) else "async"
         extra = self.view_data.setdefault(
-            "extra_js_%s_%s" % (location_path, sync_path), set()
+            "extra_js_%s_%s" % (location_path, sync_path), []
         )
-        extra.update(set(args))
+        extra.extend(args)
 
     def add_response_headers(self, headers):
         self._response.headers.update(
             (str(k), str(v))
-            for k, v in headers.items()
+            for k, v
+            in headers.items()
         )
 
     def delete_cookie(
@@ -119,6 +120,9 @@ class Context(object):
             if self._language in self._languages
             else self._default_language()
         )
+
+    def get_request_content_type(self):
+        return self._request.environment["content_type"]
 
     def get_request_host(self):
         return self._request.environment["host"]

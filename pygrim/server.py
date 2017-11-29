@@ -253,9 +253,12 @@ class Server(object):
 
         return view_class
 
+    def load_session(self, context):
+        context.load_session(self.session_handler)
+
     def _handle_by_route(self, route, context):
         if route.requires_session():
-            context.load_session(self.session_handler)
+            self.load_session(context)
 
         try:
             route.dispatch(context=context)
@@ -282,7 +285,14 @@ class Server(object):
             for one in getmro(exc.__class__):
                 log.debug("Looking up error handler for %r.", one)
                 if one in self._custom_error_handlers:
-                    self._custom_error_handlers[one](context=context, exc=exc)
+                    log.debug("Found error handler for %r.", one)
+                    handle = self._custom_error_handlers[one]
+                    try:
+                        handle(context=context, exc=exc)
+                    except DispatchFinished:
+                        pass
+                    if getattr(handle, "_save_session", False):
+                        context.save_session(self.session_handler)
                     raise DispatchFinished()
             self._error_method(context=context, exc=exc)
             raise DispatchFinished()
@@ -557,11 +567,14 @@ class Server(object):
         )
         if not file_path:
             if self._debug:
-                file_path = ""
-            else:
                 raise RuntimeError("File %r could not be found in %r" % (
                     filename, prefixes
                 ))
+            else:
+                log.error(
+                    "File %r not present in static-map: %r", filename, prefixes
+                )
+                file_path = ""
 
         return file_path
 
@@ -573,6 +586,7 @@ class Server(object):
             if self._debug:
                 raise
             else:
+                log.error("Route not registered: %r", route)
                 url = "#"
 
         return url

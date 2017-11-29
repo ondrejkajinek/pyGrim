@@ -76,6 +76,9 @@ class AbstractConfig(object):
 
     getboolean = getbool
 
+    def _asdict(self):
+        raise NotImplementedError()
+
     def _default_value(self, *args, **kwargs):
         """
         there must be this construction because this raises IndexError

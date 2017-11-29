@@ -77,7 +77,7 @@ class BaseExtension(Extension):
         return {}
 
     def _seo_dashize(self, text):
-        return "".join("-" if c in self.SEO_DASHED else c for c in text)
+        return "".join("-" if c in self.SEO_DASHED else c for c in text or "")
 
     def _seo_remove(self, text):
-        return "".join("" if c in self.SEO_REMOVED else c for c in text)
+        return "".join("" if c in self.SEO_REMOVED else c for c in text or "")
