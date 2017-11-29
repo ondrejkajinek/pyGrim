@@ -7,6 +7,7 @@ from string import strip as string_strip
 from urllib import unquote_plus
 
 # local
+from .methods import DELETE, GET, POST, PUT
 from ..components.containers import ImmutableDict, NormalizedImmutableDict
 from ..components.utils import get_instance_name
 from ..components.utils.json2 import loads as json_loads
@@ -47,9 +48,9 @@ class Request(object):
                 save = False
         elif attr == "RAW_POST":
             data = "".join(part for part in self.environment["wsgi.input"])
-        elif attr in ("GET", "DELETE"):
+        elif attr in (GET, DELETE):
             data = self._parse_string(self.environment.get("query_string"))
-        elif attr in ("POST", "PUT"):
+        elif attr in (POST, PUT):
             if self._headers.get("content_type") in (
                 None, "application/x-www-form-urlencoded"
             ):

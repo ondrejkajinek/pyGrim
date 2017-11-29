@@ -12,6 +12,7 @@ except ImportError:
 
 # local
 from .exceptions import HeadersAlreadySent
+from .methods import DELETE, GET, HEAD, POST, PUT
 from ..components.routing import StopDispatch
 from ..components.containers import ImmutableDict, NormalizedDict
 
@@ -63,10 +64,10 @@ class Context(object):
         super(Context, self).__setattr__(key, value)
 
     def DELETE(self, key=None, fallback=None):
-        return self._request_param("DELETE", key, fallback)
+        return self._request_param(DELETE, key, fallback)
 
     def GET(self, key=None, fallback=None):
-        return self._request_param("GET", key, fallback)
+        return self._request_param(GET, key, fallback)
 
     def JSON(self, key=None, fallback=None):
         return self._request_param("JSON", key, fallback)
@@ -75,10 +76,10 @@ class Context(object):
         return self._request_param(self.get_request_method(), key, fallback)
 
     def POST(self, key=None, fallback=None):
-        return self._request_param("POST", key, fallback)
+        return self._request_param(POST, key, fallback)
 
     def PUT(self, key=None, fallback=None):
-        return self._request_param("PUT", key, fallback)
+        return self._request_param(PUT, key, fallback)
 
     def RAW_POST(self):
         return self._request.RAW_POST
@@ -221,7 +222,7 @@ class Context(object):
         return self._view
 
     def is_request_get(self):
-        return self._request.environment["request_method"] == "GET"
+        return self._request.environment["request_method"] == GET
 
     def is_request_head(self):
         return (
@@ -229,7 +230,7 @@ class Context(object):
         )
 
     def is_request_post(self):
-        return self._request.environment["request_method"] == "POST"
+        return self._request.environment["request_method"] == POST
 
     def load_session(self):
         if self._session_loaded is False:
