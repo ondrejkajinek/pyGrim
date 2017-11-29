@@ -99,7 +99,7 @@ class route(BaseDecorator):
 
     def __init__(self, methods, pattern=None, name=None, *args, **kwargs):
         self._route = {
-            "methods": methods,
+            "methods": ensure_tuple(methods),
             "name": name,
             "pattern": pattern
         }

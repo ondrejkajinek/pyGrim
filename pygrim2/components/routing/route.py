@@ -3,14 +3,14 @@
 # std
 from logging import getLogger
 from re import compile as re_compile
-from string import upper as string_upper
 from urllib import quote_plus
 
 # local
 from ..utils import (
-    ensure_string, ensure_tuple, fix_trailing_slash, get_method_name, is_regex,
+    ensure_string, fix_trailing_slash, get_method_name, is_regex,
     remove_trailing_slash
 )
+from ...http.methods import GET, HEAD, METHODS
 
 log = getLogger("pygrim.components.routing.route")
 
@@ -71,9 +71,15 @@ class Route(RouteObject):
     URL_PARAM_REGEXP = re_compile("\(\?P<([^>]+)>[^)]+\)")
 
     def __init__(self, methods, pattern, handle, name=None):
+        # All routes supporting GET also support HEAD
+        if GET in methods and HEAD not in methods:
+            methods += (HEAD,)
+
         super(Route, self).__init__(pattern)
         self._handle = handle
-        self._methods = tuple(map(string_upper, ensure_tuple(methods)))
+        self._methods = tuple(
+            method for method in methods if method in METHODS
+        )
         self._name = name
 
     def __str__(self):

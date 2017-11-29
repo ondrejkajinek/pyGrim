@@ -225,9 +225,7 @@ class Context(object):
         return self._request.environment["request_method"] == GET
 
     def is_request_head(self):
-        return (
-            self._request.environment.get("original_request_method") == "HEAD"
-        )
+        return self._request.environment["request_method"] == HEAD
 
     def is_request_post(self):
         return self._request.environment["request_method"] == POST

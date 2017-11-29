@@ -139,15 +139,10 @@ class Request(object):
         return ImmutableDict(parsed)
 
     def _save_environment(self, env):
-        method = env.pop("REQUEST_METHOD").upper()
-        if method == "HEAD":
-            env["original_request_method"] = method
-            method = "GET"
-
         env["host"] = self._get_host(env)
         env["ip"] = self._get_ip(env)
         env["path_info"] = env.pop("PATH_INFO").rstrip("/") or "/"
-        env["request_method"] = method
+        env["request_method"] = env.pop("REQUEST_METHOD").upper()
         env["server_port"] = self._get_port(env)
         env["accept_language"] = self._accept_language(env)
         self.environment = NormalizedImmutableDict(**env)
