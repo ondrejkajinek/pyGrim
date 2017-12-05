@@ -531,8 +531,11 @@ class Server(object):
         context.view_data.update(
             (key, getattr(context, key))
             for key
-            in ("current_route", "session", "template", "_route_params")
+            in ("current_route", "template", "_route_params")
         )
+        if context.session_loaded():
+            context.view_data["session"] = context.session
+
         self._set_json_view(context)
 
     def _set_fallback_view(self, context):
