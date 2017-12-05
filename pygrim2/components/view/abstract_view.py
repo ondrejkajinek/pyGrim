@@ -24,17 +24,11 @@ class AbstractView(object):
 class BaseView(AbstractView):
 
     def _initialize_assets(self, config):
-        self._css = set(config.get("assets:css", ()))
-        self._js = {
-            "header": {
-                "async": set(config.get("assets:js:header:async", ())),
-                "sync": set(config.get("assets:js:header:sync", ()))
-            },
-            "footer": {
-                "async": set(config.get("assets:js:footer:async", ())),
-                "sync": set(config.get("assets:js:footer:sync", ()))
-            }
-        }
+        self._css = config.get("assets:css", [])
+        self._js_header_async = config.get("assets:js:header:async", [])
+        self._js_header_sync = config.get("assets:js:header:sync", [])
+        self._js_footer_async = config.get("assets:js:footer:async", [])
+        self._js_footer_sync = config.get("assets:js:footer:sync", [])
 
     def _initialize_view(self, config):
         self._debug = config.getbool("pygrim:debug", True)
@@ -44,22 +38,24 @@ class BaseView(AbstractView):
         self._template_check(context)
 
         context.view_data.update({
-            "css": tuple(self._css | set(
-                set(context.view_data.pop("extra_css", ()))
-            )),
+            "css": self._css + context.view_data.pop("extra_css", []),
             "debug": self._debug,
-            "js_header_sync": tuple(self._js["header"]["sync"] | set(
-                context.view_data.pop("extra_js_header_sync", ())
-            )),
-            "js_header_async": tuple(self._js["header"]["async"] | set(
-                context.view_data.pop("extra_js_header_async", ())
-            )),
-            "js_footer_sync": tuple(self._js["footer"]["sync"] | set(
-                context.view_data.pop("extra_js_footer_sync", ())
-            )),
-            "js_footer_async": tuple(self._js["footer"]["async"] | set(
-                context.view_data.pop("extra_js_footer_async", ())
-            ))
+            "js_header_sync": (
+                self._js_header_sync +
+                context.view_data.pop("extra_js_header_sync", [])
+            ),
+            "js_header_async": (
+                self._js_header_async +
+                context.view_data.pop("extra_js_header_async", [])
+            ),
+            "js_footer_sync": (
+                self._js_footer_sync +
+                context.view_data.pop("extra_js_footer_sync", [])
+            ),
+            "js_footer_async": (
+                self._js_footer_async +
+                context.view_data.pop("extra_js_footer_async", [])
+            )
         })
 
     def _post_render(self, context):

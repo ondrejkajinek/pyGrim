@@ -98,15 +98,16 @@ class Context(object):
         }
 
     def add_css(self, *args):
-        extra = self.view_data.setdefault("extra_css", set())
-        extra.update(args)
+        extra = self.view_data.setdefault("extra_css", [])
+        extra += tuple(args)
 
     def add_js(self, *args, **kwargs):
         location_path = "header" if kwargs.get("header", True) else "footer"
         sync = "sync" if kwargs.get("sync", True) else "async"
-        self.view_data.setdefault(
-            "extra_js_%s_%s" % (location_path, sync), set()
-        ).update(args)
+        extra = self.view_data.setdefault(
+            "extra_js_%s_%s" % (location_path, sync), []
+        )
+        extra += tuple(args)
 
     def add_response_headers(self, headers):
         self._response.headers.update(
