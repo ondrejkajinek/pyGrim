@@ -11,6 +11,3 @@ class DummyView(AbstractView):
 
     def _render(self, context):
         return ""
-
-    def _template_check(self, context):
-        pass

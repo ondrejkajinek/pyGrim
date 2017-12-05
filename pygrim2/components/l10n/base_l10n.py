@@ -40,17 +40,19 @@ class BaseL10n(AbstractL10n):
 
         if language not in self._translations:
             try:
-                accept_languages = (
+                accepted = (
                     lang.split(";")[0]
                     for lang
-                    in context._request.environment["accept_language"]
-                    if lang.split(";")[0] in self._translations
+                    in context._request.environment["accept_languages"]
                 )
             except KeyError:
                 language = self._default_locale
             else:
                 language = (
-                    next((lang for lang in accept_languages if lang), None) or
+                    next(
+                        (l for l in accepted if l in self._translations),
+                        None
+                    ) or
                     self._default_locale
                 )
 

@@ -30,7 +30,7 @@ class Router(AbstractRouter):
             )
             route.set_pattern(
                 re_compile("^" + full_pattern.lstrip("^"))
-                if route.is_regex() or self._is_group_regular()
+                if route.is_regular() or self._is_group_regular()
                 else full_pattern
             )
             specificity = route.specificity()
@@ -110,7 +110,7 @@ class Router(AbstractRouter):
 
     def _is_group_regular(self):
         return any(
-            group.is_regex()
+            group.is_regular()
             for group
             in self._route_groups
         )

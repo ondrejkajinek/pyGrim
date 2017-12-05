@@ -24,11 +24,11 @@ class RouteObject(object):
     def get_pattern(self):
         return (
             self._pattern.pattern
-            if self.is_regex()
+            if self.is_regular()
             else self._pattern
         )
 
-    def is_regex(self):
+    def is_regular(self):
         return is_regex(self._pattern)
 
     def set_pattern(self, pattern):
@@ -58,7 +58,7 @@ class RouteGroup(RouteObject):
             remove_trailing_slash(self.get_pattern()),
             other.get_pattern().lstrip("/")
         ))
-        if any(i.is_regex() for i in (self, other)):
+        if any(i.is_regular() for i in (self, other)):
             full_pattern = re_compile(full_pattern)
 
         return full_pattern
@@ -103,12 +103,12 @@ class Route(RouteObject):
     def specificity(self):
         return (
             self.URL_PARAM_REGEXP.sub("", self.get_pattern()).count("/")
-            if self.is_regex()
+            if self.is_regular()
             else self.get_pattern().count("/")
         )
 
     def url_for(self, params):
-        if self.is_regex():
+        if self.is_regular():
             readable, param_names, optional_names = self._pattern_to_readable()
             for name in optional_names:
                 params.setdefault(name, "")
@@ -139,9 +139,10 @@ class Route(RouteObject):
     def _asdict(self):
         return {
             "handle_name": get_method_name(self._handle),
+            "methods": self._methods,
             "name": self.get_name(),
             "pattern": self.get_pattern(),
-            "regular": self.is_regex()
+            "regular": self.is_regular()
         }
 
     def _pattern_to_readable(self):
@@ -167,7 +168,7 @@ class Route(RouteObject):
     def _uri_matches(self, context):
         uri = context.get_request_uri()
         log.debug("matching %r with  %r", self.get_pattern(), uri)
-        if self.is_regex():
+        if self.is_regular():
             matches = self._pattern.match(uri)
             match = matches is not None
             context.set_route_params(matches.groupdict() if match else {})

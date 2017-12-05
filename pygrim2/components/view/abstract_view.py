@@ -79,6 +79,3 @@ class BaseView(AbstractView):
             raise RuntimeError(
                 "Trying to render response but no template has been set."
             )
-
-    def _use_flash(self, context):
-        return context.session_loaded() and "_flash" in context.session

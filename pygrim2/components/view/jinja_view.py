@@ -61,7 +61,7 @@ class JinjaView(BaseView):
         return tuple(self._env.loader.searchpath)
 
     def use_translation(self, translation):
-        if self._has_i18n():
+        if self._has_gettext():
             self._env.install_gettext_translations(translation)
 
     def _get_extensions(self, config):
@@ -81,7 +81,7 @@ class JinjaView(BaseView):
 
         return map(str, extensions)
 
-    def _has_i18n(self):
+    def _has_gettext(self):
         return I18N_EXT_NAME in self._env.extensions
 
     def _render_template(self, context):
