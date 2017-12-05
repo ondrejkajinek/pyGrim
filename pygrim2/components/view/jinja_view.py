@@ -46,11 +46,6 @@ class JinjaView(BaseView):
         )
         self._translations = translations or {}
 
-        if "url_for" in extra_functions:
-            self._env.filters.update({
-                "url_for": extra_functions["url_for"]
-            })
-
         self._env.globals.update(extra_functions)
         if config.get("jinja:suppress_none"):
             self._env.finalize = _suppress_none
