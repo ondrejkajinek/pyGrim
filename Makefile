@@ -57,18 +57,17 @@ install:
 	python setup.py install
 
 linkItems:
-	( \
-		ln -sf `pwd`/pygrim2 /usr/local/lib/python${PY_VERSION}/dist-packages/pygrim2  \
-    )
+	ln -sf `pwd`/pygrim2 /usr/local/lib/python${PY_VERSION}/dist-packages/pygrim2
+
+unlinkItems:
+	rm -f /usr/local/lib/python${PY_VERSION}/dist-packages/pygrim2
 
 postinstall:
-	( \
-    	bash `pwd`/debian/postinst \
-	)
+	bash `pwd`/debian/postinst
 
 installPackages:
-	( \
-		apt-get install python-dev \
-	)
+	apt-get install python-dev
 
 link: linkItems installPackages postinstall
+
+unlink: unlinkItems
