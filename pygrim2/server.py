@@ -196,7 +196,7 @@ class Server(object):
         context.set_response_status(500)
         self._set_fallback_view(context)
 
-    def _default_not_found_handler(self, context):
+    def _default_not_found_handler(self, context, exc):
         context.set_response_body("Not found")
         context.set_response_status(404)
         self._set_fallback_view(context)
