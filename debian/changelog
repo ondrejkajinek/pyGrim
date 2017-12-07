@@ -1,3 +1,11 @@
+pygrim (0.1.47) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * changed imager url
+  * fit_image fixed
+
+ -- OndraK <root@ondrak>  Thu, 07 Dec 2017 10:55:39 +0100
+
 pygrim (0.1.46) testing; urgency=medium
 
   * COMMIT MESSASGES
