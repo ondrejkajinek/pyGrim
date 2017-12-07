@@ -1,3 +1,11 @@
+pygrim (0.1.48) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * fix_image can generate url with only one slash at the beginning --
+    good for proxy passes
+
+ -- OndraK <root@ondrak>  Thu, 07 Dec 2017 12:03:46 +0100
+
 pygrim (0.1.47) testing; urgency=medium
 
   * COMMIT MESSASGES
