@@ -31,7 +31,7 @@ class BaseExtension(Extension):
 
     def fit_image(self, path, size=160):
         if not path.startswith("/"):
-            path = "//img.mopa.cz/fit,img,%s,;%s" % size, path
+            path = "//img.mopa.cz/fit,img,%s,;%s" % (size, path)
         elif self.ENVELOPE_REGEXP.match(path):
             path = self.ENVELOPE_FORMATTER.sub("%s/\g<0>" % size, path)
 
