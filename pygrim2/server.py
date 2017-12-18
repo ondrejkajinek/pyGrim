@@ -177,14 +177,14 @@ class Server(object):
         self._controllers[controller_name] = controller
         start_log.debug("Controller %r registered", controller_name)
 
-    def register_model(self, model):
+    def register_model(self, model_class):
         if self._model is not None:
             start_log.warning(
                 "Model is already registered: %r",
                 get_instance_name(self._model)
             )
 
-        self._model = model
+        self._model = model_class(self.config)
         # Rewrite _model in controllers that were registered so far,
         # destroying original one
         for controller in self._controllers.itervalues():
