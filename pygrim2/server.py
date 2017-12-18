@@ -529,7 +529,7 @@ class Server(object):
             "Content-Type"
         )
         context.view_data.update(
-            (key, getattr(context, key))
+            ("__" + key, getattr(context, key))
             for key
             in ("current_route", "template", "_route_params")
         )
