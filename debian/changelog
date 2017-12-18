@@ -1,3 +1,10 @@
+pygrim (0.1.49) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * Rozsireni filtru fit_image o width a height
+
+ -- Václav Pokluda <root@darky>  Mon, 18 Dec 2017 12:35:30 +0100
+
 pygrim (0.1.48) testing; urgency=medium
 
   * COMMIT MESSASGES
