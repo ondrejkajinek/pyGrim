@@ -2,7 +2,7 @@
 
 # std
 from logging import getLogger
-from re import compile as re_compile, IGNORECASE as re_IGNORECASE
+from re import compile as re_compile
 
 # non-std
 from jinja2.ext import Extension
@@ -17,8 +17,6 @@ log = getLogger("pygrim.components.jinja_ext.base")
 class BaseExtension(Extension):
 
     DASH_SQUEEZER = re_compile("r/-{2,}")
-    ENVELOPE_REGEXP = re_compile(r"/envelope/\d+\.jpeg", re_IGNORECASE)
-    ENVELOPE_FORMATTER = re_compile(r"\d+")
     SEO_DASHED = (" ", "/", "\\", ":")
     SEO_REMOVED = ("*", "?", "\"", "<", ">", "|", ",")
     SIZE_PREFIXES = ("", "ki", "Mi", "Gi", "Ti")
@@ -34,11 +32,19 @@ class BaseExtension(Extension):
         log.warning("Filter `as_json` is deprecated and will be removed soon.")
         return self.to_json(data)
 
-    def fit_image(self, path, size=160):
-        if not path.startswith("/"):
-            path = "//img.mopa.cz/fit,img,%s,;%s" % (size, path)
-        elif self.ENVELOPE_REGEXP.match(path):
-            path = self.ENVELOPE_FORMATTER.sub("%s/\g<0>" % size, path)
+    # TODO: remove, put to some GIT specific extension!
+    def fit_image(self, path, size=None, proxy=False, width=None, height=None):
+        size = size or 160
+        if not width and not height:
+            width = size
+
+        width = width or ""
+        height = height or ""
+        if path and not path.startswith("/"):
+            start = "/" if proxy else "//"
+            path = "%simg.grandit.cz/fit,img,%s,%s;%s" % (
+                start, width, height, path
+            )
 
         return path
 
