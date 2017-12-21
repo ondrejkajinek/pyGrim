@@ -38,7 +38,7 @@ class Request(object):
         save = True
         if (
             attr == "JSON" and
-            self._headers.get("content_type") == "application/json"
+            self.content_type == "application/json"
         ):
             try:
                 data = json_loads(self.RAW_POST)
@@ -51,12 +51,14 @@ class Request(object):
         elif attr in (GET, DELETE):
             data = self._parse_string(self.environment.get("query_string"))
         elif attr in (POST, PUT):
-            if self._headers.get("content_type") in (
+            if self.content_type in (
                 None, "application/x-www-form-urlencoded"
             ):
                 data = self._parse_string(self.RAW_POST)
             else:
                 data = {}
+        elif attr == "content_type":
+            data = self._get_content_type()
         else:
             raise AttributeError("%r object has no attribute %r" % (
                 get_instance_name(self), attr
@@ -75,6 +77,26 @@ class Request(object):
 
     def _accept_language(self, env):
         return env.pop("ACCEPT_LANGUAGE", "").split(",")
+
+    def _get_content_type(self):
+
+        def _normalize_content_type(c_type):
+            if c_type:
+                c_type = c_type.split(";", 1)[0].strip().lower()
+
+            return c_type or None
+
+        c_type = _normalize_content_type(
+            self._headers.get("content_type")
+        )
+        # fallback for some special cases when content type is not present
+        #   in headers but can be found in environment without HTTP_ prefix
+        if not c_type:
+            c_type = _normalize_content_type(
+                self.environment.get("content_type")
+            )
+
+        return c_type or None
 
     def _get_host(self, env):
         try:
