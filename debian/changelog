@@ -1,3 +1,18 @@
+pygrim2 (2.1.1) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * Compatibility for model initialization with previous versions of
+    pyGrim2
+  * float type can now also be turned to datetime by jinja 'date_format'
+    filter
+  * Fixed joining of route groups -- bad number of slashed could occur
+  * Fixed unicode in date jinja filters
+  * Fix for situation with multiple sessions in cookie
+  * Fix for file session storage -- error state handling
+  * 'time_from_secs' filter added to jinja extension
+
+ -- ondrejkajinek <ondrej.kajinek@gmail.com>  Wed, 27 Dec 2017 10:48:16 +0100
+
 pygrim2 (2.1.0) testing; urgency=medium
 
   * COMMIT MESSASGES
