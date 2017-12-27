@@ -117,8 +117,8 @@ class route(BaseDecorator):
 
 class template(BaseDecorator):
     """
-    Takes result of decorated method (expects {"data": view_data}),
-    puts it to context, sets specified template and displays it.
+    Sets specified template and optionally view.
+    Puts result of decorated method to context.view_data.
     """
 
     def __init__(self, template_, view=None, *args, **kwargs):

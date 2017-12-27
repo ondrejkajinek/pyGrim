@@ -44,6 +44,9 @@ class SessionStorage(object):
 
     def _get_id(self, request):
         cookie = request.cookies.get(self._cookie["name"])
+        if isinstance(cookie, (tuple, list, xrange, set)):
+            cookie = cookie[-1]
+
         if cookie:
             session_id = cookie
             log.debug("Session to be loaded: %r", session_id)

@@ -26,7 +26,7 @@ class FileSessionStorage(SessionStorage):
 
     def delete(self, session):
         full_path = self._get_path(session.get_id())
-        if os_path.isfile(full_path):
+        if full_path and os_path.isfile(full_path):
             try:
                 os_remove(full_path)
                 successful = True
@@ -45,8 +45,9 @@ class FileSessionStorage(SessionStorage):
     def load(self, request):
         session_id = self._get_id(request)
         try:
-            if os_path.isfile(self._get_path(session_id)):
-                with open(self._get_path(session_id), "r") as cin:
+            session_file = self._get_path(session_id)
+            if session_file and os_path.isfile(session_file):
+                with open(session_file, "r") as cin:
                     session = pickle.load(cin)
             else:
                 session = {}
@@ -73,4 +74,13 @@ class FileSessionStorage(SessionStorage):
                 raise SessionInitializeError
 
     def _get_path(self, session_id):
-        return os_path.join(self._session_dir, session_id)
+        if isinstance(session_id, basestring):
+            session_path = os_path.join(self._session_dir, session_id)
+        else:
+            log.error(
+                "Session id is not string but %s (value: %r)",
+                type(session_id), session_id
+            )
+            session_path = None
+
+        return session_path
