@@ -2,7 +2,7 @@
 
 # std
 from collections import OrderedDict
-from inspect import getmembers, ismethod, getmro
+from inspect import getmembers, isclass, ismethod, getmro
 from locale import LC_ALL, setlocale
 from logging import getLogger
 from os import path
@@ -184,7 +184,18 @@ class Server(object):
                 get_instance_name(self._model)
             )
 
-        self._model = model_class(self.config)
+        if isclass(model_class):
+            self._model = model_class(self.config)
+        else:
+            # Compat with < 2.1.1 version of pyGrim
+            log.warning(
+                "You are using the 'old' register_model interface. "
+                "From 2.1.1, register_model should get model class instead of "
+                "its instance, and model constructor must accept server "
+                "config as its only argument."
+            )
+            self._model = model_class
+
         # Rewrite _model in controllers that were registered so far,
         # destroying original one
         for controller in self._controllers.itervalues():
