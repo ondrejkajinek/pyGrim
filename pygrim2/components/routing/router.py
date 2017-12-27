@@ -1,7 +1,6 @@
 # coding: utf8
 
 # std
-from os.path import join as path_join
 from re import compile as re_compile
 
 # local
@@ -25,8 +24,8 @@ class Router(AbstractRouter):
 
     def map(self, route):
         if isinstance(route, Route):
-            full_pattern = "%s" % path_join(
-                "/" + self._group_pattern(), route.get_pattern().strip("/")
+            full_pattern = self._join(
+                self._group_pattern(), route.get_pattern().strip("/")
             )
             route.set_pattern(
                 re_compile("^" + full_pattern.lstrip("^"))
@@ -92,8 +91,8 @@ class Router(AbstractRouter):
 
     def _group_pattern(self):
         pattern = (
-            path_join(*tuple(
-                group.get_pattern().strip("/")
+            self._join(*tuple(
+                group.get_pattern()
                 for group
                 in self._route_groups
             ))
@@ -113,4 +112,12 @@ class Router(AbstractRouter):
             group.is_regular()
             for group
             in self._route_groups
+        )
+
+    def _join(self, *args):
+        return "".join(
+            part if part.lstrip("(").startswith("/") else "/" + part
+            for part
+            in args
+            if part
         )
