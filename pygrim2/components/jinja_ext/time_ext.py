@@ -41,7 +41,7 @@ class TimeExtension(Extension):
                 if source.isdigit()
                 else parse_dt(source)
             )
-        elif isinstance(source, (int, long)):
+        elif isinstance(source, (int, long, float)):
             obj = datetime.fromtimestamp(source)
         elif isinstance(source, DTS):
             obj = source
