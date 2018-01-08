@@ -118,7 +118,7 @@ class Context(object):
         return (
             self._language
             if self._language in self._languages
-            else self._default_language()
+            else self._default_language
         )
 
     def get_request_content_type(self):
@@ -239,10 +239,8 @@ class Context(object):
     def set_route_params(self, params=None):
         self._route_params = ImmutableDict(params or {})
 
-    def _default_language(self):
-        return self.config.get("pygrim:i18n:default_locale")
-
     def _initialize_localization(self):
+        self._default_language = self.config.get("pygrim:i18n:default_locale")
         self._lang_key = self.config.get(
             "pygrim:i18n:cookie_key", "site_language"
         )
@@ -290,11 +288,11 @@ class Context(object):
                     in self._request.environment["accept_language"].split(",")
                 )
             except KeyError:
-                language = self._default_language()
+                language = self._default_language
             else:
                 language = (
                     next((lang for lang in accept_languages if lang), None) or
-                    self._default_language()
+                    self._default_language
                 )
 
         return language
