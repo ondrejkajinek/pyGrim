@@ -1,3 +1,26 @@
+pygrim (0.1.49) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * Rozsireni filtru fit_image o width a height
+
+ -- Václav Pokluda <root@darky>  Mon, 18 Dec 2017 12:35:30 +0100
+
+pygrim (0.1.48) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * fix_image can generate url with only one slash at the beginning --
+    good for proxy passes
+
+ -- OndraK <root@ondrak>  Thu, 07 Dec 2017 12:03:46 +0100
+
+pygrim (0.1.47) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * changed imager url
+  * fit_image fixed
+
+ -- OndraK <root@ondrak>  Thu, 07 Dec 2017 10:55:39 +0100
+
 pygrim (0.1.46) testing; urgency=medium
 
   * COMMIT MESSASGES

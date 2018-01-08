@@ -29,9 +29,18 @@ class BaseExtension(Extension):
         log.warning("Filter `as_json` is deprecated and will be removed soon.")
         return self.to_json(data)
 
-    def fit_image(self, path, size=160):
+    def fit_image(self, path, size=None, proxy=False, width=None, height=None):
+        if not size:
+            size = 160
+        if not width and not height:
+            width = size
+
+        width = width or ""
+        height = height or ""
         if not path.startswith("/"):
-            path = "//img.mopa.cz/fit,img,%s,;%s" % size, path
+            start = "/" if proxy else "//"
+            path = "%simg.grandit.cz/fit,img,%s,%s;%s" % (
+                start, width, height, path)
         elif self.ENVELOPE_REGEXP.match(path):
             path = self.ENVELOPE_FORMATTER.sub("%s/\g<0>" % size, path)
 
