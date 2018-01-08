@@ -18,6 +18,7 @@ class Context(object):
         self._suppress_port = config.getbool("context:suppress_port", False)
         self._force_https = config.getbool("context:force_https", False)
         self._default_headers = config.get("context:default_headers", None)
+        self._lang_switch = config.get("pygrim:i18n:locale_switch", "lang")
 
         self.current_route = None
         self.session = None
@@ -271,15 +272,15 @@ class Context(object):
         return value
 
     def _select_language(self):
-        cookieval = self._request.cookies.get(self._lang_key)
-        if isinstance(cookieval, list):
-            if cookieval:
-                cookieval = cookieval[-1]
-            else:
-                cookieval = None
-            # endif
-        # endif
-        language = self._language_map.get(cookieval)
+        language = self._language_map.get(self.GET(self._lang_switch))
+        if language is None:
+            cookieval = self._request.cookies.get(self._lang_key)
+            if isinstance(cookieval, list):
+                if cookieval:
+                    language = self._language_map.get(cookieval[-1])
+                else:
+                    language = None
+
         if language is None:
             try:
                 accept_languages = (
