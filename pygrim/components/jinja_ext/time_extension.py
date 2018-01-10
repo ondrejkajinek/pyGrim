@@ -1,10 +1,10 @@
 # coding: utf8
 
-from datetime import date, datetime
+from datetime import date, datetime, timedelta
 from dateutil.parser import parse as parse_dt
 from jinja2.ext import Extension
 from time import gmtime, strftime
-
+from ..formater import Formater
 
 DTS = (
     type(datetime.min),
@@ -20,6 +20,7 @@ class TimeExtension(Extension):
         super(TimeExtension, self).__init__(environment)
         environment.filters.update(self._get_filters())
         environment.globals.update(self._get_functions())
+        self.formater = Formater("en_US.UTF8")
 
     def as_date(self, date_, format_str=None):
         if isinstance(date_, basestring):
@@ -30,7 +31,7 @@ class TimeExtension(Extension):
             text = unicode(text, "utf8")
         return text
 
-    def date_format(self, source, format_str):
+    def date_format(self, source, format_str, locale=None):
         if isinstance(source, basestring):
             obj = (
                 datetime.fromtimestamp(float(source))
@@ -43,8 +44,10 @@ class TimeExtension(Extension):
             obj = source
         else:
             return None
-
-        return obj.strftime(format_str).decode('utf-8')
+        if locale:
+            return self.formater.format(obj, format_str, locale=locale)
+        else:
+            return obj.strftime(format_str).decode('utf-8')
 
     def date_now(self):
         return date.today()
@@ -55,8 +58,13 @@ class TimeExtension(Extension):
     def minutes_from_seconds(self, seconds):
         return "%d:%d" % (seconds // 60, seconds % 60)
 
-    def time_from_seconds(self, seconds):
-        return strftime("%H:%M:%S", gmtime(seconds))
+    def time_from_seconds(self, seconds, locale=None):
+        if locale:
+            return self.formater.format(
+                timedelta(seconds=seconds), locale=locale
+            )
+        else:
+            return strftime("%H:%M:%S", gmtime(seconds))
 
     def _get_filters(self):
         return {

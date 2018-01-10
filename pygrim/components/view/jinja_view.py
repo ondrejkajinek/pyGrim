@@ -88,11 +88,12 @@ class JinjaView(AbstractView):
                 context.view_data.pop("extra_js_footer_async", [])
             )
         })
-
-        if self._has_i18n() and context.get_language():
+        lang = context.get_language()
+        if self._has_i18n() and lang:
             self._env.install_gettext_translations(
-                self._translations[context.get_language()]
+                self._translations[lang]
             )
+            context.view_data["locale"] = lang
 
         if self._debug and self._dump_switch in context.GET():
             result = self._handle_dump(context)

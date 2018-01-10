@@ -20,7 +20,13 @@ except ImportError:
 
 
 def py_2_babel_dateformat(fmt):
+    if not fmt:
+        return None
 
+    if fmt == "%x":
+        return None
+    if fmt == "%c":
+        return None
     fmt = fmt.replace("%B", "LLLL")  # full month name - infinitive
     #  fmt = fmt.replace("%B", "MMMM")  # full month name - depends on day
     fmt = fmt.replace("%H", "HH")  # 24 Hour
@@ -42,7 +48,9 @@ def py_2_babel_dateformat(fmt):
     return fmt
 
 
-DTT = type(datetime.datetime.min)
+DT_DT = type(datetime.datetime.min)
+DT_D = type(datetime.date.min)
+DT_TD = type(datetime.timedelta.min)
 
 
 class Formater(object):
@@ -68,8 +76,11 @@ class Formater(object):
             )
         locale = locale or self._locale
 
-        if isinstance(what, DTT):
-            if babel:
+        if isinstance(what, DT_DT):
+            if fmt == "%c":
+                what = what.date()
+                # change format and let it on date formater
+            elif babel:
                 fmt = py_2_babel_dateformat(fmt)
                 if fmt:
                     return babel_dates.format_datetime(
@@ -77,6 +88,30 @@ class Formater(object):
                     )
                 else:
                     return babel_dates.format_datetime(what, locale=locale)
+            else:
+                return what.strftime(fmt)
+            # endif
+        if isinstance(what, DT_D):
+            if babel:
+                fmt = py_2_babel_dateformat(fmt)
+                if fmt:
+                    return babel_dates.format_date(
+                        what, fmt, locale=locale
+                    )
+                else:
+                    return babel_dates.format_date(what, locale=locale)
+            else:
+                return what.strftime(fmt)
+            # endif
+        if isinstance(what, DT_TD):
+            if babel:
+                fmt = py_2_babel_dateformat(fmt)
+                if fmt:
+                    return babel_dates.format_timedelta(
+                        what, fmt, locale=locale
+                    )
+                else:
+                    return babel_dates.format_timedelta(what, locale=locale)
             else:
                 return what.strftime(fmt)
             # endif

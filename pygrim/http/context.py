@@ -1,7 +1,7 @@
 # coding: utf8
 
 from .grim_dicts import ImmutableDict
-from .formater import Formater
+from ..components.formater import Formater
 from logging import getLogger
 
 try:
