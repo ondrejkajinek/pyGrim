@@ -18,6 +18,7 @@ class Context(object):
         self._suppress_port = config.getbool("context:suppress_port", False)
         self._force_https = config.getbool("context:force_https", False)
         self._default_headers = config.get("context:default_headers", None)
+        self._lang_switch = config.get("pygrim:i18n:locale_switch", "lang")
 
         self.current_route = None
         self.session = None
@@ -118,7 +119,7 @@ class Context(object):
         return (
             self._language
             if self._language in self._languages
-            else self._default_language()
+            else self._default_language
         )
 
     def get_request_content_type(self):
@@ -239,10 +240,8 @@ class Context(object):
     def set_route_params(self, params=None):
         self._route_params = ImmutableDict(params or {})
 
-    def _default_language(self):
-        return self.config.get("pygrim:i18n:default_locale")
-
     def _initialize_localization(self):
+        self._default_language = self.config.get("pygrim:i18n:default_locale")
         self._lang_key = self.config.get(
             "pygrim:i18n:cookie_key", "site_language"
         )
@@ -273,15 +272,16 @@ class Context(object):
         return value
 
     def _select_language(self):
-        cookieval = self._request.cookies.get(self._lang_key)
-        if isinstance(cookieval, list):
-            if cookieval:
+        language = self._language_map.get(self.GET(self._lang_switch))
+        if language is None:
+            cookieval = self._request.cookies.get(self._lang_key)
+            if cookieval and isinstance(cookieval, list):
                 cookieval = cookieval[-1]
+            if cookieval:
+                language = self._language_map.get(cookieval)
             else:
-                cookieval = None
-            # endif
-        # endif
-        language = self._language_map.get(cookieval)
+                language = None
+
         if language is None:
             try:
                 accept_languages = (
@@ -290,11 +290,14 @@ class Context(object):
                     in self._request.environment["accept_language"].split(",")
                 )
             except KeyError:
-                language = self._default_language()
+                language = self._default_language
             else:
                 language = (
                     next((lang for lang in accept_languages if lang), None) or
-                    self._default_language()
+                    self._default_language
                 )
+        else:
+            # lang was in url or in get => create or prolong lang cookie
+            self.set_language(language)
 
         return language
