@@ -275,11 +275,12 @@ class Context(object):
         language = self._language_map.get(self.GET(self._lang_switch))
         if language is None:
             cookieval = self._request.cookies.get(self._lang_key)
-            if isinstance(cookieval, list):
-                if cookieval:
-                    language = self._language_map.get(cookieval[-1])
-                else:
-                    language = None
+            if cookieval and isinstance(cookieval, list):
+                cookieval = cookieval[-1]
+            if cookieval:
+                language = self._language_map.get(cookieval)
+            else:
+                language = None
 
         if language is None:
             try:
@@ -295,5 +296,8 @@ class Context(object):
                     next((lang for lang in accept_languages if lang), None) or
                     self._default_language
                 )
+        else:
+            # lang was in url or in get => create or prolong lang cookie
+            self.set_language(language)
 
         return language
