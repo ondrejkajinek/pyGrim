@@ -1,3 +1,15 @@
+pygrim (0.1.50) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * #39965: when selecting locale, configured GET variable (defaults to
+    lang) is used first; then cookies, Accept-Language header and
+    default language are used, in order
+  * #39965: default language is saved to context during
+    initialize_localization, instead of loading it from config whenever
+    it is accessed
+
+ -- Václav Pokluda <root@darky>  Wed, 10 Jan 2018 08:07:08 +0100
+
 pygrim (0.1.49) testing; urgency=medium
 
   * COMMIT MESSASGES
