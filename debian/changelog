@@ -1,3 +1,10 @@
+pygrim (0.1.51) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * fixed lang_switch behavior
+
+ -- Václav Pokluda <root@darky>  Wed, 10 Jan 2018 08:49:05 +0100
+
 pygrim (0.1.50) testing; urgency=medium
 
   * COMMIT MESSASGES
