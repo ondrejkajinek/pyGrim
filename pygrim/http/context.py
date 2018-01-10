@@ -1,6 +1,7 @@
 # coding: utf8
 
 from .grim_dicts import ImmutableDict
+from .formater import Formater
 from logging import getLogger
 
 try:
@@ -14,6 +15,7 @@ log = getLogger("pygrim.http.context")
 class Context(object):
 
     def __init__(self, environment, config, request_class, response_class):
+        self.formater = None
         self.config = config
         self._suppress_port = config.getbool("context:suppress_port", False)
         self._force_https = config.getbool("context:force_https", False)
@@ -34,6 +36,8 @@ class Context(object):
         self.set_route_params()
         if self.config.get("pygrim:i18n", False):
             self._initialize_localization()
+        if not self.formater:
+            self.formater = Formater(self.get_language())
 
     def DELETE(self, key=None, fallback=None):
         return self._request_param("DELETE", key, fallback)
@@ -221,6 +225,10 @@ class Context(object):
     def set_language(self, language):
         language = self._language_map.get(language)
         if language in self._languages:
+            if self.formater:
+                self.formater._set_locale(language)
+            else:
+                self.formater = Formater(language)
             self._language = language
             self.add_cookie(
                 self._lang_key, self._language, 3600 * 24 * 365, path="/"
