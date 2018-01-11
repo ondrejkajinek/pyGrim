@@ -5,7 +5,7 @@ from datetime import datetime
 
 class Model(object):
 
-    def __init__(self):
+    def __init__(self, config):
         pass
 
     def get_time(self):

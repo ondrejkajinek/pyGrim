@@ -38,7 +38,7 @@ controllers = (
 #   server is filename and application is method (uwsgi will do __call__ on
 #   this object on every request)
 application = Server()
-application.register_model(Model())
+application.register_model(Model)
 for controller_class in controllers:
     application.register_controller(controller_class())
 
