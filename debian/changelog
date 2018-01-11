@@ -1,3 +1,111 @@
+pygrim2 (2.1.1) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * Compatibility for model initialization with previous versions of
+    pyGrim2
+  * float type can now also be turned to datetime by jinja 'date_format'
+    filter
+  * Fixed joining of route groups -- bad number of slashed could occur
+  * Fixed unicode in date jinja filters
+  * Fix for situation with multiple sessions in cookie
+  * Fix for file session storage -- error state handling
+  * 'time_from_secs' filter added to jinja extension
+
+ -- ondrejkajinek <ondrej.kajinek@gmail.com>  Wed, 27 Dec 2017 10:48:16 +0100
+
+pygrim2 (2.1.0) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * Fixed Content-Type detecion in http/request
+  * fit_image enhanced -- features from pygrim1
+  * When using dump view, extra information (data that are added by
+    server) use '__' prefix for their keys
+  * Changed the way how model is registered: only class is given, server
+    will instantiate it itself. Pygrim server will always pass its
+    config to model
+  * fit_image fixed
+  * Fix: Added missing parameter to _default_not_found_handler
+  * Session is dumped to JSON only when it was originally loaded
+  * Fixed order of assets loaded from config and added through
+    context.add_{js,css}
+  * url_for removed from jinja filters
+  * Code deduplication
+  * PygrimYamlLoader inherits from SafeLoader instead of BaseLoader --
+    it casts config values
+  * Improved methods definition when creating routes; HEAD is supported
+    by all routes that support GET
+  * Constants for HTTP methods introduced
+  * Containers moved from components/grim_dicts.py to
+    components/containers/
+  * Implemented 'pygrim:route_dump' config option, which will introduce
+    debug route for printing registered routes
+  * Changed Context constructor, request and response are created by
+    server itself, it no longer gives context required classes to
+    instantiate
+  * Fixed ugly typo in context.__setattr__
+  * Methods for printing JS and CSS can now accept extra kwargs, which
+    are used as attributes for <script> and <link> tags
+  * Added availability to specify file suffixes (via
+    pygrim:plain_not_found) that use default not found handler when they
+    are not handled by any route (so that missing files are handled as
+    '404: Not Found' without consuming time
+  * Path info (request uri) is now stored without trailing slash,
+    routing is modified to handle this change
+  * Static-map is now OrderedDict -- order from config is preserved
+  * Jinja extensions: files renamed
+  * inverted condition fixed
+  * Fixed a bug with file version in view methods
+  * pyGrim can now use custom implementation of Request and Response --
+    as long as implementation is derived from pygrim's classes
+  * Implemented view method for obtaining static file url; refactor of
+    related methods
+  * Fallbacking Jinja tags for include and extends implemented. They
+    take two parameters, templates and prefixes. Both templates and
+    prefixes can be either string (only one item given) or sequence
+    (tuple, list) when multiple items are used. These tags look for each
+    given template through all given prefixes, e.g., when calling '{%
+    prefix_include (A, B), (C, D) %}', following temlates are searched:
+    C/A, D/A, C/B, D/B. The first found is included / extended.
+  * BaseL10N moved to separate file
+  * Jinja extensions: URL functions and filters moved to separate file
+  * Jinja extensions: minutes_from_seconds filter moved to time
+    extension
+  * Fixed an error with custom jinja extensions in config -- path was
+    unicode instead of str, caused a TypeError
+  * Implemented YamlConfig._asdict, used by json2.dumps -- YamlConfig is
+    now json2 seraializable
+  * Config can now specify its default part, which is merged with loaded
+    data; when no default (or None) is given, DEFAULT_CONFIG for pyGrim
+    is used -- to use no default config, pass empty dict
+  * Server can return its config dir
+  * fixed state when duplicate cookie for language received (for example
+    Chrome creates such state when the same cookie is set for whole
+    domain and for specific path)
+  * query_string is now safely obtained
+  * Jinja autoreload configuration is loaded as boolean type
+  * default session lifetime extended to 7 days
+  * fix loading debug configuration variable
+  * When dumping data, original Content-Type is dumped, too.
+  * Added comment about PygrimYamlLoader -- reimplementation of default
+    PyYAML BaseLoader
+  * Implemented c_locale decorator for internal usage -- runs method
+    using C locale, then switches back to original locale
+  * Added safe_title filter for jinja
+  * l10n:lang_switch option added -- GET parameter for temporary
+    languague switching. Minor refactor of language selection method
+    (called by Context.__init__)
+  * Accept-Language request header is split into languagues
+  * Renamed attribute 'default_locale' of AbstractL10N
+  * Fixed fallback view setting (in the case of default error handling) -
+    - if view is disabled, it sets dummy view
+  * Context loads all required config values in __init__, now it does
+    not store config in its attribute
+  * Fixed link path in Makefile
+  * Fixed package name in debian/control
+  * Several minor fixes and refactors
+
+ -- ondrejkajinek <ondrej.kajinek@gmail.com>  Thu, 21 Dec 2017 15:54:40 +0100
+
 pygrim2 (2.0.0) testing; urgency=medium
 
   * COMMIT MESSASGES
