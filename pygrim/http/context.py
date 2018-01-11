@@ -132,6 +132,9 @@ class Context(object):
             else self._default_language
         )
 
+    def get_available_languages(self):
+        return tuple(self._languages)
+
     def get_request_content_type(self):
         return self._request.environment["content_type"]
 
