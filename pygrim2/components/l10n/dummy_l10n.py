@@ -15,7 +15,7 @@ class DummyL10n(AbstractL10n):
         return True
 
     def select_language(self, context):
-        pass
+        return None, False
 
     def translations(self):
         return {}

@@ -257,9 +257,7 @@ class Context(object):
     def set_language(self, language):
         if self._check_language(language):
             self._language = language
-            self.add_cookie(
-                self.l10n.lang_key(), self._language, 3600 * 24 * 365, path="/"
-            )
+            self._save_language_cookie()
 
     def set_temp_language(self, language):
         if self._check_language(language):
@@ -291,7 +289,9 @@ class Context(object):
         return res
 
     def _initialize_localization(self):
-        self._language = self.l10n.select_language(self)
+        self._language, save_cookie = self.l10n.select_language(self)
+        if save_cookie:
+            self._save_language_cookie()
 
     def _request_param(self, method, key=None, fallback=None):
         try:
@@ -307,3 +307,8 @@ class Context(object):
             value = None
 
         return value
+
+    def _save_language_cookie(self):
+        self.add_cookie(
+            self.l10n.lang_key(), self._language, 3600 * 24 * 365, path="/"
+        )
