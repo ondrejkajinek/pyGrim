@@ -32,6 +32,12 @@ class Context(object):
 
         self._session_loaded = False
         self.set_route_params()
+
+        self._default_language = 'cs_CZ.UTF8'
+        self._language = self._default_language
+        self._lang_key = None
+        self._languages = (self._default_language,)
+        self._language_map = {}
         if self.config.get("pygrim:i18n", False):
             self._initialize_localization()
 
