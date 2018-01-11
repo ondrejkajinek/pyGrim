@@ -2,6 +2,7 @@
 
 from logging import getLogger
 from pygrim2 import error_handler, not_found_handler, route, template
+from pygrim2 import GET
 from re import compile as re_compile
 from time import time
 
@@ -10,7 +11,7 @@ log = getLogger(__file__)
 
 class First(object):
 
-    @route("GET", "/", "home")
+    @route(GET, "/", "home")
     def home(self, context):
         context.view_data.update({
             "text": u"Hello, this is the most simple case."
@@ -18,16 +19,17 @@ class First(object):
         context.add_js("/tmp/added_header_async.js", sync=False)
         context.template = "layout.jinja"
 
-    @route("GET", "/double_routed", "double_routed")
-    @route("GET", "/dual_routed", "dual_routed")
-    @route("GET", name="twice_routed")
+    @route(GET, "/double_routed", "double_routed")
+    @route(GET, "/dual_routed", "dual_routed")
+    # this route will take pattern from method name, resulting in /twice_routed
+    @route(GET, name="twice_routed")
     def twice_routed(self, context):
         context.view_data.update({
             "text": u"This handle can be accessed via two different routes."
         })
         context.template = "layout.jinja"
 
-    @route("GET", "/session", "session")
+    @route(GET, "/session", "session")
     def session_text(self, context):
         context.session.setdefault("text", "")
         context.session["text"] += "a"
@@ -40,14 +42,14 @@ class First(object):
         })
         context.template = "layout.jinja"
 
-    @route("GET", name="cookie_show")
+    @route(GET, name="cookie_show")
     @template("layout.jinja")
     def cookie_show(self, context):
         return {
             "text": "COOKIES = %r" % context.get_cookies()
         }
 
-    @route("GET", name="cookie_set")
+    @route(GET, name="cookie_set")
     @template("layout.jinja")
     def cookie_set(self, context):
         cur_time = int(time())
@@ -61,14 +63,14 @@ class First(object):
             )
         }
 
-    @route("GET", name="flash")
+    @route(GET, name="flash")
     def flash(self, context):
         context.flash("info", "First flash message.")
         context.flash("info", "Second flash message.")
         context.flash("layout", "This is 'layout' flash.")
         context.template = "flash.jinja"
 
-    @route("GET", name="set_flash")
+    @route(GET, name="set_flash")
     def set_flash(self, context):
         context.flash(
             "info", "Current time: %s" % self._model.get_time().isoformat()
@@ -82,7 +84,7 @@ class First(object):
         })
         context.template = "layout.jinja"
 
-    @route("GET", "/template", "template")
+    @route(GET, "/template", "template")
     @template("layout.jinja")
     def use_template_display(self, context):
         return {
@@ -92,7 +94,7 @@ class First(object):
             )
         }
 
-    @route("GET", "/template_rewrite", "template_rewrite")
+    @route(GET, "/template_rewrite", "template_rewrite")
     @template("nonexisting.jinja")
     def use_template_override(self, context):
         context.template = "layout.jinja"
@@ -107,7 +109,7 @@ class First(object):
         }
 
     @route(
-        "GET", re_compile(r"/template/(?P<template>[^/]+)"), "template_show"
+        GET, re_compile(r"/template/(?P<template>[^/]+)"), "template_show"
     )
     @template("layout.jinja")
     def template_show(self, context, template):
@@ -115,11 +117,11 @@ class First(object):
             "text": "Template %r is given" % template
         }
 
-    @route("GET", name="type_error")
+    @route(GET, name="type_error")
     def type_error(self, context):
         raise TypeError("This method raises 'TypeError'")
 
-    @route("GET", name="runtime_error")
+    @route(GET, name="runtime_error")
     def runtime_error(self, context):
         raise RuntimeError("This method raises 'RuntimeError'")
 

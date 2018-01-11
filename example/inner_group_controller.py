@@ -2,6 +2,7 @@
 
 from re import compile as re_compile
 
+from pygrim2 import GET
 from pygrim2 import RouteGroup, RoutePassed
 from pygrim2 import route, template
 from group_controller import Group
@@ -11,7 +12,7 @@ class InnerGroup(Group):
 
     _route_group = Group._route_group + RouteGroup("/inner/test/")
 
-    @route("GET", re_compile("/(?P<param>[0-9]+)"))
+    @route(GET, re_compile("/(?P<param>[0-9]+)"))
     @template("layout.jinja")
     def int_inner_group_test(self, context, param):
         return {
@@ -22,7 +23,7 @@ class InnerGroup(Group):
             )
         }
 
-    @route("GET", re_compile("/(?P<param>[a-z]+)[^/]*"))
+    @route(GET, re_compile("/(?P<param>[a-z]+)[^/]*"))
     def str_inner_group_test_pass(self, context, param=None):
         context.view_data.update({
             "previous_text": (
@@ -33,7 +34,7 @@ class InnerGroup(Group):
         })
         raise RoutePassed()
 
-    @route("GET", re_compile("/(?P<param>[a-z0-9]+)"))
+    @route(GET, re_compile("/(?P<param>[a-z0-9]+)"))
     @template("layout.jinja")
     def inner_group_test(self, context, param=None):
         text = context.view_data.get("previous_text") or ""

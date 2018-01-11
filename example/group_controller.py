@@ -1,5 +1,6 @@
 # coding: utf8
 
+from pygrim2 import GET
 from pygrim2 import RouteGroup
 from pygrim2 import route, template
 
@@ -8,7 +9,7 @@ class Group(object):
 
     _route_group = RouteGroup("/group")
 
-    @route("GET", "/test")
+    @route(GET, "/test")
     @template("layout.jinja")
     def group_test(self, context):
         return {

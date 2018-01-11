@@ -10,6 +10,7 @@ try:
 except ImportError:
     from checkers import StrChkr, IntChkr
 
+from pygrim2 import GET
 from pygrim2 import route, template, Validator
 
 log = getLogger(__file__)
@@ -17,7 +18,7 @@ log = getLogger(__file__)
 
 class Second(object):
 
-    @route("GET", "/second", "second_home")
+    @route(GET, "/second", "second_home")
     def home(self, context):
         # This would cause
         # self._controllers.Second.home(context)
@@ -29,14 +30,14 @@ class Second(object):
             ) % context.view_data["text"]
         })
 
-    @route("GET", name="model")
+    @route(GET, name="model")
     @template("layout.jinja")
     def model(self, context):
         return {
             "text": "Now: %s" % self._model.get_time().isoformat()
         }
 
-    @route("GET", name="redirect")
+    @route(GET, name="redirect")
     def redirect(self, context):
         context.redirect(self._router.url_for(
             "message",
@@ -45,14 +46,14 @@ class Second(object):
             }
         ))
 
-    @route("GET", re_compile(r"/message/((?P<message>[^/]+))?"), "message")
+    @route(GET, re_compile(r"/message/((?P<message>[^/]+))?"), "message")
     @template("layout.jinja")
     def message(self, context, message):
         return {
             "text": "Message: %s" % (message or "NO MESSAGE")
         }
 
-    @route("GET", name="generator")
+    @route(GET, name="generator")
     def generator(self, context):
         context.set_view("raw")
         context.set_response_body((
@@ -61,7 +62,7 @@ class Second(object):
             in xrange(4)
         ))
 
-    @route("GET", name="generator_function")
+    @route(GET, name="generator_function")
     def generator_fction(self, context):
 
         def fction():
@@ -72,7 +73,7 @@ class Second(object):
         context.set_view("raw")
         context.set_response_body(fction)
 
-    @route("GET", name="broken_generator_function")
+    @route(GET, name="broken_generator_function")
     def broken_generator_fction(self, context):
 
         def fction():
@@ -83,7 +84,7 @@ class Second(object):
         context.set_view("raw")
         context.set_response_body(fction)
 
-    @route("GET", name="validated")
+    @route(GET, name="validated")
     @template("layout.jinja")
     def validated(self, context):
         validator = Validator(

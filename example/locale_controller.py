@@ -2,6 +2,7 @@
 
 from re import compile as re_compile
 
+from pygrim2 import GET
 from pygrim2 import RouteGroup
 from pygrim2 import route, template
 
@@ -10,7 +11,7 @@ class LocaleController(object):
 
     _route_group = RouteGroup("/locale/")
 
-    @route("GET", "/", "locale")
+    @route(GET, "/", "locale")
     @template("locale.jinja")
     def locale(self, context):
         default_locale = context.get_language()
@@ -19,7 +20,7 @@ class LocaleController(object):
             "locale": default_locale
         }
 
-    @route("GET", "/temp_en", "locale_temp_en")
+    @route(GET, "/temp_en", "locale_temp_en")
     @template("locale.jinja")
     def locale_temp_en(self, context):
         default_locale = context.get_language()
@@ -30,7 +31,7 @@ class LocaleController(object):
             "locale": temp_locale
         }
 
-    @route("GET", re_compile("/set/(?P<locale>[^/]+)"), "locale_set")
+    @route(GET, re_compile("/set/(?P<locale>[^/]+)"), "locale_set")
     @template("locale.jinja")
     def locale_set(self, context, locale):
         default_locale = context.get_language()
