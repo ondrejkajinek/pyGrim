@@ -2,7 +2,7 @@
 
 {% block flash %}
 	<p>This page shows locale info</p>
-	<p>Selected locale (cookies, accepted language): {{ default_locale }}</p>
+	<p>Selected locale (lang switch, cookies, accepted language): {{ default_locale }}</p>
 	<p>Locale: {{ locale }}</p>
 	<p>Greetings: {{ _("hello") }}</p>
 	<p>Greetings with fallback: {{ _("hi", "hello") }} (original key "hi" is not translated, "hello" is used instead)</p>

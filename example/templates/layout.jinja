@@ -49,6 +49,9 @@
 		<li><a href="{{ url_for("validated") }}?first=hello&second=10">Validated (ok)</a></li>
 		<li><a href="{{ url_for("validated") }}?first=hello">Validated (ok 2)</a></li>
 		<li><a href="{{ url_for("validated") }}?first=hello&second=world">Validated (ko)</a></li>
+		<li><a href="{{ url_for("locale") }}">Locale</a></li>
+		<li><a href="{{ url_for("locale_temp_en") }}">Locale (temp en)</a></li>
+		<li><a href="{{ url_for("locale_set", {"locale": "cs_CZ.UTF-8"}) }}">Locale -> CS</a></li>
 		<li><a href="{{ url_for("generator") }}">Generator</a></li>
 		<li><a href="{{ url_for("generator_function") }}">Generator function</a></li>
 		<li><a href="{{ url_for("broken_generator_function") }}">Generator function (broken)</a></li>
