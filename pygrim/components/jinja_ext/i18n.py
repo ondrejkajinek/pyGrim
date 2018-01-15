@@ -33,6 +33,31 @@ def ngettext_factory(method):
 
 class I18NExtension(InternationalizationExtension):
 
+    def __init__(self, environment):
+        super(I18NExtension, self).__init__(environment)
+        environment.globals.update(self._get_functions())
+
+    def lang_text(self, source, language, order=None):
+        try:
+            text = source[language]
+        except:
+            if isinstance(source, dict):
+                for key in (order or sorted(source.keys())):
+                    text = source.get(key)
+                    if text:
+                        break
+            else:
+                text = ""
+        else:
+            text = ""
+
+        return text
+
+    def _get_functions(self):
+        return {
+            "lang_text": self.lang_text
+        }
+
     def _install(self, translations, newstyle=None):
         gettext = getattr(translations, 'ugettext', None)
         if gettext is None:
