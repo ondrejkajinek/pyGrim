@@ -1,6 +1,10 @@
 # coding: utf8
-
+from logging import getLogger
 from jinja2.ext import InternationalizationExtension
+from jinja2.runtime import Undefined
+
+
+log = getLogger("pygrim.jinja_ext.i18n")
 
 
 def gettext_factory(method):
@@ -38,18 +42,16 @@ class I18NExtension(InternationalizationExtension):
         environment.globals.update(self._get_functions())
 
     def lang_text(self, source, language, order=None):
-        try:
-            text = source[language]
-        except:
-            if isinstance(source, dict):
+        text = None
+        if source and isinstance(source, dict):
+            text = source.get(language)
+            if not text:
                 for key in (order or sorted(source.keys())):
                     text = source.get(key)
                     if text:
                         break
-            else:
-                text = ""
-        else:
-            text = ""
+        if not text:
+            text = Undefined()
 
         return text
 
