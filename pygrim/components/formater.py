@@ -8,12 +8,13 @@ log = getLogger("pygrim.http.formater")
 try:
     import babel
     from babel import dates as babel_dates
+    log.debug("Babel translations available")
+except ImportError:
     print "!! Babel library not availbale"
     log.warning(
         "Babel library not availabe - "
         "locale dependent translates could be wrong"
     )
-except ImportError:
     babel = None
 
 # endtry
