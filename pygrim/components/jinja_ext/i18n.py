@@ -41,7 +41,8 @@ class I18NExtension(InternationalizationExtension):
         super(I18NExtension, self).__init__(environment)
         environment.globals.update(self._get_functions())
 
-    def lang_text(self, source, language, order=None):
+    @staticmethod
+    def lang_text(source, language, order=None):
         text = None
         if source and isinstance(source, dict):
             text = source.get(language)

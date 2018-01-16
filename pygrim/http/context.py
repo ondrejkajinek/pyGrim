@@ -2,6 +2,7 @@
 
 from .grim_dicts import ImmutableDict
 from ..components.formater import Formater
+from ..components.jinja_ext.i18n import I18NExtension, Undefined
 from logging import getLogger
 
 try:
@@ -131,6 +132,16 @@ class Context(object):
             if self._language in self._languages
             else self._default_language
         )
+
+    def lang_text(self, source, order=None):
+        if order is None:
+            order = (i.split("_", 1)[0] for i in self._languages)
+        ret = I18NExtension.lang_text(
+            source, self._language.split("_", 1)[0], order=order
+        )
+        if isinstance(ret, Undefined):
+            ret = None
+        return ret
 
     def get_available_languages(self):
         return tuple(self._languages)
