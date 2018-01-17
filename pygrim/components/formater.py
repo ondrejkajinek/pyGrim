@@ -56,17 +56,19 @@ DT_TD = type(datetime.timedelta.min)
 
 class Formater(object):
     def __init__(self, locale):
-        log.warning(
-            "Babel library not availabe - "
-            "locale dependent translates could be wrong"
-        )
+        if not babel:
+            log.warning(
+                "Babel library not availabe - "
+                "locale dependent translates could be wrong"
+            )
         self._locale = locale
 
     def _set_locale(self, locale):
-        log.warning(
-            "Babel library not availabe - "
-            "locale dependent translates could be wrong"
-        )
+        if not babel:
+            log.warning(
+                "Babel library not availabe - "
+                "locale dependent translates could be wrong"
+            )
         self._locale = locale
 
     def format(self, what, fmt=None, locale=None):
