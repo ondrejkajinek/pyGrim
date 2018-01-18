@@ -61,16 +61,21 @@ class Formater(object):
         self._set_locale(locale)
 
     def __getattr__(self, key):
+        if key.endswith("_babel") or key.endswith("_nobabel"):
+            raise RuntimeError()
+
         if babel:
-            method = getattr(self, "_%s_babel" % key, None)
+            attr_name = "_%s_babel" % key
         else:
             log.warning(
                 "Babel library not availabe - "
                 "locale dependent translates could be wrong"
             )
-            method = getattr(self, "_%s_nobabel" % key, None)
+            attr_name = "_%s_nobabel" % key
 
-        if not method:
+        try:
+            method = getattr(self, attr_name)
+        except RuntimeError:
             raise AttributeError(key)
 
         return method
