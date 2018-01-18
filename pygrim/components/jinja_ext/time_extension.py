@@ -44,8 +44,9 @@ class TimeExtension(Extension):
             obj = source
         else:
             return None
+
         if locale:
-            return self.formater.format(obj, format_str, locale=locale)
+            return self.formater.format_date(obj, format_str, locale=locale)
         else:
             return obj.strftime(format_str).decode('utf-8')
 

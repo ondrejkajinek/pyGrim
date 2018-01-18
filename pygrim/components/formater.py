@@ -8,6 +8,7 @@ log = getLogger("pygrim.http.formater")
 try:
     import babel
     from babel import dates as babel_dates
+    from babel import numbers as babel_numbers
     log.debug("Babel translations available")
 except ImportError:
     print "!! Babel library not availbale"
@@ -55,64 +56,135 @@ DT_TD = type(timedelta.min)
 
 
 class Formater(object):
+
     def __init__(self, locale):
         self._set_locale(locale)
 
-    def _set_locale(self, locale):
-        if not babel:
+    def __getattr__(self, key):
+        if babel:
+            method = getattr(self, "_%s_babel" % key, None)
+        else:
             log.warning(
                 "Babel library not availabe - "
                 "locale dependent translates could be wrong"
             )
-        self._locale = locale
+            method = getattr(self, "_%s_nobabel" % key, None)
 
-    def format(self, what, fmt=None, locale=None):
-        if not babel:
-            log.warning(
-                "Babel library not availabe - "
-                "locale dependent translates could be wrong"
-            )
+        if not method:
+            raise AttributeError(key)
+
+        return method
+
+    def _format_currency_babel(self, amount, currency, locale=None):
+        return self._get_currency_parts(
+            amount, currency, locale or self._locale
+        )
+
+    def _format_currency_nobabel(self, amount, currency, locale=None):
+        return amount, currency, False
+
+    def _format_currency_int_babel(self, amount, currency, locale=None):
+        amount, currency, currency_last, separator = self._get_currency_parts(
+            amount, currency, locale or self._locale
+        )
+        amount = int(babel_numbers.parse_decimal(amount, locale))
+        return amount, currency, currency_last, separator
+
+    def _format_currency_int_nobabel(self, amount, currency, locale=None):
+        return int(amount), currency, False
+
+    def _format_date_babel(self, what, fmt=None, locale=None):
         locale = locale or self._locale
 
         if isinstance(what, DT_DT):
             if fmt == "%c":
                 what = what.date()
-                # change format and let it on date formater
-            elif babel:
-                fmt = py_2_babel_dateformat(fmt)
-                if fmt:
-                    return babel_dates.format_datetime(
-                        what, fmt, locale=locale
-                    )
-                else:
-                    return babel_dates.format_datetime(what, locale=locale)
+
+            fmt = py_2_babel_dateformat(fmt)
+            if fmt:
+                return babel_dates.format_datetime(
+                    what, fmt, locale=locale
+                )
             else:
-                return what.strftime(fmt)
-            # endif
+                return babel_dates.format_datetime(what, locale=locale)
+
         if isinstance(what, DT_D):
-            if babel:
-                fmt = py_2_babel_dateformat(fmt)
-                if fmt:
-                    return babel_dates.format_date(
-                        what, fmt, locale=locale
-                    )
-                else:
-                    return babel_dates.format_date(what, locale=locale)
+            fmt = py_2_babel_dateformat(fmt)
+            if fmt:
+                return babel_dates.format_date(
+                    what, fmt, locale=locale
+                )
             else:
-                return what.strftime(fmt)
-            # endif
+                return babel_dates.format_date(what, locale=locale)
+
         if isinstance(what, DT_TD):
-            if babel:
-                fmt = py_2_babel_dateformat(fmt)
-                if fmt:
-                    return babel_dates.format_timedelta(
-                        what, fmt, locale=locale
-                    )
-                else:
-                    return babel_dates.format_timedelta(what, locale=locale)
+            fmt = py_2_babel_dateformat(fmt)
+            if fmt:
+                return babel_dates.format_timedelta(
+                    what, fmt, locale=locale
+                )
             else:
-                return what.strftime(fmt)
-            # endif
+                return babel_dates.format_timedelta(what, locale=locale)
+
         raise RuntimeError("formating %s not implemented" % (type(what),))
 
-# eof
+    def _format_date_nobabel(self, what, fmt=None, locale=None):
+        locale = locale or self._locale
+
+        if isinstance(what, DT_DT):
+            if fmt == "%c":
+                what = what.date()
+
+            return what.strftime(fmt)
+
+        if isinstance(what, DT_D):
+            return what.strftime(fmt)
+
+        if isinstance(what, DT_TD):
+            return what.strftime(fmt)
+
+        raise RuntimeError("formating %s not implemented" % (type(what),))
+
+    def _format_decimal_babel(self, number, precision=None, locale=None):
+        return babel_numbers.format_decimal(
+            number=number,
+            format="#.%s" % "".join("#" for _ in xrange(precision)),
+            locale=locale or self._locale
+        )
+
+    def _format_decimal_nobabel(self, number, precision=None, locale=None):
+        return ("%%0.%df" % precision) % int(number)
+
+    def _format_number_babel(self, number, locale=None):
+        return babel_numbers.format_number(number, locale or self._locale)
+
+    def _format_number_nobabel(self, number, locale=None):
+        return number
+
+    def _get_currency_parts(self, amount, currency, locale):
+        formatted = babel_numbers.format_currency(
+            number=amount,
+            currency=currency,
+            locale=locale
+        )
+        amount = formatted
+        currency = ""
+        currency_last = amount[0].isdigit()
+        if currency_last:
+            while not amount[-1].isdigit():
+                currency = amount[-1] + currency
+                amount = amount[:-1]
+        else:
+            while not amount[0].isdigit():
+                currency += amount[0]
+                amount = amount[1:]
+
+        return (
+            amount,
+            currency,
+            currency_last,
+            babel_numbers.get_decimal_symbol(locale)
+        )
+
+    def _set_locale(self, locale):
+        self._locale = locale
