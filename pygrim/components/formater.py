@@ -62,7 +62,7 @@ class Formater(object):
 
     def __getattr__(self, key):
         if key.endswith("_babel") or key.endswith("_nobabel"):
-            raise RuntimeError()
+            raise AttributeError(key.rsplit("_", 1)[0])
 
         if babel:
             attr_name = "_%s_babel" % key
@@ -73,10 +73,7 @@ class Formater(object):
             )
             attr_name = "_%s_nobabel" % key
 
-        try:
-            method = getattr(self, attr_name)
-        except RuntimeError:
-            raise AttributeError(key)
+        method = getattr(self, attr_name)
 
         return method
 
