@@ -1,7 +1,7 @@
 # coding: utf8
 
+from datetime import date, datetime, timedelta
 from logging import getLogger
-import datetime
 
 log = getLogger("pygrim.http.formater")
 
@@ -49,9 +49,9 @@ def py_2_babel_dateformat(fmt):
     return fmt
 
 
-DT_DT = type(datetime.datetime.min)
-DT_D = type(datetime.date.min)
-DT_TD = type(datetime.timedelta.min)
+DT_DT = type(datetime.min)
+DT_D = type(date.min)
+DT_TD = type(timedelta.min)
 
 
 class Formater(object):
