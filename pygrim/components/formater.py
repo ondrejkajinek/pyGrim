@@ -27,6 +27,8 @@ def py_2_babel_dateformat(fmt):
 
     if fmt == "%x":
         return None
+    if fmt == "%X":
+        return None
     if fmt == "%c":
         return None
     fmt = fmt.replace("%B", "LLLL")  # full month name - infinitive
@@ -97,10 +99,12 @@ class Formater(object):
 
     def _format_date_babel(self, what, fmt=None, locale=None):
         locale = locale or self._locale
+        if fmt == "%x":
+            what = what.date()
+        elif fmt == "%X":
+            what = what.time()
 
         if isinstance(what, DT_DT):
-            if fmt == "%c":
-                what = what.date()
 
             fmt = py_2_babel_dateformat(fmt)
             if fmt:
