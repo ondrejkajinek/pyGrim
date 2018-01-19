@@ -1,3 +1,28 @@
+pygrim (0.2.0) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * better formating string
+  * Fix formater behavir for %x, %X and %c
+  * optimalized getattr in formater
+  * Fixed recursion error when non-existing function of Formater is
+    called
+  * Implementation of jinja functions for number and currency formatting
+  * import simplified
+  * code deduplication
+  * fiexd misplaced babel warnings
+  * lang_text method tunelled to context - you can usi it now fom code -
+    not only view
+  * Babel availability logging fixed
+  * lang_text returns jinja2.Undefined instead of empty string
+  * function lang_text added to jinja i18n extension -- used for
+    selecting trans by specified locale
+  * get available languages method exposed in context
+  * fix default language variables in context if i18 not initialized
+  * improved babel integration to jinja TimeExtension
+  * babel used for date and time formating - first draft
+
+ -- Václav Pokluda <root@darky>  Fri, 19 Jan 2018 18:51:21 +0100
+
 pygrim (0.1.51) testing; urgency=medium
 
   * COMMIT MESSASGES
