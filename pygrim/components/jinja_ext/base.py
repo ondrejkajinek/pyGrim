@@ -102,7 +102,7 @@ class BaseExtension(Extension):
         if kwargs:
             amount = """<span %s data-sep="%s">%s</span>""" % (
                 " ".join(
-                    """%s="%s\"""" % (key, value)
+                    '%s="%s"' % (key, value)
                     for key, value
                     in kwargs.iteritems()
                 ),

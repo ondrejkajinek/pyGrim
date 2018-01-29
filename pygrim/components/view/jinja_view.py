@@ -17,6 +17,7 @@ def _suppress_none(self, variable):
         else variable
     )
 
+
 _suppress_none.contextfunction = True
 
 
