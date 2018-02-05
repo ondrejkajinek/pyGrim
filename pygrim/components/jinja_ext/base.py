@@ -5,7 +5,7 @@ from ..utils.functions import strip_accent
 from ..utils.json2 import dumps as json_dumps
 from jinja2.ext import Extension, Markup
 from logging import getLogger
-from re import compile as re_compile, IGNORECASE as re_IGNORECASE
+from re import compile as re_compile
 
 log = getLogger("pygrim.components.jinja_ext.base")
 
@@ -13,8 +13,6 @@ log = getLogger("pygrim.components.jinja_ext.base")
 class BaseExtension(Extension):
 
     DASH_SQUEEZER = re_compile("r/-{2,}")
-    ENVELOPE_REGEXP = re_compile(r"/envelope/\d+\.jpeg", re_IGNORECASE)
-    ENVELOPE_FORMATTER = re_compile(r"\d+")
     SEO_DASHED = (" ", "/", "\\", ":")
     SEO_REMOVED = ("*", "?", "\"", "<", ">", "|", ",")
     SIZE_PREFIXES = ("", "ki", "Mi", "Gi", "Ti")
@@ -62,8 +60,6 @@ class BaseExtension(Extension):
             start = "/" if proxy else "//"
             path = "%simg.grandit.cz/fit,img,%s,%s;%s" % (
                 start, width, height, path)
-        elif self.ENVELOPE_REGEXP.match(path):
-            path = self.ENVELOPE_FORMATTER.sub("%s/\g<0>" % size, path)
 
         return path
 
