@@ -1,3 +1,11 @@
+pygrim (0.2.3) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * bugfixed session handling for not-found
+  * format weekdays and month names
+
+ -- Václav Pokluda <root@darky>  Fri, 09 Feb 2018 13:59:58 +0100
+
 pygrim (0.2.2) testing; urgency=medium
 
   * COMMIT MESSASGES
