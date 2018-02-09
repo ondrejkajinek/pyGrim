@@ -1,3 +1,11 @@
+pygrim (0.2.2) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * Unused feature from fit_image removed -- originally used in some php
+    portals :(
+
+ -- OndraK <root@ondrak>  Mon, 05 Feb 2018 13:34:27 +0100
+
 pygrim (0.2.1) testing; urgency=medium
 
   * COMMIT MESSASGES
