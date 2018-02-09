@@ -175,7 +175,7 @@ class Context(object):
         return self._request.environment["path_info"]
 
     def get_request_root_uri(self):
-        return self._request.environment["script_name"]
+        return self._request.environment.get("script_name")
 
     def get_request_url(self):
         scheme = self.get_request_scheme()
