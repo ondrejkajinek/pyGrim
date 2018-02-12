@@ -61,8 +61,7 @@ class BaseExtension(Extension):
         height = height or ""
         if not path.startswith("/"):
             start = "/" if proxy else "//"
-            # path = "%simg.grandit.cz/%s,img,%s,%s;%s" % (
-            path = "%sdarky.ats:7000/%s,img,%s,%s;%s" % (
+            path = "%simg.grandit.cz/%s,img,%s,%s;%s" % (
                 start, method or "fit", width, height, path)
 
         return path
