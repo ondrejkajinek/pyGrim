@@ -1,3 +1,10 @@
+pygrim (0.2.5) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * fixed error with fit_image path
+
+ -- OndraK <root@ondrak>  Mon, 12 Feb 2018 13:44:22 +0100
+
 pygrim (0.2.4) testing; urgency=medium
 
   * COMMIT MESSASGES
