@@ -1,3 +1,11 @@
+pygrim (0.2.4) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * do fit_image přidán parametr method -- lze volat i jiné metody, než
+    jen fit (default)
+
+ -- OndraK <root@ondrak>  Mon, 12 Feb 2018 09:22:48 +0100
+
 pygrim (0.2.3) testing; urgency=medium
 
   * COMMIT MESSASGES
