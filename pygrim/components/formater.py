@@ -41,6 +41,12 @@ def py_2_babel_dateformat(fmt):
     fmt = fmt.replace("%-M", "mm")  # minutes not padded
     fmt = fmt.replace("%d", "dd")  # day of month
     fmt = fmt.replace("%-d", "d")  # day of month not padded
+    fmt = fmt.replace("%A", "EEEE")  # WEkkday name FULL
+    fmt = fmt.replace("%a", "EEE")  # WEkkday name SHORT
+    fmt = fmt.replace("%B", "MMMM")  # Month name FULL
+    fmt = fmt.replace("%b", "MMM")  # Month name SHORT
+    fmt = fmt.replace("%y", "YY")  # last 2 digits of year
+    fmt = fmt.replace("%Y", "YYYY")  # full year
 
     # check if any percent remains
     if "%" in fmt.replace("%%", ""):

@@ -323,7 +323,14 @@ class Server(object):
             else:
                 for prefix, handle in self._not_found_methods:
                     if request_uri.startswith(prefix):
-                        handle(context=context)
+                        if not context.session and handle._session:
+                            self.load_session(context)
+                        try:
+                            handle(context=context)
+                        except DispatchFinished:
+                            pass
+                        if context.session_loaded():
+                            context.save_session(self.session_handler)
                         break
         except DispatchFinished:
             pass
