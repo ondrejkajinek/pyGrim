@@ -1,3 +1,10 @@
+pygrim (0.2.6) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * script_name defaults to /
+
+ -- Václav Pokluda <root@darky>  Mon, 12 Feb 2018 14:24:38 +0100
+
 pygrim (0.2.5) testing; urgency=medium
 
   * COMMIT MESSASGES
