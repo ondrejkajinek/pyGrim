@@ -1,6 +1,6 @@
 # coding: utf8
 
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, time
 from dateutil.parser import parse as parse_dt
 from jinja2.ext import Extension
 from time import gmtime, strftime
@@ -10,6 +10,7 @@ DTS = (
     type(datetime.min),
     type(date.min),
 )
+DTT = type(time.min)
 
 
 class TimeExtension(Extension):
@@ -59,6 +60,21 @@ class TimeExtension(Extension):
     def minutes_from_seconds(self, seconds):
         return "%d:%d" % (seconds // 60, seconds % 60)
 
+    def time_format(self, source, format_str, locale=None):
+        if isinstance(source, basestring):
+            obj = parse_dt(source).time()
+        elif isinstance(source, DTS):
+            obj = source.time()
+        elif isinstance(source, DTT):
+            obj = source
+        else:
+            return None
+
+        if locale:
+            return self.formater.format_time(obj, format_str, locale=locale)
+        else:
+            return obj.strftime(format_str).decode('utf-8')
+
     def time_from_seconds(self, seconds, locale=None):
         if locale:
             return self.formater.format(
@@ -72,6 +88,7 @@ class TimeExtension(Extension):
             "as_date": self.as_date,
             "date_format": self.date_format,
             "mins_from_secs": self.minutes_from_seconds,
+            "time_format": self.time_format,
             "time_from_secs": self.time_from_seconds
         }
 

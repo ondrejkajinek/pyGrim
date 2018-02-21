@@ -140,13 +140,7 @@ class Formater(object):
                 return babel_dates.format_timedelta(what, locale=locale)
 
         if isinstance(what, DT_T):
-            fmt = py_2_babel_dateformat(fmt)
-            if fmt:
-                return babel_dates.format_time(
-                    what, fmt, locale=locale
-                )
-            else:
-                return babel_dates.format_time(what, locale=locale)
+            return self._format_time_babel(what, fmt, locale)
 
         raise RuntimeError("formating %s not implemented" % (type(what),))
 
@@ -182,6 +176,28 @@ class Formater(object):
 
     def _format_number_nobabel(self, number, locale=None):
         return number
+
+    def _format_time_babel(self, what, fmt=None, locale=None):
+        locale = locale or self._locale
+
+        if isinstance(what, DT_T):
+            fmt = py_2_babel_dateformat(fmt)
+            if fmt:
+                return babel_dates.format_time(
+                    what, fmt, locale=locale
+                )
+            else:
+                return babel_dates.format_time(what, locale=locale)
+
+        raise RuntimeError("formating %s not implemented" % (type(what),))
+
+    def _format_time_nobabel(self, what, fmt=None, locale=None):
+        locale = locale or self._locale
+
+        if isinstance(what, DT_T):
+            return what.strftime(fmt)
+
+        raise RuntimeError("formating %s not implemented" % (type(what),))
 
     def _get_currency_parts(self, amount, currency, locale):
         formatted = babel_numbers.format_currency(
