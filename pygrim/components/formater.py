@@ -1,6 +1,6 @@
 # coding: utf8
 
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, time
 from logging import getLogger
 
 log = getLogger("pygrim.http.formater")
@@ -61,6 +61,7 @@ def py_2_babel_dateformat(fmt):
 DT_DT = type(datetime.min)
 DT_D = type(date.min)
 DT_TD = type(timedelta.min)
+DT_T = type(time.min)
 
 
 class Formater(object):
@@ -137,6 +138,15 @@ class Formater(object):
                 )
             else:
                 return babel_dates.format_timedelta(what, locale=locale)
+
+        if isinstance(what, DT_T):
+            fmt = py_2_babel_dateformat(fmt)
+            if fmt:
+                return babel_dates.format_time(
+                    what, fmt, locale=locale
+                )
+            else:
+                return babel_dates.format_time(what, locale=locale)
 
         raise RuntimeError("formating %s not implemented" % (type(what),))
 
