@@ -106,9 +106,9 @@ class Formater(object):
 
     def _format_date_babel(self, what, fmt=None, locale=None):
         locale = locale or self._locale
-        if fmt == "%x":
+        if fmt == "%x" and isinstance(what, DT_DT):
             what = what.date()
-        elif fmt == "%X":
+        elif fmt == "%X" and isinstance(what, DT_DT):
             what = what.time()
 
         if isinstance(what, DT_DT):
