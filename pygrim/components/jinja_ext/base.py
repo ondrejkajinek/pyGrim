@@ -86,10 +86,13 @@ class BaseExtension(Extension):
         )
         return res or "_"
 
-    def seo(self, text):
+    def seo(self, text, replace_char="-"):
         return self.DASH_SQUEEZER.sub(
-            "-",
-            self._seo_dashize(self._seo_remove(text))
+            replace_char,
+            self._seo_dashize(
+                self._seo_remove(strip_accent(text).lower()),
+                replace_char
+            )
         )
 
     def to_json(self, value, indent=None):
@@ -135,8 +138,13 @@ class BaseExtension(Extension):
             "number_format": self.number_format
         }
 
-    def _seo_dashize(self, text):
-        return "".join("-" if c in self.SEO_DASHED else c for c in text or "")
+    def _seo_dashize(self, text, replace_char):
+        return "".join(
+            replace_char
+            if c in self.SEO_DASHED
+            else c
+            for c in text or ""
+        )
 
     def _seo_remove(self, text):
         return "".join("" if c in self.SEO_REMOVED else c for c in text or "")
