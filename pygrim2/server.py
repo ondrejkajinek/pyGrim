@@ -40,7 +40,7 @@ from .components.utils import (
     remove_trailing_slash
 )
 from .components.view import (
-    AbstractView, DummyView, JsonView, JinjaView, RawView
+    AbstractView, DummyView, DumpView, JsonView, JinjaView, RawView
 )
 from .http import Context, HeadersAlreadySent, Request, Response
 
@@ -100,6 +100,7 @@ class Server(object):
 
     KNOWN_VIEW_CLASSES = {
         "dummy": DummyView,
+        "dump": DumpView,
         "jinja": JinjaView,
         "json": JsonView,
         "raw": RawView
@@ -281,6 +282,9 @@ class Server(object):
         else:
             view_types.update(("raw", "json"))
 
+        if self.config.get("pygrim:dump_switch", "jkxd"):
+            view_types.update(("dump",))
+
         for view_type in view_types:
             try:
                 yield view_type, self.KNOWN_VIEW_CLASSES[view_type]
@@ -387,7 +391,7 @@ class Server(object):
 
     def _prepare_output(self, context):
         if self._debug and self._dump_switch in context.GET():
-            self._set_dump_view(context)
+            self._use_dump_view(context)
 
         try:
             view = self._views[context.get_view()]
@@ -502,7 +506,7 @@ class Server(object):
             )
 
     def _route_dump(self, context):
-        self._set_json_view(context)
+        self._set_dump_view(context)
         context.view_data = {
             "routes": [
                 route._asdict()
@@ -536,25 +540,11 @@ class Server(object):
                 context.save_session()
 
     def _set_dump_view(self, context):
-        context.view_data["content_type"] = context._response.headers.get(
-            "Content-Type"
-        )
-        context.view_data.update(
-            ("__" + key, getattr(context, key))
-            for key
-            in ("current_route", "template", "_route_params")
-        )
-        if context.session_loaded():
-            context.view_data["session"] = context.session
-
-        self._set_json_view(context)
+        context.set_response_content_type("application/json")
+        context.set_view("dump")
 
     def _set_fallback_view(self, context):
         context.set_view("dummy" if self._view_disabled() else "raw")
-
-    def _set_json_view(self, context):
-        context.set_response_content_type("application/json")
-        context.set_view("json")
 
     def _setup_env(self):
         self._debug = self.config.getbool("pygrim:debug", True)
@@ -619,6 +609,20 @@ class Server(object):
             abs_path = None
 
         return abs_path
+
+    def _use_dump_view(self, context):
+        context.view_data["content_type"] = context._response.headers.get(
+            "Content-Type"
+        )
+        context.view_data.update(
+            ("__" + key, getattr(context, key))
+            for key
+            in ("current_route", "template", "_route_params")
+        )
+        if context.session_loaded():
+            context.view_data["session"] = context.session
+
+        self._set_dump_view(context)
 
     def _versioned_file(self, static_file):
         abs_path = self._static_file_abs_path(static_file)

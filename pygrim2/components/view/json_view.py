@@ -1,17 +1,10 @@
 # coding: utf8
 
 # local
-from .abstract_view import BaseView
-from ..utils.json2 import dumps as json_dumps
+from .dump_view import DumpView
 
 
-class JsonView(BaseView):
+class JsonView(DumpView):
 
-    def __init__(self, config, **kwargs):
-        self._initialize_view(config)
-
-    def _render_template(self, context):
-        return json_dumps(context.view_data)
-
-    def _template_check(self, context):
+    def _add_assets(self, context):
         return

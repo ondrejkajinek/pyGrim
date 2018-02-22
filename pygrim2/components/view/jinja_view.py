@@ -7,7 +7,7 @@ from os import getcwd, path
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 # local
-from .abstract_view import BaseView
+from .base_view import BaseView
 from ..jinja_ext import i18n
 from ..utils import get_class_name
 
