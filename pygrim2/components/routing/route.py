@@ -71,6 +71,12 @@ class Route(RouteObject):
     URL_PARAM_REGEXP = re_compile("\(\?P<([^>]+)>[^)]+\)")
 
     def __init__(self, methods, pattern, handle, name=None):
+        if pattern is None:
+            pattern = "/%s" % handle.__name__
+
+        if name is None:
+            name = get_method_name(handle)
+
         # All routes supporting GET also support HEAD
         if GET in methods and HEAD not in methods:
             methods += (HEAD,)

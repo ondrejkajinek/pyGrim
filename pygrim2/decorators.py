@@ -106,9 +106,6 @@ class route(BaseDecorator):
         super(route, self).__init__(*args, **kwargs)
 
     def prepare_func(self, func):
-        if self._route["pattern"] is None:
-            self._route["pattern"] = "/%s" % func.__name__
-
         if hasattr(func, "_route"):
             func._route.append(self._route)
         else:
