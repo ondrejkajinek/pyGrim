@@ -1,3 +1,73 @@
+pygrim (0.2.6) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * script_name defaults to /
+
+ -- Václav Pokluda <root@darky>  Mon, 12 Feb 2018 14:24:38 +0100
+
+pygrim (0.2.5) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * fixed error with fit_image path
+
+ -- OndraK <root@ondrak>  Mon, 12 Feb 2018 13:44:22 +0100
+
+pygrim (0.2.4) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * do fit_image přidán parametr method -- lze volat i jiné metody, než
+    jen fit (default)
+
+ -- OndraK <root@ondrak>  Mon, 12 Feb 2018 09:22:48 +0100
+
+pygrim (0.2.3) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * bugfixed session handling for not-found
+  * format weekdays and month names
+
+ -- Václav Pokluda <root@darky>  Fri, 09 Feb 2018 13:59:58 +0100
+
+pygrim (0.2.2) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * Unused feature from fit_image removed -- originally used in some php
+    portals :(
+
+ -- OndraK <root@ondrak>  Mon, 05 Feb 2018 13:34:27 +0100
+
+pygrim (0.2.1) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * fixed behavior of url_for when . in regexp
+
+ -- Václav Pokluda <root@darky>  Mon, 22 Jan 2018 09:55:42 +0100
+
+pygrim (0.2.0) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * better formating string
+  * Fix formater behavir for %x, %X and %c
+  * optimalized getattr in formater
+  * Fixed recursion error when non-existing function of Formater is
+    called
+  * Implementation of jinja functions for number and currency formatting
+  * import simplified
+  * code deduplication
+  * fiexd misplaced babel warnings
+  * lang_text method tunelled to context - you can usi it now fom code -
+    not only view
+  * Babel availability logging fixed
+  * lang_text returns jinja2.Undefined instead of empty string
+  * function lang_text added to jinja i18n extension -- used for
+    selecting trans by specified locale
+  * get available languages method exposed in context
+  * fix default language variables in context if i18 not initialized
+  * improved babel integration to jinja TimeExtension
+  * babel used for date and time formating - first draft
+
+ -- Václav Pokluda <root@darky>  Fri, 19 Jan 2018 18:51:21 +0100
+
 pygrim (0.1.51) testing; urgency=medium
 
   * COMMIT MESSASGES

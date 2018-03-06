@@ -18,7 +18,7 @@ class UrlExtension(Extension):
         )
 
     def site_url(self, context, site):
-        return path.join(self.base_url(context), site)
+        return path.join(self.base_url(context), site.lstrip("/"))
 
     def _get_filters(self):
         return {
