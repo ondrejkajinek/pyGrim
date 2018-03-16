@@ -1,3 +1,14 @@
+pygrim (0.2.7) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * seo now remove accents, using lowercase and can use user defined
+    separator
+  * fixed formater behavior on date and time using %x or %X
+  * Added time_format filter -- can format datetime.time structure
+  * datetime.time fotmating
+
+ -- Václav Pokluda <root@darky>  Fri, 16 Mar 2018 09:05:55 +0100
+
 pygrim (0.2.6) testing; urgency=medium
 
   * COMMIT MESSASGES
