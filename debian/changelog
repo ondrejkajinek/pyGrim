@@ -1,3 +1,11 @@
+pygrim (0.2.8) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * Added new jinja filter: split_to_length -- takes a string or number
+    and splits it to parts of specified length
+
+ -- Václav Pokluda <root@darky>  Tue, 27 Mar 2018 14:10:29 +0200
+
 pygrim (0.2.7) testing; urgency=medium
 
   * COMMIT MESSASGES
