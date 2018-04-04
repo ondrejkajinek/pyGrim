@@ -123,6 +123,9 @@ class Context(object):
     def generates_response(self):
         return self._response.is_generator_function
 
+    def get_cookie(self, key):
+        return self._request.cookies.get(key)
+
     def get_cookies(self):
         return self._request.cookies.copy()
 
