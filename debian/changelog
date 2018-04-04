@@ -1,3 +1,11 @@
+pygrim (0.2.9) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * Added comment about lifetime parameter of add_cookie
+  * Added method for getting single cookie value
+
+ -- OndraK <root@ondrak>  Wed, 04 Apr 2018 09:39:14 +0200
+
 pygrim (0.2.8) testing; urgency=medium
 
   * COMMIT MESSASGES
