@@ -11,16 +11,13 @@ import sys
 
 
 def initialize_loggers(config):
-    level = config.get("logging:level", "NOTSET")
-    try:
-        level = getattr(logging, level)
-    except AttributeError:
-        level = NOTSET
+    level_name = config.get("logging:level", "NOTSET")
+    level = getattr(logging, level_name, NOTSET)
 
-    logger = getLogger()
-    logger.setLevel(level)
-    while logger.handlers:
-        logger.removeHandler(logger.handlers[0])
+    main_logger = getLogger()
+    main_logger.setLevel(level)
+    while main_logger.handlers:
+        main_logger.removeHandler(main_logger.handlers[0])
 
     logger_type = config.get("logging:type", "file").lower()
     log_format = config.get("logging:format", _default_log_format(logger_type))
@@ -55,14 +52,14 @@ def initialize_loggers(config):
 
     if handler:
         handler.setFormatter(log_formatter)
-        logger.addHandler(handler)
+        main_logger.addHandler(handler)
 
-    logger.propagate = False
+    main_logger.propagate = False
 
     try:
-        for logger in (config.get("logging:loggers") or {}).iterkeys():
-            l = getLogger(logger)
-            l.setLevel(config.get("logging:loggers:%s" % logger))
+        for logger_name in (config.get("logging:loggers") or {}).iterkeys():
+            logger = getLogger(logger_name)
+            logger.setLevel(config.get("logging:loggers:%s" % logger_name))
     except KeyError:
         log_error(
             "Missing section for detailed logger settings ([logging.loggers])"

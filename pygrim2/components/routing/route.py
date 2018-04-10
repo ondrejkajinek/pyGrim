@@ -173,7 +173,7 @@ class Route(RouteObject):
 
     def _uri_matches(self, context):
         uri = context.get_request_uri()
-        log.debug("matching %r with  %r", self.get_pattern(), uri)
+        log.debug("matching %r with %r", self.get_pattern(), uri)
         if self.is_regular():
             matches = self._pattern.match(uri)
             match = matches is not None
