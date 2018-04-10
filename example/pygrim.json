@@ -1,0 +1,66 @@
+{
+	"uwsgi": {
+		"daemonize": "/tmp/pygrim_test.log",
+		"http-socket": ":7846",
+		"chdir": "/home/ondrak/public_html/pygrim_test/",
+		"logto": "/tmp/pygrim_test.log",
+		"master": "true",
+		"module": "server:application",
+		"pidfile": "/home/ondrak/public_html/pygrim_test/pygrim.pid",
+		"processes": "1",
+		"procname": "pygrim_test",
+		"procname-master": "pygrim_test_m",
+		"pythonpath": "/home/ondrak/programming/python/pyGrim/",
+		"python-autoreload": "1",
+		"touch-reload": "/home/ondrak/public_html/pygrim_test/pygrim.yaml"
+	},
+
+	"logging": {
+		"file": "/tmp/pygrim_test.log",
+		"level": "DEBUG",
+		"loggers": {}
+	},
+
+	"jinja": {
+		"debug": true,
+		"dump_switch": "jkxd",
+		"environment": {
+			"autoescape": [
+				"jinja"
+			]
+		},
+		"template_path": "templates"
+	},
+
+	"pygrim": {
+		"debug": true,
+		"dump_switch": "jkxd",
+		"l10n": {
+			"default_locale": "cs_CZ.UTF-8",
+			"lang_domain": "test",
+			"locales": [
+				"cs_CZ.UTF-8",
+				"en_GB.UTF-8"
+			],
+			"locale_map": {
+				"cs": "cs_CZ.UTF-8",
+				"cs_CZ": "cs_CZ.UTF-8",
+				"en": "en_GB.UTF-8",
+				"en_GB": "en_GB.UTF-8"
+			},
+			"locale_path": "locales/",
+			"type": "gettext"
+		}
+	},
+
+	"session": {
+		"type": "file"
+	},
+
+	"view": {
+		"default": "jinja",
+		"types": [
+			"jinja"
+		]
+	}
+}
