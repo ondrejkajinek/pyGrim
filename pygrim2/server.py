@@ -17,7 +17,7 @@ except ImportError:
     uwsgi_opt = {}
 
 # local
-from .components.config import AbstractConfig, YamlConfig
+from .components.config import AbstractConfig, JsonConfig, YamlConfig
 from .components.exceptions import (
     ComponentTypeAlreadyRegistered, ControllerAttributeCollision,
     DuplicateContoller, UnknownView,
@@ -83,6 +83,7 @@ class ResponseWrap(object):
 class Server(object):
 
     KNOWN_CONFIG_FORMATS = {
+        "json": JsonConfig,
         "yaml": YamlConfig
     }
 
