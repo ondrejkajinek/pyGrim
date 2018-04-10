@@ -9,9 +9,13 @@ try:
 except ImportError:
     uwsgi_log = print
 
-from yaml import load as yaml_load, parser as yaml_parser
-from yaml import SafeLoader, MappingNode
-from yaml.constructor import ConstructorError
+try:
+    from yaml import load as yaml_load, parser as yaml_parser
+    from yaml import SafeLoader, MappingNode
+    from yaml.constructor import ConstructorError
+except ImportError:
+    from .dummy_yaml import yaml_load, yaml_parser
+    from .dummy_yaml import ConstructorError, SafeLoader, MappingNode
 
 # local
 from .abstract_config import AbstractConfig
