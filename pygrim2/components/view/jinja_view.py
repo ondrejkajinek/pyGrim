@@ -33,7 +33,7 @@ class JinjaView(BaseView):
             loader=FileSystemLoader(
                 searchpath=path.join(
                     getcwd(),
-                    config.get("jinja:template_path")
+                    config.get("jinja:template_path", "templates")
                 )
             ),
             autoescape=select_autoescape(
@@ -47,7 +47,7 @@ class JinjaView(BaseView):
         self._translations = translations or {}
 
         self._env.globals.update(extra_functions)
-        if config.get("jinja:suppress_none"):
+        if config.get("jinja:suppress_none", True):
             self._env.finalize = _suppress_none
 
         self._initialize_assets(config)

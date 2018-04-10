@@ -21,7 +21,9 @@ class FileSessionStorage(SessionStorage):
 
     def __init__(self, config):
         super(FileSessionStorage, self).__init__(config)
-        self._session_dir = config.get("session:args:session_dir")
+        self._session_dir = config.get(
+            "session:args:session_dir", "/tmp/pygrim_session/"
+        )
         self._create_session_dir()
 
     def delete(self, session):

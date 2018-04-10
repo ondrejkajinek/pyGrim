@@ -263,7 +263,7 @@ class Server(object):
         return Router
 
     def _find_session_handler(self):
-        storage_type = self.config.get("session:type")
+        storage_type = self.config.get("session:type", "file")
         try:
             storage_class = self.KNOWN_SESSION_HANDLERS[storage_type]
         except KeyError:
@@ -275,7 +275,7 @@ class Server(object):
         return storage_class
 
     def _find_view_classes(self):
-        view_types = self.config.getset("view:types")
+        view_types = self.config.getset("view:types", ("jinja",))
         # view is disabled when only dummy view is configured
         if view_types == ("dummy",):
             start_log.info("View is disabled, no output will be created!")

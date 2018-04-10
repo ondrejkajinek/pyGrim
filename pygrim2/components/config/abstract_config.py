@@ -16,11 +16,9 @@ class AbstractConfig(object):
     SEPARATOR = None
 
     def __init__(self, path, default=None):
-        if default is None:
-            from .default import DEFAULT_CONFIG
-            default = DEFAULT_CONFIG
-
-        self.config = deep_update(deepcopy(default), self._load_config(path))
+        self.config = deep_update(
+            deepcopy(default or {}), self._load_config(path)
+        )
 
     def get(self, key, *args, **kwargs):
         try:
