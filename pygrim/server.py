@@ -13,7 +13,8 @@ from .components.session import (
     DummySession, FileSessionStorage, RedisSessionStorage,
     RedisSentinelSessionStorage, SessionStorage
 )
-from .components.utils import ensure_tuple, get_class_name, remove_trailing_slash
+from .components.utils import ensure_tuple, get_class_name
+from .components.utils import remove_trailing_slash
 from .components.view import AbstractView, DummyView, JinjaView
 from .http import Context, Request, Response
 
@@ -228,6 +229,9 @@ class Server(object):
         for key in self.KNOWN_CONFIG_FORMATS:
             if key in uwsgi_opt:
                 self._config_dir = path.dirname(uwsgi_opt[key])
+                if not self._config_dir:
+                    self._config_dir = uwsgi_opt["chdir"] + "conf/"
+                    uwsgi_opt[key] = self._config_dir + uwsgi_opt[key]
                 return uwsgi_opt[key], self.KNOWN_CONFIG_FORMATS[key]
         else:
             raise RuntimeError("No known config format used to start uwsgi!")
