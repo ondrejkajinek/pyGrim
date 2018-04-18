@@ -114,11 +114,12 @@ class Server(object):
         self._controllers = AttributeDict()
         self._error_handlers = {}
         self._model = None
+        self._context_class = Context
         self._request_class = Request
         self._response_class = Response
 
     def __call__(self, environment, start_response):
-        context = Context(
+        context = self._context_class(
             self.config,
             self._model,
             self._session_handler,
@@ -158,6 +159,9 @@ class Server(object):
 
     def get_config_dir(self):
         return self._config_dir
+
+    def set_context_class(self, new_class):
+        self._set_internal_class("_context_class", new_class, Context)
 
     def set_request_class(self, new_class):
         self._set_internal_class("_requst_class", new_class, Request)
