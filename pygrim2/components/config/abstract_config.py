@@ -20,6 +20,9 @@ class AbstractConfig(object):
             deepcopy(default or {}), self._load_config(path)
         )
 
+    def __getitem__(self, key):
+        return self.config[key]
+
     def get(self, key, *args, **kwargs):
         try:
             target = self.config
@@ -54,6 +57,9 @@ class AbstractConfig(object):
         return self._get_typed(
             lambda x: tuple(split_to_iterable(x)), key, *args, **kwargs
         )
+
+    def _asdict(self):
+        return self.config
 
     def _default_value(self, *args, **kwargs):
         if "default" in kwargs:

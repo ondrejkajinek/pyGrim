@@ -18,12 +18,6 @@ class JsonConfig(AbstractConfig):
 
     SEPARATOR = ":"
 
-    def __getitem__(self, key):
-        return self.config[key]
-
-    def _asdict(self):
-        return self.config
-
     def _load_config(self, path):
         try:
             with open(path, "rb") as conf_in:
