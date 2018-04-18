@@ -83,6 +83,10 @@ class Context(object):
         self, name, value, lifetime=None, domain=None, path=None,
         http_only=None, secure=None
     ):
+        """
+        Sets cookie with specified name, value, domain, path, etc.,
+        for a lifetime relative to utcnow()
+        """
         self._response.cookies[name] = {
             "domain": domain,
             "http_only": http_only,
