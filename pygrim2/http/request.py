@@ -32,7 +32,7 @@ class Request(object):
     def __init__(self, environment):
         self._parse_headers(environment)
         self._save_environment(environment)
-        self.cookies = self._parse_string(self._headers.get("cookie", ""), ";")
+        self.cookies = self._parse_string(self._headers.get("cookie"), ";")
 
     def __getattr__(self, attr):
         save = True
@@ -144,6 +144,7 @@ class Request(object):
         self._headers = NormalizedImmutableDict(**headers)
 
     def _parse_string(self, source, pairs_separator="&"):
+        source = source or ""
         parts = (item for item in source.split(pairs_separator) if item)
         parsed = {}
         for part in parts:
