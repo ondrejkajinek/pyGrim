@@ -66,9 +66,13 @@ class BaseExtension(Extension):
         )
         return res or "_"
 
-    def seo(self, text):
+    def seo(self, text, replace_char="-"):
         return self.DASH_SQUEEZER.sub(
-            "-", self._seo_dashize(self._seo_remove(text))
+            replace_char,
+            self._seo_dashize(
+                self._seo_remove(strip_accent(text), replace_char),
+                replace_char
+            )
         )
 
     def split_to_length(self, value, length):
@@ -102,11 +106,11 @@ class BaseExtension(Extension):
     def _get_functions(self):
         return {}
 
-    def _seo_dashize(self, text):
-        return self._seo_replace(text, self.SEO_DASHED, "-")
+    def _seo_dashize(self, text, replace_char):
+        return self._seo_replace(text, self.SEO_DASHED, replace_char)
 
-    def _seo_remove(self, text):
-        return self._seo_replace(text, self.SEO_REMOVED, "")
+    def _seo_remove(self, text, replace_char):
+        return self._seo_replace(text, self.SEO_REMOVED, replace_char)
 
     def _seo_replace(self, text, changed, replacement):
         return "".join(replacement if c in changed else c for c in text or "")
