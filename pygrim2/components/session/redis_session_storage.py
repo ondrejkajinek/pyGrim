@@ -9,7 +9,7 @@ from .session import Session
 from .session_storage import SessionStorage
 from .session_exceptions import SessionSaveError, SessionLoadError
 from ..connectors import connect_redis, connect_redis_sentinel
-from ..decorators import c_locale
+from ..utils.decorators import c_locale
 
 log = getLogger("pygrim.components.session.redis_session_storage")
 
