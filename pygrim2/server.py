@@ -354,6 +354,8 @@ class Server(object):
                     self._default_not_found_handler(context)
                 else:
                     self._handle_not_found(context=context, exc=exc)
+
+                self._prepare_output(context)
             else:
                 self._prepare_output(context)
         except StopDispatch:
@@ -391,7 +393,7 @@ class Server(object):
     def _matching_error_handlers(self, request_uri, exc_mro):
         for exc in exc_mro:
             for prefix, err_cls, handler in self._error_handlers:
-                if request_uri.startswith(prefix) and exc is err_cls:
+                if request_uri.startswith(prefix) and exc == err_cls:
                     yield handler
 
     def _prepare_output(self, context):
