@@ -84,7 +84,7 @@ class not_found_handler(error_handler):
     Such method is called when no route matches requested url.
     """
 
-    def __init__(self, path=None, *args, **kwargs):
+    def __init__(self, path="", *args, **kwargs):
         kwargs["status"] = kwargs.get("status", 404)
         super(not_found_handler, self).__init__(
             errors=(RouteNotFound,), path=path, *args, **kwargs
