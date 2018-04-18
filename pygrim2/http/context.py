@@ -4,13 +4,8 @@
 from inspect import isgenerator
 from logging import getLogger
 
-# non-std
-try:
-    from compatibility import http_responses
-except ImportError:
-    from .codes import http_responses
-
 # local
+from .codes import http_responses
 from .exceptions import HeadersAlreadySent
 from .methods import DELETE, GET, HEAD, POST, PUT
 from ..components.routing import StopDispatch
