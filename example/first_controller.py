@@ -5,6 +5,7 @@ from pygrim2 import error_handler, not_found_handler, route, template
 from pygrim2 import GET
 from re import compile as re_compile
 from time import time
+from traceback import format_exc
 
 log = getLogger(__file__)
 
@@ -158,18 +159,20 @@ class First(object):
         context.view_data.update({
             "text": (
                 u"501: This method is used when TypeError is raised. "
-                "This handle sets http status to 501"
-            )
+                "This handle sets http status to 501."
+            ),
+            "traceback": format_exc()
         })
-        context.template = "layout.jinja"
+        context.template = "error.jinja"
         context.set_response_status(501)
 
     @error_handler()
+    @template("error.jinja")
     def ise_handle(self, context, exc):
-        context.view_data.update({
+        return {
             "text": (
                 u"500: This method is used when exception is raised "
                 u"and is handled by BaseException handler."
-            )
-        })
-        context.template = "layout.jinja"
+            ),
+            "traceback": format_exc()
+        }

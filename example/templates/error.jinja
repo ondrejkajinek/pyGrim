@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<!--[if IE 8]> <html lang="cs" class="ie8 no-js"> <![endif]-->
+<!--[if IE 9]> <html lang="cs" class="ie9 no-js"> <![endif]-->
+<!--[if !IE]><!--> <html lang="cs"> <!--<![endif]-->
+
+<head>
+	<meta charset="utf-8">
+	<title>pyGrim error</title>
+	{{ print_css(css) }}
+	{{ print_js(js_header_sync) }}
+	{{ print_js(js_header_async, sync=False) }}
+</head>
+
+<body>
+	{% block main %}
+		<p>{{ text }}</p>
+		{% if session_text is defined %}
+			<p>Session text: {{ session_text }}</p>
+		{% endif %}
+
+    {% if debug %}
+      <pre>
+        {{ traceback }}
+      </pre>
+    {% endif %}
+	{% endblock %}
+</body>
+
+{{ print_js(js_footer_sync) }}
+{{ print_js(js_footer_async, sync=False) }}
+
+</html>
+
