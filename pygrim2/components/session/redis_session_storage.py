@@ -52,7 +52,7 @@ class RedisSessionStorageBase(SessionStorage):
             )
             if ret is not True:
                 raise ValueError("Session not stored to redis")
-        except:
+        except BaseException:
             log.exception("Saving session failed!")
             raise SessionSaveError()
 

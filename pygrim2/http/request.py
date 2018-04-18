@@ -42,7 +42,7 @@ class Request(object):
         ):
             try:
                 data = json_loads(self.RAW_POST)
-            except:
+            except BaseException:
                 log.exception("Error loding json data from request")
                 data = {}
                 save = False
@@ -126,7 +126,7 @@ class Request(object):
     def _get_port(self, env):
         try:
             port = int(env.pop("SERVER_PORT"))
-        except:
+        except BaseException:
             port = self.DEFAULT_SCHEME_PORTS[env["wsgi.url_scheme"]]
 
         return port

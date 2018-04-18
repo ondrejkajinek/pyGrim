@@ -131,7 +131,7 @@ class Server(object):
 
         try:
             self._handle_request(context=context)
-        except:
+        except BaseException:
             context.set_response_body("Fatal Server Error")
             context.set_response_status(500)
             context.delete_response_headers()
@@ -315,11 +315,11 @@ class Server(object):
             self._handle_generic_error(context, exc)
         except StopDispatch:
             raise
-        except:
+        except BaseException:
             exc = exc_info()[1]
             try:
                 self._default_error_handler(context=context, exc=exc)
-            except:
+            except BaseException:
                 log.critical("Error in default_error_handler.")
                 log.exception("Error in default_error_handler.")
                 raise
@@ -356,7 +356,7 @@ class Server(object):
                     self._handle_not_found(context=context, exc=exc)
         except StopDispatch:
             pass
-        except:
+        except BaseException:
             try:
                 log.exception(
                     "Error while dispatching to: %r.",
@@ -407,7 +407,7 @@ class Server(object):
 
             try:
                 view.display(context)
-            except:
+            except BaseException:
                 log.exception("Error when calling View.display")
                 raise
 

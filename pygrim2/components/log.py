@@ -64,7 +64,7 @@ def initialize_loggers(config):
         log_error(
             "Missing section for detailed logger settings ([logging.loggers])"
         )
-    except:
+    except BaseException:
         log_exception("Error loading logging levels")
 
 
