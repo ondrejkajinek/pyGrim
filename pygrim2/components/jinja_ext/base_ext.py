@@ -3,6 +3,7 @@
 # std
 from logging import getLogger
 from re import compile as re_compile
+from textwrap import wrap
 
 # non-std
 from jinja2.ext import Extension
@@ -70,6 +71,19 @@ class BaseExtension(Extension):
             "-", self._seo_dashize(self._seo_remove(text))
         )
 
+    def split_to_length(self, value, length):
+        if not value:
+            return None
+
+        if isinstance(value, (int, long)):
+            value = str(value)
+        elif isinstance(value, basestring):
+            pass
+        else:
+            raise ValueError("int or string expected not %r" % (value,))
+
+        return wrap(value, length)
+
     def to_json(self, value, indent=None):
         return json_dumps(value)
 
@@ -80,6 +94,7 @@ class BaseExtension(Extension):
             "readable_size": self.readable_size,
             "safe_title": self.safe_title,
             "seo": self.seo,
+            "split_to_length": self.split_to_length,
             # override Jinja builtin with json2.dumps
             "tojson": self.to_json
         }
