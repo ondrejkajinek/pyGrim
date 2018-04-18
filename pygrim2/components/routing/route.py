@@ -160,6 +160,7 @@ class Route(RouteObject):
 
         readable = self.URL_OPTIONAL_REGEXP.sub(r"\1\2\3", readable)
         readable = remove_trailing_slash(readable).lstrip("^")
+        readable = readable.replace("\.", ".")
         mandatory_names = set(param_names) - set(optional_names)
         if len(mandatory_names) + len(optional_names) < len(param_names):
             raise RuntimeError(
