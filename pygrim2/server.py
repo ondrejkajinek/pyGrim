@@ -354,6 +354,8 @@ class Server(object):
                     self._default_not_found_handler(context)
                 else:
                     self._handle_not_found(context=context, exc=exc)
+            else:
+                self._prepare_output(context)
         except StopDispatch:
             pass
         except BaseException:
@@ -368,8 +370,6 @@ class Server(object):
                 pass
             else:
                 self._prepare_output(context)
-        else:
-            self._prepare_output(context)
 
     def _initialize_basic_components(self):
         self._load_config()
