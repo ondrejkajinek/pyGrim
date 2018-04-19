@@ -1,7 +1,9 @@
 # coding: utf8
 
 from logging import getLogger
-from pygrim2 import error_handler, not_found_handler, route, template
+from pygrim2 import (
+    error_handler, json_method, not_found_handler, route, template
+)
 from pygrim2 import GET
 from re import compile as re_compile
 from time import time
@@ -116,6 +118,13 @@ class First(object):
     def template_show(self, context, template):
         return {
             "text": "Template %r is given" % template
+        }
+
+    @route(GET)
+    @json_method()
+    def json_show(self, context):
+        return {
+            "text": "This method returns data as a json"
         }
 
     @route(GET, name="type_error")
