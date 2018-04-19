@@ -88,12 +88,13 @@ class Server(object):
         self._not_found_methods = {}
         self._error_method = self._default_error_method
         self._custom_error_handlers = {}
+        self._context_class = Context
         self._requst_class = Request
         self._response_class = Response
 
     def __call__(self, environment, start_response):
         start_response = ResponseWrap(start_response)
-        context = Context(
+        context = self._context_class(
             environment, self.config, self._requst_class, self._response_class
         )
         try:
@@ -172,6 +173,9 @@ class Server(object):
             "server.render", "server.display"
         )
         return self.display(*args, **kwargs)
+
+    def set_context_class(self, new_class):
+        self._set_internal_class("_context_class", new_class, Context)
 
     def set_request_class(self, new_class):
         self._set_internal_class("_requst_class", new_class, Request)
