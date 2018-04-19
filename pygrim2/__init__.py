@@ -2,7 +2,7 @@
 
 from .components.routing import RouteGroup, RoutePassed
 from .decorators import (
-    error_handler, not_found_handler, route, template, uses_data
+    error_handler, json_method, not_found_handler, route, template, uses_data
 )
 from .http.methods import DELETE, GET, HEAD, POST, PUT, UPDATE
 from .server import register_session_handler, register_view_class

@@ -78,6 +78,23 @@ class error_handler(BaseDecorator):
         super(error_handler, self).prepare_func(func)
 
 
+class json_method(BaseDecorator):
+    """
+    Sets view to json
+    Puts result of decorated method to context.view_data.
+    """
+
+    def pre_call(self, fun, args, kwargs):
+        context = kwargs.get("context")
+        context.set_view("json")
+        return super(json_method, self).pre_call(fun, args, kwargs)
+
+    def post_call(self, fun, args, kwargs, res):
+        context = kwargs.get("context")
+        context.view_data.update(res or ())
+        return super(json_method, self).post_call(fun, args, kwargs, res)
+
+
 class not_found_handler(error_handler):
     """
     Marks method as not-found handler.
