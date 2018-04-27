@@ -1,3 +1,18 @@
+pygrim (0.2.10) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * static_file func extended to support alternate files (like
+    extensions in images)
+  * Added readable_si_size filter for jinja: uses multiples of 1000
+    instead of 1024
+  * Added possibility to configure Context class
+  * fixed loading config if using uwsgi emperor mode
+  * refactor of _static_file_abs_path method
+  * Inversed condition fixed -- introduced in
+    4093fc6ca1f23e261c03f07e60e6b0a4cb144558
+
+ -- Václav Pokluda <root@darky>  Fri, 27 Apr 2018 10:46:50 +0200
+
 pygrim (0.2.9) testing; urgency=medium
 
   * COMMIT MESSASGES
