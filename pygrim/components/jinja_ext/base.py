@@ -16,7 +16,8 @@ class BaseExtension(Extension):
     DASH_SQUEEZER = re_compile("r/-{2,}")
     SEO_DASHED = (" ", "/", "\\", ":")
     SEO_REMOVED = ("*", "?", "\"", "<", ">", "|", ",")
-    SIZE_PREFIXES = ("", "ki", "Mi", "Gi", "Ti")
+    IEC_SIZE_PREFIXES = ("", "ki", "Mi", "Gi", "Ti")
+    SI_SIZE_PREFIXES = ("", "k", "M", "G", "T")
 
     tags = set()
 
@@ -71,12 +72,14 @@ class BaseExtension(Extension):
         return self.formater.format_number(number, locale)
 
     def readable_size(self, size, precision=0):
-        index = 0
-        while size >= 1024:
-            size /= 1024.0
-            index += 1
+        return self._readable_size(
+            size, precision, 1024.0, self.IEC_SIZE_PREFIXES
+        )
 
-        return ("%%0.%df %%sB" % precision) % (size, self.SIZE_PREFIXES[index])
+    def readable_si_size(self, size, precision=0):
+        return self._readable_size(
+            size, precision, 1000.0, self.SI_SIZE_PREFIXES
+        )
 
     def safe_title(self, text):
         res = "".join(
@@ -139,6 +142,7 @@ class BaseExtension(Extension):
             "as_json": self.as_json,
             "fit_image": self.fit_image,
             "readable_size": self.readable_size,
+            "readable_si_size": self.readable_si_size,
             "safe_title": self.safe_title,
             "seo": self.seo,
             "split_to_length": self.split_to_length,
@@ -152,6 +156,14 @@ class BaseExtension(Extension):
             "decimal_format": self.decimal_format,
             "number_format": self.number_format
         }
+
+    def _readable_size(self, size, precision, multiple, prefixes):
+        index = 0
+        while size >= multiple:
+            size /= multiple
+            index += 1
+
+        return ("%%0.%df %%sB" % precision) % (size, prefixes[index])
 
     def _seo_dashize(self, text, replace_char):
         return "".join(
