@@ -564,25 +564,35 @@ class Server(object):
         ))
 
     def _jinja_static_file(self, filename, prefixes):
-        filename = filename.lstrip("/")
-        file_path = next(
-            (
-                path.join(dir_prefix, static_relpath)
-                for prefix in prefixes
-                for dir_prefix, static_relpath in self._static_file_info(
-                    path.join(prefix, filename)
+        if isinstance(filename, basestring):
+            filenames = [filename]
+        else:
+            filenames = filename
+        for prefix in prefixes:
+            for filename in filenames:
+                filename = filename.lstrip("/")
+                file_path = next(
+                    (
+                        path.join(dir_pfx, static_relpath)
+                        for dir_pfx, static_relpath in self._static_file_info(
+                            path.join(prefix, filename)
+                        )
+                    ),
+                    None
                 )
-            ),
-            None
-        )
+                if file_path:
+                    break
+            if file_path:
+                break
         if not file_path:
             if self._debug:
                 raise RuntimeError("File %r could not be found in %r" % (
-                    filename, prefixes
+                    filenames, prefixes
                 ))
             else:
                 log.error(
-                    "File %r not present in static-map: %r", filename, prefixes
+                    "File %r not present in static-map: %r",
+                    filenames, prefixes
                 )
                 file_path = ""
 
