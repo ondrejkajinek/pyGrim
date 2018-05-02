@@ -1,3 +1,50 @@
+pygrim2 (2.1.2) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * Methods for static files now support uWSGI check-static
+  * Added readable_si_size filter for jinja: uses multiples of 1000
+    instead of 1024
+  * Added @json_method decorator -- pushes data to view and sets view to
+    json
+  * decorators for components moved to components/utils
+  * not_found_hander will use at least empty prefix
+  * Fixed bug introduced in ff7ffbbf73c07eb5599b630e45c3dbeaa6f725af
+  * micro simplification of add_css and add_js
+  * When route was found and exception was raised during template
+    rendering, error handlers can still be used to handle error state
+  * Excepting without specified exception class replaced with
+    BaseException excepting
+  * _parse_string sanitizes source input
+  * Added docstring for add_cookie method
+  * If script_name is not present in environment (or is empty), '/' is
+    used
+  * Removed soft dependency on non-public compatibility library
+  * Fixed an issue with site_url filter when absolute site path would
+    not join correctly to base_url
+  * seo filter for jinja can now specify the char to be used for
+    replacement
+  * added split_to_length jinja filter
+  * NoRoute now evaluates to bool as False
+  * Improved readable representation of regular route pattern
+  * PyGrim server can now use custom Context class (Context must be a
+    parent of new Context class)
+  * __getitem__ and _asdict moved from config classes to abstract config
+  * refactor
+  * missing in 8c1d66fc25ce0c5afac591c4cbc358774702b8b8: server accepts
+    JsonConfig as a valid config type
+  * Default config removed, replaced with default values being specified
+    with config.get()
+  * Added support for JSON config
+  * Added method for getting single cookie value
+  * @route decorator signature simplified: name defaults to
+    class_name.handle_name; defaults are set in Route constructor
+  * Added DumpView, which is used for data dumping; JsonView now does
+    not display assets (js, css); BaseView moved to separate file
+  * Lang cookie is properly prolonged; it is also saved when language is
+    selected by lang_switch
+
+ -- OndraK <ondrej.kajinek@gmail.com>  Wed, 02 May 2018 10:32:16 +0200
+
 pygrim2 (2.1.1) testing; urgency=medium
 
   * COMMIT MESSASGES
