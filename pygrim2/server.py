@@ -566,6 +566,11 @@ class Server(object):
             for suffix
             in self.config.get("pygrim:plain_not_found", ())
         )
+        self._static_check = [
+            remove_trailing_slash(prefix)
+            for prefix
+            in ensure_tuple(self.config.get("uwsgi:check-static", ()))
+        ]
         self._static_map = OrderedDict(
             (remove_trailing_slash(prefix) + "/", mapped_dir)
             for prefix, mapped_dir
@@ -602,16 +607,24 @@ class Server(object):
         static_normpath = path.normpath(static_path)
         for dir_prefix, dir_abs_path in self._static_map.iteritems():
             if static_normpath.startswith(dir_prefix):
-                static_relpath = path.relpath(static_normpath, dir_prefix)
-                if path.isfile(path.join(dir_abs_path, static_relpath)):
-                    yield dir_prefix, static_relpath
+                file_path = path.join(
+                    dir_abs_path,
+                    path.relpath(static_normpath, dir_prefix)
+                )
+                if path.isfile(file_path):
+                    yield path.join(file_path)
+
+        for dir_prefix in self._static_check:
+            file_path = path.join(
+                dir_prefix,
+                static_normpath.lstrip("/")
+            )
+            if path.isfile(file_path):
+                yield path.join(file_path)
 
     def _static_file_abs_path(self, static_file):
         try:
-            dir_prefix, static_relpath = next(
-                self._static_file_info(static_file)
-            )
-            abs_path = path.join(self._static_map[dir_prefix], static_relpath)
+            abs_path = next(self._static_file_info(static_file))
         except StopIteration:
             abs_path = None
 
@@ -678,9 +691,9 @@ class Server(object):
         try:
             file_path = next(
                 (
-                    path.join(dir_prefix, static_relpath)
+                    file_path
                     for prefix in prefixes
-                    for dir_prefix, static_relpath in self._static_file_info(
+                    for file_path in self._static_file_info(
                         path.join(prefix, filename)
                     )
                 )
