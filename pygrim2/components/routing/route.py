@@ -19,7 +19,7 @@ class RouteObject(object):
 
     def __init__(self, pattern, *args, **kwargs):
         super(RouteObject, self).__init__(*args, **kwargs)
-        self._pattern = fix_trailing_slash(pattern)
+        self.set_pattern(pattern)
 
     def get_pattern(self):
         return (
