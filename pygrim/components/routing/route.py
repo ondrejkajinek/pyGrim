@@ -15,7 +15,7 @@ class RouteObject(object):
 
     def __init__(self, pattern, *args, **kwargs):
         super(RouteObject, self).__init__(*args, **kwargs)
-        self._pattern = pattern
+        self.set_pattern(pattern)
 
     def get_pattern(self):
         return (
@@ -27,10 +27,17 @@ class RouteObject(object):
     def is_regex(self):
         return is_regex(self._pattern)
 
+    def set_pattern(self, pattern):
+        self._pattern = pattern
+
 
 class RouteGroup(RouteObject, list):
     def __init__(self, pattern, *args, **kwargs):
         super(RouteGroup, self).__init__(pattern, *args, **kwargs)
+
+    def set_pattern(self, pattern):
+        pattern = remove_trailing_slash(pattern)
+        super(RouteGroup, self).set_pattern(pattern)
 
 
 class Route(RouteObject):
@@ -56,6 +63,10 @@ class Route(RouteObject):
         ))
         self._name = name
 
+    def set_pattern(self, pattern):
+        pattern = fix_trailing_slash(pattern)
+        super(Route, self).set_pattern(pattern)
+
     def assign_method(self, method):
         self._handle = method
 
@@ -79,9 +90,6 @@ class Route(RouteObject):
 
     def requires_session(self):
         return getattr(self._handle, "_session", False)
-
-    def set_pattern(self, pattern):
-        self._pattern = fix_trailing_slash(pattern)
 
     def url_for(self, params):
         if self.is_regex():
