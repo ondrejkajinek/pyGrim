@@ -33,9 +33,7 @@ class BaseL10n(AbstractL10n):
         if language in self._translations:
             save_cookie = True
         else:
-            # TODO: this accesses cookies directly (context.get_cookies would
-            #       create shallow copy of cookies). However, this is ugly
-            language = context._request.cookies.get(self._lang_key)
+            language = context.get_cookie(self._lang_key)
             # fix for situation with multiple lang cookies
             if isinstance(language, list):
                 language = language[-1] if language else None
