@@ -15,7 +15,7 @@ class RouteObject(object):
 
     def __init__(self, pattern, *args, **kwargs):
         super(RouteObject, self).__init__(*args, **kwargs)
-        self._pattern = fix_trailing_slash(pattern)
+        self._pattern = pattern
 
     def get_pattern(self):
         return (
@@ -41,6 +41,7 @@ class Route(RouteObject):
 
     def __init__(self, methods, pattern, handle_name, name=None):
         super(Route, self).__init__(pattern)
+        self._pattern = fix_trailing_slash(self._pattern)
         # temporary
         # pyGrim will assign requested method on its postfork event
         self._handle = None
