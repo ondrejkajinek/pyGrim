@@ -53,6 +53,9 @@ class RouteGroup(RouteObject):
 
         return result
 
+    def set_pattern(self, pattern):
+        self._pattern = remove_trailing_slash(pattern)
+
     def _concat_pattern(self, other):
         full_pattern = "/".join((
             remove_trailing_slash(self.get_pattern()),
