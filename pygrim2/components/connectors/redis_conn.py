@@ -17,17 +17,16 @@ def connect_redis(config, section="session:args:"):
     """
 
     try:
-        import redis
+        from redis import StrictRedis
     except ImportError:
         log.exception("Cannot import python pyckage: redis")
-        return
-
-    return redis.StrictRedis(
-        host=config.get(section + "host"),
-        port=config.getint(section + "port", 6379),
-        db=config.getint(section + "database"),
-        password=config.get(section + "password", None)
-    )
+    else:
+        return StrictRedis(
+            host=config.get(section + "host"),
+            port=config.getint(section + "port", 6379),
+            db=config.getint(section + "database"),
+            password=config.get(section + "password", None)
+        )
 
 
 def connect_redis_sentinel(config, section="session:args:"):
