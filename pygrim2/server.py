@@ -329,7 +329,11 @@ class Server(object):
         for handler in self._matching_error_handlers(
             request_uri, getmro(exc.__class__)
         ):
-            handler(context=context, exc=exc)
+            try:
+                handler(context=context, exc=exc)
+            except RoutePassed:
+                continue
+
             log.debug(
                 "Error %r handled with %r.",
                 get_class_name(exc.__class__), get_method_name(handler)
