@@ -2,6 +2,7 @@
 
 # std
 from inspect import isgenerator
+from json import dumps as json_dumps
 from logging import getLogger
 
 # local
@@ -135,6 +136,17 @@ class Context(object):
 
     def delete_response_headers(self):
         self._response.headers = NormalizedDict()
+
+    def dump_request(self):
+        return json_dumps({
+            "environment": {
+                key: value
+                for key, value
+                in self._request.environment.iteritems()
+                if not (key.startswith("wsgi.") or key.startswith("uwsgi."))
+            },
+            "cookies": self._request.cookies
+        })
 
     def finalize_response(self):
         self._response.finalize(is_head=self.is_request_head())

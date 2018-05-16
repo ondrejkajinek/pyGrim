@@ -218,6 +218,12 @@ class Server(object):
         context.set_response_status(404)
         self._set_fallback_view(context)
 
+    def _dump_request(self, context):
+        log.error(
+            "Fatal error occured during request handling. Request details: %s",
+            context.dump_request()
+        )
+
     def _enhance_controller(self, controller, attr_name, attribute):
         try:
             attr = getattr(controller, attr_name)
@@ -313,12 +319,14 @@ class Server(object):
     def _handle_error(self, context, exc):
         try:
             self._handle_generic_error(context, exc)
+            self._dump_request(context)
         except StopDispatch:
             raise
         except BaseException:
             exc = exc_info()[1]
             try:
                 self._default_error_handler(context=context, exc=exc)
+                self._dump_request(context)
             except BaseException:
                 log.critical("Error in default_error_handler.")
                 log.exception("Error in default_error_handler.")
