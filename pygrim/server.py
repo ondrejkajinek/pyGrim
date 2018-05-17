@@ -202,6 +202,12 @@ class Server(object):
         context.set_response_body("Not found")
         context.set_response_status(404)
 
+    def _dump_request(self, context):
+        log.error(
+            "Error occured during request handling. Request details: %s",
+            context.dump_request()
+        )
+
     def _finalize_not_found_handlers(self):
         self._not_found_methods = tuple(
             (prefix, self._not_found_methods[prefix])
@@ -305,6 +311,7 @@ class Server(object):
             self._error_method(context=context, exc=exc)
             raise DispatchFinished()
         except DispatchFinished:
+            self._dump_request(context)
             return
         except:
             exc = exc_info()[1]
@@ -312,6 +319,7 @@ class Server(object):
         try:
             self._default_error_method(context=context, exc=exc)
         except DispatchFinished:
+            self._dump_request(context)
             return
         except:
             log.critical("Error in default_error_method.")

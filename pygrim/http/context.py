@@ -1,5 +1,7 @@
 # coding: utf8
 
+from json import dumps as json_dumps
+
 from .grim_dicts import ImmutableDict
 from ..components.formater import Formater
 from ..components.jinja_ext.i18n import I18NExtension, Undefined
@@ -120,6 +122,17 @@ class Context(object):
                 "secure": secure,
                 "value": None
             }
+
+    def dump_request(self):
+        return json_dumps({
+            "environment": {
+                key: value
+                for key, value
+                in self._request.environment.iteritems()
+                if not (key.startswith("wsgi.") or key.startswith("uwsgi."))
+            },
+            "cookies": self._request.cookies
+        })
 
     def finalize_response(self):
         self._response.finalize()
