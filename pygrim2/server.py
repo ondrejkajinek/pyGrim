@@ -346,6 +346,9 @@ class Server(object):
                 "Error %r handled with %r.",
                 get_class_name(exc.__class__), get_method_name(handler)
             )
+            if getattr(handler, "_save_session", False):
+                context.set_save_session(True)
+
             break
 
     def _handle_not_found(self, context, exc):
@@ -379,6 +382,7 @@ class Server(object):
                     context.current_route.get_handle_name()
                 )
                 context.current_route = NoRoute()
+                context.set_save_session(False)
                 self._handle_error(context=context, exc=exc_info()[1])
             except StopDispatch:
                 pass
@@ -553,10 +557,7 @@ class Server(object):
                     yield " " * int(value)
                     break
         else:
-            # We want to save session only when request was handled with
-            # route handle -- current_route is set
-            if context.current_route and context.session_loaded():
-                context.save_session()
+            context.save_session()
 
     def _set_dump_view(self, context):
         context.set_response_content_type("application/json")

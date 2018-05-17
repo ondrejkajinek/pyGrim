@@ -60,6 +60,7 @@ class Router(AbstractRouter):
         else:
             context.current_route = NoRoute()
             context.set_route_params()
+            context.set_save_session(False)
 
     def pop_group(self):
         try:

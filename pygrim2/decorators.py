@@ -54,7 +54,9 @@ class error_handler(BaseDecorator):
     Such method is used when error occurs during request handling.
     """
 
-    def __init__(self, errors=None, path=None, *args, **kwargs):
+    def __init__(
+        self, errors=None, path=None, save_session=False, *args, **kwargs
+    ):
         errors = ensure_tuple(errors or (BaseException,))
         paths = path or ("", )
         self._error_status = kwargs.pop("status", 500)
@@ -67,6 +69,7 @@ class error_handler(BaseDecorator):
         super(error_handler, self).__init__(*args, **kwargs)
         self.error_classes = errors
         self.paths = ensure_tuple(paths)
+        self._save_session = save_session
 
     def pre_call(self, fun, args, kwargs):
         kwargs.get("context").set_response_status(self._error_status)
@@ -75,6 +78,7 @@ class error_handler(BaseDecorator):
     def prepare_func(self, func):
         func._errors = self.error_classes
         func._paths = self.paths
+        func._save_session = self._save_session
         super(error_handler, self).prepare_func(func)
 
 

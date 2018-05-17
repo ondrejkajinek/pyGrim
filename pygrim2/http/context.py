@@ -31,6 +31,7 @@ class Context(object):
         self._request = request
         self._response = response
         self._session_handler = session_handler
+        super(Context, self).__setattr__("_save_session", False)
         super(Context, self).__setattr__("_session_loaded", False)
         self._suppress_port = config.getbool("context:suppress_port", False)
         self._uses_flash = config.getbool("session:flash", True)
@@ -54,7 +55,7 @@ class Context(object):
         raise AttributeError(key)
 
     def __setattr__(self, key, value):
-        if key in ("_can_create_session", "_session_loaded"):
+        if key in ("_can_create_session", "_session_loaded", "_save_session"):
             raise RuntimeError("%r is read-only!" % key)
 
         super(Context, self).__setattr__(key, value)
@@ -249,6 +250,7 @@ class Context(object):
         if self._session_loaded is False:
             self.session = self._session_handler.load(self._request)
             super(Context, self).__setattr__("_session_loaded", True)
+            super(Context, self).__setattr__("_save_session", True)
             self.add_cookie(**self._session_handler.cookie_for(self.session))
             log.debug(
                 "Session handler: %r loaded session: %r",
@@ -263,7 +265,8 @@ class Context(object):
         raise StopDispatch()
 
     def save_session(self):
-        self._session_handler.save(self.session)
+        if self._session_loaded and self._save_session:
+            self._session_handler.save(self.session)
 
     def session_loaded(self):
         return self._session_loaded
@@ -272,6 +275,9 @@ class Context(object):
         if self._check_language(language):
             self._language = language
             self._save_language_cookie()
+
+    def set_save_session(self, save):
+        super(Context, self).__setattr__("_save_session", save)
 
     def set_temp_language(self, language):
         if self._check_language(language):
