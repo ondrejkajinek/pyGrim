@@ -418,8 +418,8 @@ class Server(object):
 
         try:
             view = self._views[context.get_view()]
-        except KeyError:
-            raise UnknownView(context.get_view())
+        except KeyError as unknown_view:
+            raise UnknownView(unknown_view)
         else:
             view.use_translation(self._l10n.get(context.get_language()))
 
