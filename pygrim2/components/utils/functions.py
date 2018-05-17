@@ -55,7 +55,11 @@ def ensure_tuple(variable):
 
 
 def fix_trailing_slash(pattern):
-    return _replace_trailing_slash(pattern, "/?$")
+    return (
+        re_compile(TRAILING_SLASH_REGEXP.sub("/?$", pattern.pattern))
+        if is_regex(pattern)
+        else pattern.rstrip("/") or "/"
+    )
 
 
 def get_instance_name(instance):
@@ -75,7 +79,11 @@ def is_regex(pattern):
 
 
 def remove_trailing_slash(pattern):
-    return _replace_trailing_slash(pattern, "")
+    return (
+        re_compile(TRAILING_SLASH_REGEXP.sub("", pattern.pattern))
+        if is_regex(pattern)
+        else TRAILING_SLASH_REGEXP.sub("", pattern)
+    )
 
 
 def split_to_iterable(value, separator=","):
@@ -92,12 +100,4 @@ def strip_accent(text):
 
     return "".join(
         c for c in unicodedata_normalize("NFKD", text) if ord(c) < 127
-    )
-
-
-def _replace_trailing_slash(pattern, replacer):
-    return (
-        re_compile(TRAILING_SLASH_REGEXP.sub(replacer, pattern.pattern))
-        if is_regex(pattern)
-        else pattern.rstrip("/") or "/"
     )
