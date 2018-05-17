@@ -343,6 +343,8 @@ class Server(object):
                             self.load_session(context)
                         try:
                             handle(context=context)
+                        except RoutePassed:
+                            continue
                         except DispatchFinished:
                             pass
                         if context.session_loaded():
