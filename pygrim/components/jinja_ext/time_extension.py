@@ -1,5 +1,6 @@
 # coding: utf8
 
+from __future__ import unicode_literals
 from datetime import date, datetime, timedelta, time
 from dateutil.parser import parse as parse_dt
 from jinja2.ext import Extension
@@ -113,7 +114,7 @@ class TimeExtension(Extension):
         if locale not in months:
             return self.date_format(source_date, 'LLLL', locale)
         else:
-            return months[locale][case - 1][number][source_date.month]
+            return months[locale][case - 1][number][source_date.month - 1]
 
     def _get_filters(self):
         return {
