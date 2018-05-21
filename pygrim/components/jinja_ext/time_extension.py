@@ -12,9 +12,35 @@ DTS = (
 )
 DTT = type(time.min)
 
+months = {
+    "cs": [
+        {
+            'singular': ['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'],
+            'plural': ['Ledny', 'Únory', 'Březny', 'Dubny', 'Květny', 'Červny', 'Července', 'Srpny', 'Září', 'Říjny', 'Listopady', 'Prosince']
+        }, {
+            'singular': ['Ledna', 'Února', 'Března', 'Dubna', 'Května', 'Června', 'Července', 'Srpna', 'Září', 'Října', 'Listopadu', 'Prosince'],
+            'plural': ['Lednů', 'Únorů', 'Březnů', 'Dubnů', 'Květnů', 'Červnů', 'Červenců', 'Srpnů', 'Září', 'Říjnů', 'Listopadů', 'Prosinců']
+        }, {
+            'singular': ['Lednu', 'Únoru', 'Březnu', 'Dubnu', 'Květnu', 'Červnu', 'Červenci', 'Srpnu', 'Září', 'Říjnu', 'Listopadu', 'Prosinci'],
+            'plural': ['Lednům', 'Únorům', 'Březnům', 'Dubnům', 'Květnům', 'Červnům', 'Červencům', 'Srpnům', 'Zářím', 'Říjnům', 'Listopadům', 'Prosincům']
+        }, {
+            'singular': ['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'],
+            'plural': ['Ledny', 'Únory', 'Březny', 'Dubny', 'Květny', 'Červny', 'Července', 'Srpny', 'Září', 'Říjny', 'Listopady', 'Prosince']
+        }, {
+            'singular': ['Ledne', 'Únore', 'Březne', 'Dubne', 'Květne', 'Červne', 'Červenci', 'Srpne', 'Září', 'Říjne', 'Listopade', 'Prosinci'],
+            'plural': ['Ledny', 'Únory', 'Březny', 'Dubny', 'Květny', 'Červny', 'Července', 'Srpny', 'Září', 'Říjny', 'Listopady', 'Prosince']
+        }, {
+            'singular': ['Lednu', 'Únoru', 'Březnu', 'Dubnu', 'Květnu', 'Červnu', 'Červenci', 'Srpnu', 'Září', 'Říjnu', 'Listopadu', 'Prosinci'],
+            'plural': ['Lednech', 'Únorech', 'Březnech', 'Dubnech', 'Květnech', 'Červnech', 'Červencích', 'Srpnech', 'Zářích', 'Říjnech', 'Listopadech', 'Prosincích']
+        }, {
+            'singular': ['Lednem', 'Únorem', 'Březnem', 'Dubnem', 'Květnem', 'Červnem', 'Červencem', 'Srpnem', 'Zářím', 'Říjnem', 'Listopadem', 'Prosincem'],
+            'plural': ['Ledny', 'Únory', 'Březny', 'Dubny', 'Květny', 'Červny', 'Červenci', 'Srpny', 'Zářími', 'Říjny', 'Listopady', 'Prosinci']
+        }
+    ]
+}
+
 
 class TimeExtension(Extension):
-
     tags = set()
 
     def __init__(self, environment):
@@ -83,55 +109,11 @@ class TimeExtension(Extension):
         else:
             return strftime("%H:%M:%S", gmtime(seconds))
 
-    def month_name(self, source, format_str, month, case, number, locale):
-        if locale != 'cs':
-            return self.date_format(source, format_str, locale)
+    def month_name(self, case, locale, number, source_date):
+        if locale not in months:
+            return self.date_format(source_date, 'LLLL', locale)
         else:
-            months = {
-                1: {
-                    'cs': {
-                        'singular': ['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'],
-                        'plural': ['Ledny', 'Únory', 'Březny', 'Dubny', 'Květny', 'Červny', 'Července', 'Srpny', 'Září', 'Říjny', 'Listopady', 'Prosince']
-                    }
-                },
-                2: {
-                    'cs': {
-                        'singular': ['Ledna', 'Února', 'Března', 'Dubna', 'Května', 'Června', 'Července', 'Srpna', 'Září', 'Října', 'Listopadu', 'Prosince'],
-                        'plural': ['Lednů', 'Únorů', 'Březnů', 'Dubnů', 'Květnů', 'Červnů', 'Červenců', 'Srpnů', 'Září', 'Říjnů', 'Listopadů', 'Prosinců']
-                    }
-                },
-                3: {
-                    'cs': {
-                        'singular': ['Lednu', 'Únoru', 'Březnu', 'Dubnu', 'Květnu', 'Červnu', 'Červenci', 'Srpnu', 'Září', 'Říjnu', 'Listopadu', 'Prosinci'],
-                        'plural': ['Lednům', 'Únorům', 'Březnům', 'Dubnům', 'Květnům', 'Červnům', 'Červencům', 'Srpnům', 'Zářím', 'Říjnům', 'Listopadům', 'Prosincům']
-                    }
-                },
-                4: {
-                    'cs': {
-                        'singular': ['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'],
-                        'plural': ['Ledny', 'Únory', 'Březny', 'Dubny', 'Květny', 'Červny', 'Července', 'Srpny', 'Září', 'Říjny', 'Listopady', 'Prosince']
-                    }
-                },
-                5: {
-                    'cs': {
-                        'singular': ['Ledne', 'Únore', 'Březne', 'Dubne', 'Květne', 'Červne', 'Červenci', 'Srpne', 'Září', 'Říjne', 'Listopade', 'Prosinci'],
-                        'plural': ['Ledny', 'Únory', 'Březny', 'Dubny', 'Květny', 'Červny', 'Července', 'Srpny', 'Září', 'Říjny', 'Listopady', 'Prosince']
-                    }
-                },
-                6: {
-                    'cs': {
-                        'singular': ['Lednu', 'Únoru', 'Březnu', 'Dubnu', 'Květnu', 'Červnu', 'Červenci', 'Srpnu', 'Září', 'Říjnu', 'Listopadu', 'Prosinci'],
-                        'plural': ['Lednech', 'Únorech', 'Březnech', 'Dubnech', 'Květnech', 'Červnech', 'Červencích', 'Srpnech', 'Zářích', 'Říjnech', 'Listopadech', 'Prosincích']
-                    }
-                },
-                7: {
-                    'cs': {
-                        'singular': ['Lednem', 'Únorem', 'Březnem', 'Dubnem', 'Květnem', 'Červnem', 'Červencem', 'Srpnem', 'Zářím', 'Říjnem', 'Listopadem', 'Prosincem'],
-                        'plural': ['Ledny', 'Únory', 'Březny', 'Dubny', 'Květny', 'Červny', 'Červenci', 'Srpny', 'Zářími', 'Říjny', 'Listopady', 'Prosinci']
-                    }
-                }
-            }
-            return months[case][locale][number][month]
+            return months[locale][case - 1][number][source_date.month]
 
     def _get_filters(self):
         return {
