@@ -73,10 +73,7 @@ class TimeExtension(Extension):
         else:
             return None
 
-        if locale:
-            return self.formater.format_date(obj, format_str, locale=locale)
-        else:
-            return obj.strftime(format_str).decode('utf-8')
+        return self._format_datetime(obj, format_str, locale)
 
     def date_now(self):
         return date.today()
@@ -97,10 +94,7 @@ class TimeExtension(Extension):
         else:
             return None
 
-        if locale:
-            return self.formater.format_time(obj, format_str, locale=locale)
-        else:
-            return obj.strftime(format_str).decode('utf-8')
+        return self._format_datetime(obj, format_str, locale)
 
     def time_from_seconds(self, seconds, locale=None):
         if locale:
@@ -115,6 +109,19 @@ class TimeExtension(Extension):
             return self.date_format(source_date, 'LLLL', locale)
         else:
             return months[locale][case - 1][number][source_date.month - 1]
+
+    def _format_datetime(self, obj, format_str, locale):
+        try:
+            # will raise if obj.year < 1900
+            formatted = (
+                self.formater.format_date(obj, format_str, locale=locale)
+                if locale
+                else obj.strftime(format_str).decode('utf-8')
+            )
+        except ValueError:
+            formatted = None
+
+        return formatted
 
     def _get_filters(self):
         return {
