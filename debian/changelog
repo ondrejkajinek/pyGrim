@@ -1,3 +1,17 @@
+pygrim (0.2.11) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * fix pozice mesice + unicode
+  * up lokalizace mesicu
+  * lokalizace mesicu
+  * RoutePassed can be used in error handler to move to another error
+    handler
+  * When error occurs during request handling, request is logged
+  * fix constructing url pattern for groups vit regex
+  * minor refactor
+
+ -- Jakub Červený <root@kubac>  Mon, 21 May 2018 15:36:17 +0200
+
 pygrim (0.2.10) testing; urgency=medium
 
   * COMMIT MESSASGES

@@ -82,6 +82,9 @@ class BaseExtension(Extension):
         )
 
     def safe_title(self, text):
+        if not isinstance(text, basestring):
+            text = str(text)
+
         res = "".join(
             c
             for c

@@ -1,5 +1,6 @@
 # coding: utf8
 
+from __future__ import unicode_literals
 from datetime import date, datetime, timedelta, time
 from dateutil.parser import parse as parse_dt
 from jinja2.ext import Extension
@@ -12,9 +13,35 @@ DTS = (
 )
 DTT = type(time.min)
 
+months = {
+    "cs": [
+        {
+            'singular': ['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'],
+            'plural': ['Ledny', 'Únory', 'Březny', 'Dubny', 'Květny', 'Červny', 'Července', 'Srpny', 'Září', 'Říjny', 'Listopady', 'Prosince']
+        }, {
+            'singular': ['Ledna', 'Února', 'Března', 'Dubna', 'Května', 'Června', 'Července', 'Srpna', 'Září', 'Října', 'Listopadu', 'Prosince'],
+            'plural': ['Lednů', 'Únorů', 'Březnů', 'Dubnů', 'Květnů', 'Červnů', 'Červenců', 'Srpnů', 'Září', 'Říjnů', 'Listopadů', 'Prosinců']
+        }, {
+            'singular': ['Lednu', 'Únoru', 'Březnu', 'Dubnu', 'Květnu', 'Červnu', 'Červenci', 'Srpnu', 'Září', 'Říjnu', 'Listopadu', 'Prosinci'],
+            'plural': ['Lednům', 'Únorům', 'Březnům', 'Dubnům', 'Květnům', 'Červnům', 'Červencům', 'Srpnům', 'Zářím', 'Říjnům', 'Listopadům', 'Prosincům']
+        }, {
+            'singular': ['Leden', 'Únor', 'Březen', 'Duben', 'Květen', 'Červen', 'Červenec', 'Srpen', 'Září', 'Říjen', 'Listopad', 'Prosinec'],
+            'plural': ['Ledny', 'Únory', 'Březny', 'Dubny', 'Květny', 'Červny', 'Července', 'Srpny', 'Září', 'Říjny', 'Listopady', 'Prosince']
+        }, {
+            'singular': ['Ledne', 'Únore', 'Březne', 'Dubne', 'Květne', 'Červne', 'Červenci', 'Srpne', 'Září', 'Říjne', 'Listopade', 'Prosinci'],
+            'plural': ['Ledny', 'Únory', 'Březny', 'Dubny', 'Květny', 'Červny', 'Července', 'Srpny', 'Září', 'Říjny', 'Listopady', 'Prosince']
+        }, {
+            'singular': ['Lednu', 'Únoru', 'Březnu', 'Dubnu', 'Květnu', 'Červnu', 'Červenci', 'Srpnu', 'Září', 'Říjnu', 'Listopadu', 'Prosinci'],
+            'plural': ['Lednech', 'Únorech', 'Březnech', 'Dubnech', 'Květnech', 'Červnech', 'Červencích', 'Srpnech', 'Zářích', 'Říjnech', 'Listopadech', 'Prosincích']
+        }, {
+            'singular': ['Lednem', 'Únorem', 'Březnem', 'Dubnem', 'Květnem', 'Červnem', 'Červencem', 'Srpnem', 'Zářím', 'Říjnem', 'Listopadem', 'Prosincem'],
+            'plural': ['Ledny', 'Únory', 'Březny', 'Dubny', 'Květny', 'Červny', 'Červenci', 'Srpny', 'Zářími', 'Říjny', 'Listopady', 'Prosinci']
+        }
+    ]
+}
+
 
 class TimeExtension(Extension):
-
     tags = set()
 
     def __init__(self, environment):
@@ -83,6 +110,12 @@ class TimeExtension(Extension):
         else:
             return strftime("%H:%M:%S", gmtime(seconds))
 
+    def month_name(self, case, locale, number, source_date):
+        if locale not in months:
+            return self.date_format(source_date, 'LLLL', locale)
+        else:
+            return months[locale][case - 1][number][source_date.month - 1]
+
     def _get_filters(self):
         return {
             "as_date": self.as_date,
@@ -95,5 +128,6 @@ class TimeExtension(Extension):
     def _get_functions(self):
         return {
             "date_now": self.date_now,
-            "datetime_now": self.datetime_now
+            "datetime_now": self.datetime_now,
+            "month_name": self.month_name
         }
