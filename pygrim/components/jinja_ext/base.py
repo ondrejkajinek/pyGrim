@@ -15,7 +15,7 @@ class BaseExtension(Extension):
 
     DASH_SQUEEZER = re_compile("r/-{2,}")
     SEO_DASHED = (" ", "/", "\\", ":")
-    SEO_REMOVED = ("*", "?", "\"", "<", ">", "|", ",")
+    SEO_REMOVED = ("*", "?", "\"", "<", ">", "|", ",", "%")
     IEC_SIZE_PREFIXES = ("", "ki", "Mi", "Gi", "Ti")
     SI_SIZE_PREFIXES = ("", "k", "M", "G", "T")
 
