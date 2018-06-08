@@ -1,3 +1,13 @@
+pygrim (0.2.12) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * added percent to be removed from seo -> IE and Edge refuses to use
+    such link
+  * Fix for safe_title jinja filter: non-string data are casted to
+    string
+
+ -- Václav Pokluda <root@darky>  Fri, 08 Jun 2018 11:49:15 +0200
+
 pygrim (0.2.11) testing; urgency=medium
 
   * COMMIT MESSASGES
