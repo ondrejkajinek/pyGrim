@@ -4,6 +4,7 @@ from ..formater import Formater
 from ..utils.functions import strip_accent
 from ..utils.json2 import dumps as json_dumps
 from jinja2.ext import Extension, Markup
+from jinja2.runtime import Undefined
 from logging import getLogger
 from re import compile as re_compile
 from textwrap import wrap
@@ -161,6 +162,9 @@ class BaseExtension(Extension):
         }
 
     def _readable_size(self, size, precision, multiple, prefixes):
+        if not size:
+            return Undefined()
+
         index = 0
         while size >= multiple:
             size /= multiple
