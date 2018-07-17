@@ -563,20 +563,30 @@ class Server(object):
             in css_list
         ))
 
-    def _jinja_print_js(self, js_list, sync=True, **kwargs):
-        return Markup("\n".join(
-            """<script %ssrc="%s" %s></script>""" % (
-                "" if sync else "async ",
-                self._versioned_file(js),
-                " ".join(
-                    """%s="%s\"""" % (key, value)
-                    for key, value
-                    in kwargs.iteritems()
-                )
+    def _jinja_print_js(self, js_list, sync=True, *args, **kwargs):
+        if sync is False:
+            log.warning(
+                "print_js parameter sync is deprecated. "
+                "If you need async JS, call 'print_js(js_list, \"async\")' "
+                "instead.\n"
+                "In some future release, sync parameter will be removed."
             )
-            for js
-            in js_list
-        ))
+            args += ("async",)
+        elif sync == "async":
+            args += ("async",)
+
+        scripts = []
+        for js in js_list:
+            attrs = ("src=\"%s\"" % (self._versioned_file(js),),)
+            attrs += args
+            attrs += tuple(
+                """%s="%s\"""" % (key, value)
+                for key, value
+                in kwargs.iteritems()
+            )
+            scripts.append("<script %s></script>" % (" ".join(attrs),))
+
+        return Markup("\n".join(scripts))
 
     def _jinja_static_file(self, filename, prefixes):
         if isinstance(filename, basestring):
