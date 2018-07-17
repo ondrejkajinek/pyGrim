@@ -49,22 +49,34 @@ start_log = getLogger("pygrim_start.server")
 log = getLogger("pygrim.server")
 
 
-def register_session_handler(name, cls):
-    if name in Server.KNOWN_SESSION_HANDLERS:
+def _register_component_type(name, cls, server_attr_name, component_name):
+    server_attr = getattr(Server, server_attr_name)
+    # TODO: what is faster, if name in server_attr, or try-except
+    #       name collision is not happening in production env.
+    if name in server_attr:
         raise ComponentTypeAlreadyRegistered(
-            "SessionHandler", name, Server.KNOWN_SESSION_HANDLERS[name]
+            component_name, name, server_attr[name]
         )
 
-    Server.KNOWN_SESSION_HANDLERS[name] = cls
+    server_attr[name] = cls
+
+
+def register_config_format(name, cls):
+    _register_component_type(name, cls, "Config", "KNOWN_CONFIG_FORMATS")
+
+
+def register_l10n_class(name, cls):
+    _register_component_type(name, cls, "L10n", "KNONW_L10N_CLASSES")
+
+
+def register_session_handler(name, cls):
+    _register_component_type(
+        name, cls, "SessionHandler", "KNOWN_SESSION_HANDLERS"
+    )
 
 
 def register_view_class(name, cls):
-    if name in Server.KNOWN_VIEW_CLASSES:
-        raise ComponentTypeAlreadyRegistered(
-            "View", name, Server.KNOWN_VIEW_CLASSES[name]
-        )
-
-    Server.KNOWN_VIEW_CLASSES[name] = cls
+    _register_component_type(name, cls, "View", "KNOWN_VIEW_CLASSES")
 
 
 class ResponseWrap(object):
