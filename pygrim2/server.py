@@ -684,20 +684,30 @@ class Server(object):
             in css_list
         ))
 
-    def _view_print_js(self, js_list, sync=True, **kwargs):
-        return Markup("\n".join(
-            """<script src="%s"%s %s></script>""" % (
-                self._versioned_file(js),
-                "" if sync else " async",
-                " ".join(
-                    """%s="%s\"""" % (key, value)
-                    for key, value
-                    in kwargs.iteritems()
-                )
+    def _view_print_js(self, js_list, sync=True, *args, **kwargs):
+        if sync is False:
+            log.warning(
+                "print_js parameter sync is deprecated. "
+                "If you need async JS, call 'print_js(js_list, \"async\")' "
+                "instead.\n"
+                "In some future release, sync parameter will be removed."
             )
-            for js
-            in js_list
-        ))
+            args += ("async",)
+        elif sync == "async":
+            args += ("async",)
+
+        scripts = []
+        for js in js_list:
+            attrs = ("src=\"%s\"" % (self._versioned_file(js),),)
+            attrs += args
+            attrs += tuple(
+                """%s="%s\"""" % (key, value)
+                for key, value
+                in kwargs.iteritems()
+            )
+            scripts.append("<script %s></script>" % (" ".join(attrs),))
+
+        return Markup("\n".join(scripts))
 
     def _view_static_file(self, filename, prefixes):
         filename = filename.lstrip("/")
