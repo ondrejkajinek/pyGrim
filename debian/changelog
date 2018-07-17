@@ -1,3 +1,16 @@
+pygrim (0.2.13) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * fix of a typo
+  * Improved logging of registered route handles during startup
+  * Improved print_js function -- now accepts attrs without value (e.g.,
+    defer, async) as args
+  * readable_size returns Undefined() when no size is given
+  * #44095: fix for datetime formatting functions: years < 1900 will
+    cause ValueError
+
+ -- OndraK <root@ondrak>  Tue, 17 Jul 2018 12:13:06 +0200
+
 pygrim (0.2.12) testing; urgency=medium
 
   * COMMIT MESSASGES
