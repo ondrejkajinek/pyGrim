@@ -13,7 +13,7 @@ from .components.session import (
     DummySession, FileSessionStorage, RedisSessionStorage,
     RedisSentinelSessionStorage, SessionStorage
 )
-from .components.utils import ensure_tuple, get_class_name
+from .components.utils import ensure_tuple, get_class_name, get_method_name
 from .components.utils import remove_trailing_slash
 from .components.view import AbstractView, DummyView, JinjaView
 from .http import Context, Request, Response
@@ -230,6 +230,11 @@ class Server(object):
                 )
             else:
                 route.assign_method(method)
+                log.debug(
+                    "Method '%s' registered to handle route '%s'",
+                    get_method_name(method),
+                    route.get_pattern()
+                )
 
     def _find_config_class(self):
         for key in self.KNOWN_CONFIG_FORMATS:
@@ -434,7 +439,6 @@ class Server(object):
         self._error_method = method
 
     def _process_exposed_method(self, method):
-        log.debug("Method %r exposed as route handler", method)
         self._methods[method._dispatch_name] = method
 
         for prefix in getattr(method, "_not_found", ()):
