@@ -74,7 +74,7 @@ class method(BaseDecorator):
 class error_handler(method):
     """
     Marks method as an error handler for specific exception.
-    Can only catch exceptions derived from BaseExcepition.
+    Can only catch exceptions derived from BaseException.
     Such method is used when error occurs during request handling.
     Also exposes method, see method decorator.
     """
