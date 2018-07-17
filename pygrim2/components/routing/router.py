@@ -5,6 +5,7 @@ from re import compile as re_compile
 
 # local
 from .abstract_router import AbstractRouter
+from .exceptions import PatternAlreadyExists
 from .exceptions import RouteAlreadyExists, RouteNotRegistered
 from .route import NoRoute, Route, RouteGroup
 
@@ -36,6 +37,10 @@ class Router(AbstractRouter):
                 if route.is_regular() or self._is_group_regular()
                 else full_pattern
             )
+
+            if any(filter(lambda existing: existing == route, self._routes)):
+                raise PatternAlreadyExists(full_pattern)
+
             specificity = route.specificity()
             index = next(
                 (
