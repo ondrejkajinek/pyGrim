@@ -19,7 +19,7 @@ class BaseExtension(Extension):
 
     DASH_SQUEEZER = re_compile("r/-{2,}")
     SEO_DASHED = (" ", "/", "\\", ":")
-    SEO_REMOVED = ("*", "?", "\"", "<", ">", "|", ",")
+    SEO_REMOVED = ("*", "?", "\"", "<", ">", "|", ",", "%")
     IEC_SIZE_PREFIXES = ("", "ki", "Mi", "Gi", "Ti")
     SI_SIZE_PREFIXES = ("", "k", "M", "G", "T")
 
@@ -76,7 +76,7 @@ class BaseExtension(Extension):
         return self.DASH_SQUEEZER.sub(
             replace_char,
             self._seo_dashize(
-                self._seo_remove(strip_accent(text), replace_char),
+                self._seo_remove(strip_accent(text).lower()),
                 replace_char
             )
         )
@@ -125,7 +125,7 @@ class BaseExtension(Extension):
         return self._seo_replace(text, self.SEO_DASHED, replace_char)
 
     def _seo_remove(self, text, replace_char):
-        return self._seo_replace(text, self.SEO_REMOVED, replace_char)
+        return self._seo_replace(text, self.SEO_REMOVED, "")
 
     def _seo_replace(self, text, changed, replacement):
         return "".join(replacement if c in changed else c for c in text or "")
