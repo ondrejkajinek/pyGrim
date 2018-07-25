@@ -433,8 +433,6 @@ class Server(object):
         except KeyError as unknown_view:
             raise UnknownView(unknown_view)
         else:
-            view.use_translation(self._l10n.get(context.get_language()))
-
             try:
                 view.display(context)
             except BaseException:
@@ -524,7 +522,8 @@ class Server(object):
                 "print_css": self._view_print_css,
                 "print_js": self._view_print_js,
                 "url_for": self._view_url_for,
-            }
+            },
+            "l10n": self._l10n
         }
         self._views = {}
         for view_name, view_class in self._find_view_classes():
