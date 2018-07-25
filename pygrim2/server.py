@@ -526,9 +526,6 @@ class Server(object):
                 "url_for": self._view_url_for,
             }
         }
-        if self.config.getbool("pygrim:l10n", False):
-            view_kwargs["translations"] = self._l10n.translations()
-
         self._views = {}
         for view_name, view_class in self._find_view_classes():
             view = view_class(self.config, **view_kwargs)

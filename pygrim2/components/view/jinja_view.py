@@ -26,7 +26,7 @@ _suppress_none.contextfunction = True
 
 class JinjaView(BaseView):
 
-    def __init__(self, config, extra_functions, translations=None, **kwargs):
+    def __init__(self, config, extra_functions, **kwargs):
         self._debug = config.getbool("jinja:debug", False)
         self._env = Environment(
             extensions=self._get_extensions(config),
@@ -44,8 +44,6 @@ class JinjaView(BaseView):
             ),
             auto_reload=config.getbool("jinja:environment:auto_reload", True),
         )
-        self._translations = translations or {}
-
         self._env.globals.update(extra_functions)
         if config.get("jinja:suppress_none", True):
             self._env.finalize = _suppress_none
