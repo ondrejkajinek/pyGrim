@@ -1,3 +1,11 @@
+pygrim (0.2.14) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * seo filter fixed to return anything if nothing remains after
+    replaces
+
+ -- Václav Pokluda <root@darky>  Thu, 30 Aug 2018 07:48:21 +0200
+
 pygrim (0.2.13) testing; urgency=medium
 
   * COMMIT MESSASGES
