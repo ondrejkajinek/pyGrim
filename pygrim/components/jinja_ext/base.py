@@ -95,13 +95,16 @@ class BaseExtension(Extension):
         return res or "_"
 
     def seo(self, text, replace_char="-"):
-        return self.DASH_SQUEEZER.sub(
+        ret = self.DASH_SQUEEZER.sub(
             replace_char,
             self._seo_dashize(
                 self._seo_remove(strip_accent(text).lower()),
                 replace_char
             )
         )
+        if not ret and replace_char:
+            ret = replace_char
+        return ret
 
     def split_to_length(self, value, length):
         if not value:
