@@ -605,7 +605,7 @@ class Server(object):
                     (
                         path.join(dir_pfx, static_relpath)
                         for dir_pfx, static_relpath in self._static_file_info(
-                            pah.join(prefix, filename) if prefix else filename
+                            path.join(prefix, filename) if prefix else filename
                         )
                     ),
                     None
