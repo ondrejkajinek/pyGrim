@@ -1,3 +1,10 @@
+pygrim (0.2.15) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * static file exists jinja function addeded
+
+ -- Václav Pokluda <root@darky>  Mon, 24 Sep 2018 07:53:26 +0200
+
 pygrim (0.2.14) testing; urgency=medium
 
   * COMMIT MESSASGES
