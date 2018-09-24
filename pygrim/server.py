@@ -490,6 +490,7 @@ class Server(object):
                 "print_css": self._jinja_print_css,
                 "print_js": self._jinja_print_js,
                 "static_file": self._jinja_static_file,
+                "static_file_exists": self._jinja_static_file_exists,
                 "url_for": self._jinja_url_for,
             }
         }
@@ -604,7 +605,7 @@ class Server(object):
                     (
                         path.join(dir_pfx, static_relpath)
                         for dir_pfx, static_relpath in self._static_file_info(
-                            path.join(prefix, filename)
+                            pah.join(prefix, filename) if prefix else filename
                         )
                     ),
                     None
@@ -626,6 +627,32 @@ class Server(object):
                 file_path = ""
 
         return file_path
+
+    def _jinja_static_file_exists(self, filename, prefixes=None):
+        if isinstance(filename, basestring):
+            filenames = [filename]
+        else:
+            filenames = filename
+        if prefixes is None:
+            prefixes = ("",)
+        for prefix in prefixes:
+            prefix = prefix or "/"
+            for filename in filenames:
+                filename = filename.lstrip("/")
+                file_path = next(
+                    (
+                        path.join(dir_pfx, static_relpath)
+                        for dir_pfx, static_relpath in self._static_file_info(
+                            path.join(prefix, filename)
+                        )
+                    ),
+                    None
+                )
+                if file_path:
+                    break
+            if file_path:
+                break
+        return bool(file_path)
 
     def _jinja_url_for(self, route, params=None):
         params = params or {}
