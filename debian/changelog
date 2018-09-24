@@ -1,3 +1,10 @@
+pygrim (0.2.16) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * bugfix
+
+ -- Václav Pokluda <root@darky>  Mon, 24 Sep 2018 11:54:45 +0200
+
 pygrim (0.2.15) testing; urgency=medium
 
   * COMMIT MESSASGES
