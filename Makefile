@@ -38,13 +38,18 @@ buildDeb: runGit
 	cd build/${PACKAGE_NAME}-${VERSION} && \
 		$(ENV) debuild -us -uc
 
-
 deb: pkg
-	scp build/${FULL_PKG_NAME} debian.ats:${PACKAGES_REMOTE_DIR} && \
-		ssh aptly@debian.ats bash pkg-to-testing ${PACKAGES_REMOTE_DIR}${FULL_PKG_NAME} jessie && \
-		git push
 
-debtest: deb
+debtest: debtest-jessie debtest-stretch
+	git push
+
+debtest-jessie: deb
+	scp build/${FULL_PKG_NAME} debian.ats:${PACKAGES_REMOTE_DIR} \
+	&& ssh aptly@debian.ats bash pkg-to-testing ${PACKAGES_REMOTE_DIR}${FULL_PKG_NAME} jessie
+
+debtest-stretch: deb
+	scp build/${FULL_PKG_NAME} debian.ats:${PACKAGES_REMOTE_DIR} \
+	&& ssh aptly@debian.ats bash pkg-to-testing ${PACKAGES_REMOTE_DIR}${FULL_PKG_NAME} stretch
 
 clean:
 	rm -rf dist
