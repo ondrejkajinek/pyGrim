@@ -15,9 +15,11 @@ class PatternAlreadyExists(BaseRoutingException):
 
 class RouteAlreadyExists(BaseRoutingException):
 
-    def __init__(self, name):
+    def __init__(self, route):
         super(RouteAlreadyExists, self).__init__(
-            "Named route %r already exists." % name
+            "Named route %r (pattern %r) already exists." % (
+                route.get_name(), route.get_pattern()
+            )
         )
 
 
