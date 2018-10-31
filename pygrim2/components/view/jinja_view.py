@@ -80,7 +80,7 @@ class JinjaView(BaseView):
             config.getboolean("pygrim:l10n", False) and
             config.get("pygrim:l10n:type") == "gettext"
         ):
-            extensions.update(("pygrim2.components.jinja_ext.i18n",))
+            extensions.update((I18N_EXT_NAME,))
 
         return map(str, extensions)
 
