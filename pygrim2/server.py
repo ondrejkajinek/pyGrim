@@ -378,7 +378,7 @@ class Server(object):
                     context.get_request_uri()
                 )[1]
                 if request_suffix in self._plain_not_found_suffixes:
-                    self._default_not_found_handler(context)
+                    self._default_not_found_handler(context=context, exc=exc)
                 else:
                     self._handle_not_found(context=context, exc=exc)
 
