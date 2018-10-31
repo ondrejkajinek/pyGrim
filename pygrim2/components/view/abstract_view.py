@@ -14,8 +14,5 @@ class AbstractView(object):
     def get_template_directory(self):
         return ()
 
-    def use_translation(self, translation):
-        pass
-
     def _render(self, context):
         raise NotImplementedError()

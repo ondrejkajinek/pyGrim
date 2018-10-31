@@ -49,22 +49,34 @@ start_log = getLogger("pygrim_start.server")
 log = getLogger("pygrim.server")
 
 
-def register_session_handler(name, cls):
-    if name in Server.KNOWN_SESSION_HANDLERS:
+def _register_component_type(name, cls, server_attr_name, component_name):
+    server_attr = getattr(Server, server_attr_name)
+    # TODO: what is faster, if name in server_attr, or try-except
+    #       name collision is not happening in production env.
+    if name in server_attr:
         raise ComponentTypeAlreadyRegistered(
-            "SessionHandler", name, Server.KNOWN_SESSION_HANDLERS[name]
+            component_name, name, server_attr[name]
         )
 
-    Server.KNOWN_SESSION_HANDLERS[name] = cls
+    server_attr[name] = cls
+
+
+def register_config_format(name, cls):
+    _register_component_type(name, cls, "Config", "KNOWN_CONFIG_FORMATS")
+
+
+def register_l10n_class(name, cls):
+    _register_component_type(name, cls, "L10n", "KNONW_L10N_CLASSES")
+
+
+def register_session_handler(name, cls):
+    _register_component_type(
+        name, cls, "SessionHandler", "KNOWN_SESSION_HANDLERS"
+    )
 
 
 def register_view_class(name, cls):
-    if name in Server.KNOWN_VIEW_CLASSES:
-        raise ComponentTypeAlreadyRegistered(
-            "View", name, Server.KNOWN_VIEW_CLASSES[name]
-        )
-
-    Server.KNOWN_VIEW_CLASSES[name] = cls
+    _register_component_type(name, cls, "View", "KNOWN_VIEW_CLASSES")
 
 
 class ResponseWrap(object):
@@ -423,8 +435,6 @@ class Server(object):
         except KeyError as unknown_view:
             raise UnknownView(unknown_view)
         else:
-            view.use_translation(self._l10n.get(context.get_language()))
-
             try:
                 view.display(context)
             except BaseException:
@@ -514,11 +524,9 @@ class Server(object):
                 "print_css": self._view_print_css,
                 "print_js": self._view_print_js,
                 "url_for": self._view_url_for,
-            }
+            },
+            "l10n": self._l10n
         }
-        if self.config.getbool("pygrim:l10n", False):
-            view_kwargs["translations"] = self._l10n.translations()
-
         self._views = {}
         for view_name, view_class in self._find_view_classes():
             view = view_class(self.config, **view_kwargs)

@@ -5,6 +5,7 @@ from re import compile as re_compile
 
 # local
 from .abstract_router import AbstractRouter
+from .exceptions import PatternAlreadyExists
 from .exceptions import RouteAlreadyExists, RouteNotRegistered
 from .route import NoRoute, Route, RouteGroup
 
@@ -12,7 +13,7 @@ from .route import NoRoute, Route, RouteGroup
 class Router(AbstractRouter):
 
     def __init__(self):
-        self._named_routes = None
+        self._named_routes = {}
         self._routes = []
         self._route_groups = []
 
@@ -24,6 +25,10 @@ class Router(AbstractRouter):
 
     def map(self, route):
         if isinstance(route, Route):
+            route_name = route.get_name()
+            if route_name in self._named_routes:
+                raise RouteAlreadyExists(route.get_pattern())
+
             full_pattern = self._join(
                 self._group_pattern(), route.get_pattern().strip("/")
             )
@@ -32,6 +37,10 @@ class Router(AbstractRouter):
                 if route.is_regular() or self._is_group_regular()
                 else full_pattern
             )
+
+            if any(filter(lambda existing: existing == route, self._routes)):
+                raise PatternAlreadyExists(full_pattern)
+
             specificity = route.specificity()
             index = next(
                 (
@@ -43,6 +52,7 @@ class Router(AbstractRouter):
                 len(self._routes)
             )
             self._routes.insert(index, route)
+            self._named_routes[route_name] = route
         elif isinstance(route, RouteGroup):
             self.push_group(route)
             for one in route:
@@ -72,23 +82,12 @@ class Router(AbstractRouter):
         self._route_groups.append(group)
 
     def url_for(self, route_name, params):
-        route = self._get_named_route(route_name)
-        return route.url_for(params)
-
-    def _get_named_route(self, name):
-        if not self._has_named_route(name):
-            raise RouteNotRegistered(name)
-
-        return self._named_routes[name]
-
-    def _get_named_routes(self):
-        self._named_routes = {}
-        for route in self._routes:
-            name = route.get_name()
-            if name:
-                if name in self._named_routes:
-                    raise RouteAlreadyExists
-                self._named_routes[name] = route
+        try:
+            route = self._named_routes[route_name]
+        except KeyError:
+            raise RouteNotRegistered(route_name)
+        else:
+            return route.url_for(params)
 
     def _group_pattern(self):
         pattern = (
@@ -101,12 +100,6 @@ class Router(AbstractRouter):
             else ""
         )
         return pattern
-
-    def _has_named_route(self, route_name):
-        if self._named_routes is None:
-            self._get_named_routes()
-
-        return route_name in self._named_routes
 
     def _is_group_regular(self):
         return any(

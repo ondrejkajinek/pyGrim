@@ -91,6 +91,12 @@ class Route(RouteObject):
         )
         self._name = name
 
+    def __eq__(self, other):
+        return (
+            self.get_pattern() == other.get_pattern() and
+            set(self._methods).intersection(other._methods)
+        )
+
     def __str__(self):
         return repr(self._asdict())
 
