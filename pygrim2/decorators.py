@@ -68,8 +68,8 @@ class error_handler(BaseDecorator):
                 )
 
         super(error_handler, self).__init__(*args, **kwargs)
-        self.error_classes = errors
-        self.paths = ensure_tuple(paths)
+        self._error_classes = errors
+        self._paths = ensure_tuple(paths)
         self._save_session = save_session
 
     def pre_call(self, fun, args, kwargs):
@@ -77,8 +77,8 @@ class error_handler(BaseDecorator):
         return super(error_handler, self).pre_call(fun, args, kwargs)
 
     def prepare_func(self, func):
-        func._errors = self.error_classes
-        func._paths = self.paths
+        func._errors = self._error_classes
+        func._paths = self._paths
         func._save_session = self._save_session
         super(error_handler, self).prepare_func(func)
 
