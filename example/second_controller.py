@@ -1,7 +1,6 @@
 # coding: utf8
 
 from logging import getLogger
-from re import compile as re_compile
 from time import sleep
 from sys import exc_info
 
@@ -11,7 +10,7 @@ except ImportError:
     from checkers import StrChkr, IntChkr
 
 from pygrim2 import GET
-from pygrim2 import route, template, Validator
+from pygrim2 import route, regex_route, template, Validator
 
 log = getLogger(__file__)
 
@@ -46,7 +45,7 @@ class Second(object):
             }
         ))
 
-    @route(GET, re_compile(r"/message/((?P<message>[^/]+))?"), "message")
+    @regex_route(GET, r"/message(/(?P<message>[^/]+))?", "message")
     @template("layout.jinja")
     def message(self, context, message):
         return {

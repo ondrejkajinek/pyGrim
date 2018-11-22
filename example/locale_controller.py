@@ -1,10 +1,8 @@
 # coding: utf8
 
-from re import compile as re_compile
-
 from pygrim2 import GET
 from pygrim2 import RouteGroup
-from pygrim2 import route, template
+from pygrim2 import route, regex_route, template
 
 
 class LocaleController(object):
@@ -31,7 +29,7 @@ class LocaleController(object):
             "locale": temp_locale
         }
 
-    @route(GET, re_compile("/set/(?P<locale>[^/]+)"), "locale_set")
+    @regex_route(GET, "/set/(?P<locale>[^/]+)", "locale_set")
     @template("locale.jinja")
     def locale_set(self, context, locale):
         default_locale = context.get_language()

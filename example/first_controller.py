@@ -2,10 +2,9 @@
 
 from logging import getLogger
 from pygrim2 import (
-    error_handler, json_method, not_found_handler, route, template
+    error_handler, json_method, not_found_handler, route, regex_route, template
 )
 from pygrim2 import GET
-from re import compile as re_compile
 from time import time
 from traceback import format_exc
 
@@ -111,9 +110,7 @@ class First(object):
             "session_text": context.session.get("text")
         }
 
-    @route(
-        GET, re_compile(r"/template/(?P<template>[^/]+)"), "template_show"
-    )
+    @regex_route(GET, r"/template/(?P<template>[^/]+)", "template_show")
     @template("layout.jinja")
     def template_show(self, context, template):
         return {
