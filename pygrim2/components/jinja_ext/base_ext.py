@@ -7,6 +7,7 @@ from textwrap import wrap
 
 # non-std
 from jinja2.ext import Extension
+from jinja2.runtime import Undefined
 
 # local
 from .utils import Counter
@@ -117,6 +118,9 @@ class BaseExtension(Extension):
         }
 
     def _readable_size(self, size, precision, multiple, prefixes):
+        if size is None:
+            return Undefined()
+
         index = 0
         while size >= multiple:
             size /= multiple
