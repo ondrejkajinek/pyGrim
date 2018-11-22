@@ -1,3 +1,11 @@
+pygrim (0.2.18) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * Counter now has value property
+  * Added counter function to pygrim.components.jinja_ext.BaseExtension
+
+ -- Václav Pokluda <root@darky>  Thu, 22 Nov 2018 15:15:26 +0100
+
 pygrim (0.2.17) testing; urgency=medium
 
   * COMMIT MESSASGES
