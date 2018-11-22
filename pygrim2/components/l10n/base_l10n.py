@@ -4,6 +4,7 @@ from logging import getLogger
 from os import path
 
 from .abstract_l10n import AbstractL10n
+from ..containers import ShortcutDict
 
 start_log = getLogger("pygrim_start.components.l10n.gettext")
 
@@ -71,7 +72,7 @@ class BaseL10n(AbstractL10n):
         locale_map = config.get("pygrim:l10n:locale_map", {})
         for shortcut, locale in locale_map.iteritems():
             if locale in self._translations:
-                self._translations[shortcut] = self._translations[locale]
+                self._translations.add_shortcut(shortcut, locale)
 
     def _load_translations(self, config):
         l10n_kwargs = {
@@ -81,7 +82,7 @@ class BaseL10n(AbstractL10n):
                 config.get("pygrim:l10n:locale_path")
             )
         }
-        self._translations = {}
+        self._translations = ShortcutDict()
         for lang in config.get("pygrim:l10n:locales"):
             l10n_kwargs["locales"] = (lang,)
             try:

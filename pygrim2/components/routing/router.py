@@ -27,7 +27,7 @@ class Router(AbstractRouter):
         if isinstance(route, Route):
             route_name = route.get_name()
             if route_name in self._named_routes:
-                raise RouteAlreadyExists(route.get_pattern())
+                raise RouteAlreadyExists(route)
 
             full_pattern = self._join(
                 self._group_pattern(), route.get_pattern().strip("/")
