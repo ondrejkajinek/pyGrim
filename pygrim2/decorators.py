@@ -4,6 +4,7 @@
 from __future__ import print_function
 from functools import wraps
 from logging import getLogger
+from re import compile as re_compile
 
 # non-std
 try:
@@ -131,6 +132,17 @@ class route(BaseDecorator):
             func._route.append(self._route)
         else:
             func._route = [self._route]
+
+
+class regex_route(route):
+
+    def __init__(self, methods, pattern=None, name=None, *args, **kwargs):
+        if pattern is not None:
+            pattern = re_compile(pattern)
+
+        super(regex_route, self).__init__(
+            methods, pattern, name, *args, **kwargs
+        )
 
 
 class template(BaseDecorator):
