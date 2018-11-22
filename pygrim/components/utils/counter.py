@@ -10,3 +10,7 @@ class Counter(object):
         value = self._counter
         self._counter += 1
         return value
+
+    @property
+    def value(self):
+        return self._counter
