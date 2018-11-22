@@ -9,6 +9,7 @@ from textwrap import wrap
 from jinja2.ext import Extension
 
 # local
+from .utils import Counter
 from ..utils.functions import strip_accent
 from ..utils.json2 import dumps as json_dumps
 
@@ -111,7 +112,9 @@ class BaseExtension(Extension):
         }
 
     def _get_functions(self):
-        return {}
+        return {
+            "counter": Counter
+        }
 
     def _readable_size(self, size, precision, multiple, prefixes):
         index = 0
