@@ -59,17 +59,17 @@ class error_handler(BaseDecorator):
         self, errors=None, path=None, save_session=False, *args, **kwargs
     ):
         errors = ensure_tuple(errors or (BaseException,))
-        paths = path or ("", )
         self._error_status = kwargs.pop("status", 500)
         for one in errors:
             if not issubclass(one, BaseException):
+                # TODO: more useful message
                 raise RuntimeError(
                     "%s must be subclass of BaseException" % (one,)
                 )
 
         super(error_handler, self).__init__(*args, **kwargs)
         self._error_classes = errors
-        self._paths = ensure_tuple(paths)
+        self._paths = ensure_tuple(path or ("",))
         self._save_session = save_session
 
     def pre_call(self, fun, args, kwargs):
