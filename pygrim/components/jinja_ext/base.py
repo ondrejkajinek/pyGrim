@@ -1,6 +1,7 @@
 # coding: utf8
 
 from ..formater import Formater
+from ..utils import Counter
 from ..utils.functions import strip_accent
 from ..utils.json2 import dumps as json_dumps
 from jinja2.ext import Extension, Markup
@@ -158,6 +159,7 @@ class BaseExtension(Extension):
 
     def _get_functions(self):
         return {
+            "counter": Counter,
             "currency_format": self.currency_format,
             "currency_int_format": self.currency_int_format,
             "decimal_format": self.decimal_format,
