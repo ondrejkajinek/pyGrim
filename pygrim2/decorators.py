@@ -92,6 +92,7 @@ class json_method(BaseDecorator):
     def pre_call(self, fun, args, kwargs):
         context = kwargs.get("context")
         context.set_view("json")
+        context.set_response_content_type("application/json")
         return super(json_method, self).pre_call(fun, args, kwargs)
 
     def post_call(self, fun, args, kwargs, res):
