@@ -10,7 +10,7 @@ from jinja2.ext import Extension
 from jinja2.runtime import Undefined
 
 # local
-from .utils import Counter
+from ..utils import Counter
 from ..utils.functions import strip_accent
 from ..utils.json2 import dumps as json_dumps
 
