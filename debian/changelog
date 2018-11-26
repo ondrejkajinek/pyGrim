@@ -1,3 +1,64 @@
+pygrim2 (2.1.3) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * Makefile - upload to stretch repo
+  * pep8
+  * json_method decorator now set content-type response header prior to
+    calling route handle
+  * unnecessary local variable removed
+  * Fixed attr names in error_handler decorator
+  * Fixed import path
+  * regex_route added to example
+  * Added @regex_route decorator -- calls re.compile and passes params
+    to @route
+  * readable_size and readable_si_size filters will now return Undefined
+    when no size is given
+  * Counter class added to pygrim2.components.jinja_ext.BaseExtension
+  * Translations in BaseL10n is implemented as ShortcutsDict, locale map
+    is added as shortcuts to translation keys instead of copying
+    translations to shortcut keys
+  * Fixed bug with i18n extension for jinja -- wrong detection if
+    extension is loaded...
+  * Improved messge for RouteAlreadyExists exception
+  * Improved controller name when logging registered controller (debug
+    level)
+  * Fixed error with _default_not_found_handler for
+    'plain_not_found_suffixes'
+  * Instance of l10n is added to view classes upon initialization;
+    JinjaView now doesn't create Environment during constructor, but
+    saves Env. parameters and creates Env. when render is called --
+    environment (with installed translation) is thus request-specific.
+    Each that can use l10n should now take care of selecting proper
+    translation.
+  * Removed unused translations in JinjaView -- translation is inserted
+    by the server before render is called
+  * Fixed _seo_remove function, percent sign added to seo_removed chars
+  * Exception (PatternAlreadyExists) is raised when registering route
+    with the same pattern and at least one common HTTP method; regular
+    routes are unlike to raise even when matching the same strings
+  * Added methods for registering new component types: l10n, config
+  * Route names are stored when route is registered -- pyGrim can detect
+    name collision, looking for route by its name is much easier
+  * Improved print_js function -- now accepts attrs without value (e.g.,
+    defer, async) as args
+  * Fix for safe_title jinja filter: non-string data are casted to
+    string
+  * refactor when unknown view is set
+  * Revert Code deduplication in components/utils
+  * @error_handler can now auto-save when successfully ran -- specified
+    with argument
+  * refactor of redis connector
+  * When error occurs during request handling, request is logged
+  * RoutePassed can be used in error handler to move to another error
+    handler
+  * minor code renice
+  * Code deduplication in components/utils
+  * Fixed pattern for regular route groups
+  * minor refactor in route.py
+  * removed 'install_requires' from setup.py
+
+ -- Václav Pokluda <vaclav.pokluda@grandit.cz>  Mon, 26 Nov 2018 09:21:32 +0100
+
 pygrim2 (2.1.2) testing; urgency=medium
 
   * COMMIT MESSASGES
