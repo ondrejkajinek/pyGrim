@@ -20,6 +20,7 @@ class Context(object):
     def __init__(
         self, config, model, session_handler, l10n, request, response
     ):
+        self.config = config
         self.current_route = None
         self.l10n = l10n
         self.model = model
