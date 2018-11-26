@@ -1,3 +1,11 @@
+pygrim2 (2.1.6) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * context saves pointer to config
+  * Makefile - upload to stretch repo - fixed
+
+ -- Václav Pokluda <vaclav.pokluda@grandit.cz>  Mon, 26 Nov 2018 14:26:08 +0100
+
 pygrim2 (2.1.5) testing; urgency=medium
 
   * COMMIT MESSASGES
