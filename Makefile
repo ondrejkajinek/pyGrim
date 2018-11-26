@@ -38,7 +38,8 @@ pkg: deb
 debtest: deb
 	python setup.py create_tag \
 	&& scp build/${FULL_PKG_NAME} debian.ats:${PACKAGES_REMOTE_DIR} \
-	&& ssh aptly@debian.ats bash pkg-to-testing ${PACKAGES_REMOTE_DIR}${FULL_PKG_NAME} jessie
+	&& ssh aptly@debian.ats bash pkg-to-testing ${PACKAGES_REMOTE_DIR}${FULL_PKG_NAME} jessie \
+	&& scp build/${FULL_PKG_NAME} debian.ats:${PACKAGES_REMOTE_DIR} \
 	&& ssh aptly@debian.ats bash pkg-to-testing ${PACKAGES_REMOTE_DIR}${FULL_PKG_NAME} stretch
 
 clean:
