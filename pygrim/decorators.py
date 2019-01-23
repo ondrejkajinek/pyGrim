@@ -59,8 +59,6 @@ class method(BaseDecorator):
     properly derived from this class.
     """
     def __init__(self, *args, **kwargs):
-        log.critical("*" * 1000 + "Trace %r", "DECORATOR - METHOD - INIT")
-
         self._session = bool(kwargs.pop("session", False))
         self._dispatch_name = kwargs.pop("dispatch_name", None)
         super(method, self).__init__(*args, **kwargs)
@@ -218,32 +216,29 @@ class canonical_url(BaseDecorator):
         ...
     """
     def __init__(self, *args, **kwargs):
-        log.critical("*" * 1000 + "Trace %r", "INIT")
         self.canonical_args = kwargs.get("canonical")
-        # self.canonical_args = kwargs.pop("canonical", None)
 
         super(canonical_url, self).__init__(*args, **kwargs)
 
     def post_call(self, fun, args, kwargs, ret):
-        log.critical("*"*1000+"Trace %r", "POST CALL")
         context = kwargs.get("context")
-        # if self.canonical_args is not None:
-        #     def get_in(where, keys):
-        #         if not isinstance(keys, (tuple, list)):
-        #             return keys
-        #         for one in keys:
-        #             if hasattr(where, one):
-        #                 where = getattr(where, one)
-        #             else:
-        #                 where = where[one]
-        #         return where
-        #
-        #     canonical_urlx = context.current_route.url_for({
-        #         k: get_in(context.view_data, keys)
-        #         for k, keys in self.canonical_args.iteritems()
-        #     })
-        # context.view_data["canonical_url"] = canonical_url
-        context.view_data["canonical_url"] = "test"
+        if self.canonical_args is not None:
+
+            def get_in(where, keys):
+                if not isinstance(keys, (tuple, list)):
+                    return keys
+                for one in keys:
+                    if hasattr(where, one):
+                        where = getattr(where, one)
+                    else:
+                        where = where[one]
+                return where
+
+            canonical_urlx = context.current_route.url_for({
+                k: get_in(context.view_data, keys)
+                for k, keys in self.canonical_args.iteritems()
+            })
+        context.view_data["canonical_url"] = canonical_url
         return super(canonical_url, self).post_call(fun, args, kwargs, ret)
 
 # eof

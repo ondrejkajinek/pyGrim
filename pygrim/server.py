@@ -126,6 +126,7 @@ class Server(object):
 
     def display(self, *args, **kwargs):
         self.view.display(*args, **kwargs)
+        # TODO problem here!!!!!
         raise DispatchFinished()
 
     def get_config_dir(self):
