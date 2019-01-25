@@ -364,7 +364,8 @@ class Context(object):
                 else:
                     where = where[one]
             return where
-
+        if self.current_route is None:
+            return None
         try:
             data = {}
             if self.canonical_args:
@@ -373,7 +374,7 @@ class Context(object):
                     for k, keys in self.canonical_args.iteritems()
                 }
             data.update(args)
-            return self.current_route.url_for(data)
+            return self.get_request_url() + self.current_route.url_for(data)
         except:
             if (
                 _raise_on_error is True or
