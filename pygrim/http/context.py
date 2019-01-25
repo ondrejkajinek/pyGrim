@@ -354,7 +354,7 @@ class Context(object):
 
         return language
 
-    def get_canocnical_url(self, _raise_on_error=False, **args):
+    def get_canonical_url(self, _raise_on_error=False, **args):
         def get_in(where, keys):
             if not isinstance(keys, (tuple, list)):
                 return keys

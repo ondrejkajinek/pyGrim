@@ -119,7 +119,7 @@ class JinjaView(AbstractView):
         dump_data["session"] = context.session
         dump_data["template_path"] = context.template
         try:
-            dump_data["canonical_url"] = context.get_canocnical_url(
+            dump_data["canonical_url"] = context.get_canonical_url(
                 _raise_on_error=True
             )
         except KeyError as e:
