@@ -63,6 +63,13 @@ class Route(RouteObject):
         ))
         self._name = name
 
+    def __repr__(self):
+        return "%s(%r,%r,%r,%r,%r)" % (
+            type(self), self._methods,
+            self._pattern.pattern if self.is_regex() else self._pattern,
+            self._handle_name, self._handle, self._name
+        )
+
     def set_pattern(self, pattern):
         pattern = fix_trailing_slash(pattern)
         super(Route, self).set_pattern(pattern)
