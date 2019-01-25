@@ -373,7 +373,7 @@ class Context(object):
                     for k, keys in self.canonical_args.iteritems()
                 }
             data.update(args)
-            return self.current_route.url_for(args)
+            return self.current_route.url_for(data)
         except:
             if (
                 _raise_on_error is True or
