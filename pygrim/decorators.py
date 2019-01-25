@@ -126,7 +126,11 @@ class not_found_method(method):
 
     def __init__(self, *args, **kwargs):
         super(not_found_method, self).__init__(**kwargs)
-        self._not_found_prefixes = args or ("",)
+        self._not_found_prefixes = []
+        for one in (args or (("", 0),)):
+            if isinstance(one, basestring):
+                one = (one, 0)
+            self._not_found_prefixes.append(tuple(one))
 
     def pre_call(self, fun, args, kwargs):
         kwargs.get("context").set_response_status(404)

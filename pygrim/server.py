@@ -1,5 +1,4 @@
 # coding: utf8
-
 from .components.config import AbstractConfig, YamlConfig
 from .components.exceptions import (
     WrongConfigBase, WrongRouterBase, WrongSessionHandlerBase, WrongViewBase
@@ -189,8 +188,8 @@ class Server(object):
             if getattr(member, "_exposed", False) is True:
                 self._process_exposed_method(member)
 
-        if "" not in self._not_found_methods:
-            self._not_found_methods[""] = self._default_not_found_method
+        if ("", 0) not in self._not_found_methods:
+            self._not_found_methods[("", 0)] = self._default_not_found_method
 
         self._finalize_not_found_handlers()
 
@@ -211,11 +210,11 @@ class Server(object):
 
     def _finalize_not_found_handlers(self):
         self._not_found_methods = tuple(
-            (prefix, self._not_found_methods[prefix])
-            for prefix
+            (prefix, priority, self._not_found_methods[(prefix, priority)])
+            for prefix, priority
             in sorted(
-                self._not_found_methods,
-                key=lambda x: x.count("/"),
+                self._not_found_methods.keys(),
+                key=lambda x: x[0].count("/") * 10000 + x[1],
                 reverse=True
             )
         )
@@ -333,6 +332,7 @@ class Server(object):
             raise
 
     def _handle_not_found(self, context):
+        context.current_route = None
         log.debug(
             "No route found to handle request %r.",
             context.get_request_uri()
@@ -343,13 +343,21 @@ class Server(object):
             if request_suffix in self._plain_not_found_suffixes:
                 self._default_not_found_method(context)
             else:
-                for prefix, handle in self._not_found_methods:
+                for prefix, priority, handle in self._not_found_methods:
                     if request_uri.startswith(prefix):
+                        log.debug(
+                            "Using %r %r %r for not_found handling %r",
+                            prefix, priority, handle, request_uri
+                        )
                         if not context.session and handle._session:
                             self.load_session(context)
                         try:
                             handle(context=context)
                         except RoutePassed:
+                            log.debug(
+                                "Not used %r %r %r for not_found on %r",
+                                prefix, priority, handle, request_uri
+                            )
                             continue
                         except DispatchFinished:
                             pass
@@ -442,8 +450,8 @@ class Server(object):
     def _process_exposed_method(self, method):
         self._methods[method._dispatch_name] = method
 
-        for prefix in getattr(method, "_not_found", ()):
-            self._process_not_found_method(method, prefix)
+        for (prefix, priority) in getattr(method, "_not_found", ()):
+            self._process_not_found_method(method, prefix, priority)
 
         if getattr(method, "_error", False) is True:
             self._process_error_handler(method)
@@ -451,14 +459,15 @@ class Server(object):
         for err_cls in getattr(method, "_custom_error", ()):
             self._process_custom_error_handler(method, err_cls)
 
-    def _process_not_found_method(self, method, prefix):
-        if prefix in self._not_found_methods:
+    def _process_not_found_method(self, method, prefix, priority=0):
+        key = (prefix, priority)
+        if key in self._not_found_methods:
             raise RuntimeError(
                 "Duplicate handling of not-found %r with %r and %r.",
-                prefix, self._not_found_methods[prefix], method
+                key, self._not_found_methods[key], method
             )
         log.debug("Method %r registered to handle not-found state", method)
-        self._not_found_methods[prefix] = method
+        self._not_found_methods[key] = method
 
     def _register_router(self):
         router_class = self._find_router_class()
