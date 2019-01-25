@@ -341,7 +341,7 @@ class Server(object):
             request_uri = context.get_request_uri()
             request_suffix = path.splitext(request_uri)[1]
             if request_suffix in self._plain_not_found_suffixes:
-                self._default_not_found_handler(context)
+                self._default_not_found_method(context)
             else:
                 for prefix, handle in self._not_found_methods:
                     if request_uri.startswith(prefix):
