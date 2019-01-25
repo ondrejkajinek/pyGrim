@@ -17,7 +17,11 @@ log = getLogger("pygrim.http.context")
 
 class Context(object):
 
-    def __init__(self, environment, config, request_class, response_class):
+    def __init__(
+        self, environment, config, request_class, response_class, debug=False
+    ):
+        self._debug = debug
+        self.canonical_args = None
         self.formater = None
         self.config = config
         self._suppress_port = config.getbool("context:suppress_port", False)
@@ -349,3 +353,32 @@ class Context(object):
             self.set_language(language)
 
         return language
+
+    def get_canocnical_url(self, _raise_on_error=False, **args):
+        def get_in(where, keys):
+            if not isinstance(keys, (tuple, list)):
+                return keys
+            for one in keys:
+                if hasattr(where, one):
+                    where = getattr(where, one)
+                else:
+                    where = where[one]
+            return where
+
+        try:
+            data = {}
+            if self.canonical_args:
+                data = {
+                    k: get_in(self.view_data, keys)
+                    for k, keys in self.canonical_args.iteritems()
+                }
+            data.update(args)
+            return self.current_route.url_for(args)
+        except:
+            if (
+                _raise_on_error is True or
+                self._debug
+            ):
+                raise
+            return None
+# eof

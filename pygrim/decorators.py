@@ -3,6 +3,7 @@
 from __future__ import print_function
 from functools import wraps
 from components.utils import json2 as json
+from copy import deepcopy
 
 try:
     from uwsgi import log as uwsgi_log
@@ -220,25 +221,10 @@ class canonical_url(BaseDecorator):
 
         super(canonical_url, self).__init__(*args, **kwargs)
 
-    def post_call(self, fun, args, kwargs, ret):
+    def pre_call(self, fun, args, kwargs):
         context = kwargs.get("context")
         if self.canonical_args is not None:
-
-            def get_in(where, keys):
-                if not isinstance(keys, (tuple, list)):
-                    return keys
-                for one in keys:
-                    if hasattr(where, one):
-                        where = getattr(where, one)
-                    else:
-                        where = where[one]
-                return where
-
-            canonical_urlx = context.current_route.url_for({
-                k: get_in(context.view_data, keys)
-                for k, keys in self.canonical_args.iteritems()
-            })
-        context.view_data["canonical_url"] = canonical_url
-        return super(canonical_url, self).post_call(fun, args, kwargs, ret)
+            context.canonical_args = deepcopy(self.canonical_args)
+        return super(canonical_url, self).pre_call(fun, args, kwargs)
 
 # eof

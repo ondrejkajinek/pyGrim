@@ -95,7 +95,8 @@ class Server(object):
     def __call__(self, environment, start_response):
         start_response = ResponseWrap(start_response)
         context = self._context_class(
-            environment, self.config, self._requst_class, self._response_class
+            environment, self.config, self._requst_class, self._response_class,
+            debug=self._debug
         )
         try:
             self._handle_request(context=context)
@@ -126,7 +127,6 @@ class Server(object):
 
     def display(self, *args, **kwargs):
         self.view.display(*args, **kwargs)
-        # TODO problem here!!!!!
         raise DispatchFinished()
 
     def get_config_dir(self):

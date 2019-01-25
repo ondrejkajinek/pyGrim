@@ -1,6 +1,7 @@
 # coding: utf8
 
 from os import getcwd, path
+import traceback
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
@@ -117,6 +118,16 @@ class JinjaView(AbstractView):
         )
         dump_data["session"] = context.session
         dump_data["template_path"] = context.template
+        try:
+            dump_data["canonical_url"] = context.get_canocnical_url(
+                _raise_on_error=True
+            )
+        except KeyError as e:
+            dump_data["canonical_url"] = "Missing route argument:%r" % (
+                e.args[0],
+            )
+        except:
+            dump_data["canonical_url"] = traceback.format_exc()
 
         context.set_response_content_type("application/json")
         return json_dumps(dump_data)
