@@ -119,9 +119,11 @@ class JinjaView(AbstractView):
         dump_data["session"] = context.session
         dump_data["template_path"] = context.template
         try:
-            dump_data["canonical_url"] = context.get_canonical_url(
+            canonical_url = context.get_canonical_url(
                 _raise_on_error=True
             )
+            if canonical_url is not None:
+                dump_data["canonical_url"] = canonical_url
         except KeyError as e:
             dump_data["canonical_url"] = "Missing route argument:%r" % (
                 e.args[0],
