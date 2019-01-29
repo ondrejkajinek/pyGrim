@@ -1,3 +1,19 @@
+pygrim (0.2.20) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * condition if canonical_url is None
+  * canonical url shuld contail full url not only uri
+  * multiple not found method support implemented
+  * repr for Route object implemented
+  * bugfix default not found
+  * FIX - current route is constructed from the right variable
+  * bugfix
+  * canonical urls can be generated using context object
+  * #52142 objeveni problemu s post_call metodou
+  * #52142 rozpracovano...
+
+ -- root <root@radek.ats>  Tue, 29 Jan 2019 16:33:28 +0100
+
 pygrim (0.2.19) testing; urgency=medium
 
   * COMMIT MESSASGES
