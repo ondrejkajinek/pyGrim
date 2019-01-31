@@ -35,7 +35,7 @@ class NormalizedDict(dict):
     def pop(self, key, *args, **kwargs):
         try:
             value = super(NormalizedDict, self).pop(self._normalize_key(key))
-        except:
+        except KeyError:
             if "default" in kwargs:
                 value = kwargs["default"]
             elif args:
