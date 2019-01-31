@@ -1,8 +1,9 @@
 # coding: utf8
 
 # std
-import cPickle as pickle
 from logging import getLogger
+from pickle import HIGHEST_PROTOCOL
+from pickle import dumps as pickle_dumps, loads as pickle_loads
 
 # local
 from .session import Session
@@ -16,7 +17,7 @@ log = getLogger("pygrim.components.session.redis_session_storage")
 
 class RedisSessionStorageBase(SessionStorage):
 
-    PROTOCOL = pickle.HIGHEST_PROTOCOL
+    PROTOCOL = HIGHEST_PROTOCOL
 
     def __init__(self, config):
         super(RedisSessionStorageBase, self).__init__(config)
@@ -33,7 +34,7 @@ class RedisSessionStorageBase(SessionStorage):
         try:
             data = self.redis.get(session_id)
             if data:
-                session = pickle.loads(data)
+                session = pickle_loads(data)
             else:
                 session = {}
         except IOError:
@@ -48,7 +49,7 @@ class RedisSessionStorageBase(SessionStorage):
             ret = self.redis.setex(
                 session.get_id(),
                 self._cookie["lifetime"],
-                pickle.dumps(session.get_content(), self.PROTOCOL)
+                pickle_dumps(session.get_content(), self.PROTOCOL)
             )
             if ret is not True:
                 raise ValueError("Session not stored to redis")
