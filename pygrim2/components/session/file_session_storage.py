@@ -69,7 +69,7 @@ class FileSessionStorage(SessionStorage):
 
     def _create_session_dir(self):
         try:
-            os_mkdir(self._session_dir, 0755)
+            os_mkdir(self._session_dir, mode=0o755)
         except OSError as exc:
             # already exists
             if exc.errno != 17:
