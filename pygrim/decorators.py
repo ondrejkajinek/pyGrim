@@ -227,7 +227,7 @@ class canonical_url(BaseDecorator):
 
     def pre_call(self, fun, args, kwargs):
         context = kwargs.get("context")
-        if self.canonical_args is not None:
+        if context and self.canonical_args is not None:
             context.canonical_args = deepcopy(self.canonical_args)
         return super(canonical_url, self).pre_call(fun, args, kwargs)
 
