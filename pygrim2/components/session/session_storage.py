@@ -44,7 +44,7 @@ class SessionStorage(object):
 
     def _get_id(self, request):
         cookie = request.cookies.get(self._cookie["name"])
-        if isinstance(cookie, (tuple, list, xrange, set)):
+        if isinstance(cookie, (tuple, list, set)):
             cookie = cookie[-1]
 
         if cookie:

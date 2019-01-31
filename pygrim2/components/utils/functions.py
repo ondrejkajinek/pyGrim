@@ -46,7 +46,7 @@ def ensure_string(text):
 def ensure_tuple(variable):
     if isinstance(variable, tuple):
         res = variable
-    elif isinstance(variable, (list, set, buffer, xrange)):
+    elif isinstance(variable, (list, set, memoryview)):
         res = tuple(variable)
     else:
         res = (variable,)
