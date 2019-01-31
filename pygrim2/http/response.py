@@ -5,7 +5,7 @@ from datetime import datetime, timedelta
 from inspect import isgenerator, isgeneratorfunction
 from logging import getLogger
 from os import SEEK_END
-from urllib import quote_plus as url_quoteplus
+from urllib.parse import quote_plus as url_quoteplus
 
 # local
 from ..components.containers import NormalizedDict

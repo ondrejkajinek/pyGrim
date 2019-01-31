@@ -3,7 +3,7 @@
 # std
 from logging import getLogger
 from re import compile as re_compile
-from urllib import quote_plus
+from urllib.parse import quote_plus
 
 # local
 from ..utils import (

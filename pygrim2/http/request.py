@@ -3,7 +3,7 @@
 # std
 from logging import getLogger
 from re import compile as re_compile, IGNORECASE as re_IGNORECASE
-from urllib import unquote_plus
+from urllib.parse import unquote_plus
 
 # local
 from .methods import DELETE, GET, POST, PUT
