@@ -149,7 +149,7 @@ class Request(object):
         parsed = {}
         for part in parts:
             key, value = (
-                map(string_strip, map(unquote_plus, part.split("=", 1)))
+                [unquote_plus(i).strip() for i in part.split("=", 1)]
                 if "=" in part
                 else (unquote_plus(part.strip()), None)
             )

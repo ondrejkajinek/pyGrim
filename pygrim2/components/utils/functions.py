@@ -88,7 +88,7 @@ def remove_trailing_slash(pattern):
 
 def split_to_iterable(value, separator=","):
     return (
-        map(string_strip, value.split(separator))
+        [part.strip() for part in value.split(separator)]
         if isinstance(value, basestring)
         else value
     )

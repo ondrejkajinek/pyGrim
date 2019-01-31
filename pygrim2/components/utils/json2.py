@@ -17,7 +17,7 @@ from json import *
 from .functions import ensure_string
 
 # JSON does not support these values, so we mark them as invalid
-InvalidJsonFloatValues = map(float, ("inf", "-inf", "NaN"))
+InvalidJsonFloatValues = tuple(float(inv) for inv in ("inf", "-inf", "NaN"))
 
 """
 TODO: translate

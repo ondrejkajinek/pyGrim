@@ -598,7 +598,7 @@ class Server(object):
             (remove_trailing_slash(prefix) + "/", mapped_dir)
             for prefix, mapped_dir
             in (
-                map(string_strip, mapping.split("=", 1))
+                [part.strip() for part in mapping.split("=", 1)]
                 for mapping
                 in ensure_tuple(self.config.get("uwsgi:static-map", ()))
                 if "=" in mapping

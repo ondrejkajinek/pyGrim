@@ -56,10 +56,9 @@ def connect_redis_sentinel(config, section="session:args:"):
             return getattr(self.master, attr)
 
     sentinel_hosts = tuple(
-        map(string_strip, i.split(":", 1))
+        [filter(None, (part.strip() for part in i.split(":", 1)))]
         for i
         in config.get(section + "sentinels", "").split(",")
-        if i.strip()
     )
 
     sh_len = len(sentinel_hosts)

@@ -141,9 +141,7 @@ class Route(RouteObject):
 
         if query_params:
             url += "?%s" % "&".join(
-                "%s=%s" % tuple(
-                    map(quote_plus, map(ensure_string, (key, value)))
-                )
+                "{}={}".format(quote_plus(str(key)), quote_plus(str(value)))
                 for key, value
                 in query_params.iteritems()
             )

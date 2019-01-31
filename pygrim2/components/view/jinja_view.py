@@ -83,7 +83,7 @@ class JinjaView(BaseView):
         ):
             extensions.update((I18N_EXT_NAME,))
 
-        return map(str, extensions)
+        return [str(ext) for ext in extensions]
 
     def _has_gettext(self):
         return I18N_EXT_NAME in self._env_kwargs["extensions"]
