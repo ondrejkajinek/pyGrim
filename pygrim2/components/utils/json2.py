@@ -2,9 +2,9 @@
 
 # std
 from collections import Iterable
-from cStringIO import StringIO
 from datetime import date, datetime, timedelta
 from decimal import Decimal
+from io import StringIO
 from types import GeneratorType
 from unicodedata import normalize as unicodedata_normalize
 from uuid import UUID
