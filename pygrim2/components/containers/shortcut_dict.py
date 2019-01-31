@@ -9,7 +9,7 @@ class ShortcutDict(dict):
 
     def __contains__(self, item):
         return (
-            item in self.iterkeys() or
+            item in self.keys() or
             self._shortcuts.get(item) and self._shortcuts[item] in self
         )
 

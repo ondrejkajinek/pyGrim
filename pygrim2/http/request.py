@@ -133,7 +133,7 @@ class Request(object):
 
     def _parse_headers(self, environment):
         headers = {}
-        for key in environment.iterkeys():
+        for key in environment.keys():
             upper_key = key.upper()
             if (
                 upper_key.startswith("X_") or
@@ -155,7 +155,7 @@ class Request(object):
             )
             parsed.setdefault(key, []).append(value)
 
-        for key in parsed.iterkeys():
+        for key in parsed.keys():
             if len(parsed[key]) == 1:
                 parsed[key] = parsed[key][0]
 

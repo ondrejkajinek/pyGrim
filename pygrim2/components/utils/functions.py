@@ -11,7 +11,7 @@ TRAILING_SLASH_REGEXP = re_compile("/\??\$?$|\$?$")
 
 
 def deep_update(original, override):
-    for key, value in override.iteritems():
+    for key, value in override.items():
         if isinstance(value, Mapping):
             new_value = deep_update(original.get(key, {}), value)
             original[key] = new_value

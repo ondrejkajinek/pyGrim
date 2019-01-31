@@ -11,7 +11,7 @@ class NormalizedDict(dict):
         super(NormalizedDict, self).__init__((
             (self._normalize_key(key), value)
             for key, value
-            in dict(*args, **kwargs).iteritems()
+            in dict(*args, **kwargs).items()
         ))
 
     def __missing__(self, key):
@@ -52,7 +52,7 @@ class NormalizedDict(dict):
 
     def update(self, other=None):
         iterator = (
-            other.iteritems()
+            other.items()
             if isinstance(other, dict)
             else other or ()
         )

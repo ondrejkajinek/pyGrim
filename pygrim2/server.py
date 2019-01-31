@@ -218,7 +218,7 @@ class Server(object):
 
         # Rewrite _model in controllers that were registered so far,
         # destroying original one
-        for controller in self._controllers.itervalues():
+        for controller in self._controllers.values():
             controller._model = self._model
 
     def _default_error_handler(self, context, exc):
@@ -628,7 +628,7 @@ class Server(object):
 
     def _static_file_info(self, static_path):
         static_normpath = path.normpath(static_path)
-        for dir_prefix, dir_abs_path in self._static_map.iteritems():
+        for dir_prefix, dir_abs_path in self._static_map.items():
             if static_normpath.startswith(dir_prefix):
                 file_path = path.join(
                     dir_abs_path,
@@ -687,7 +687,7 @@ class Server(object):
                 " ".join(
                     """%s="%s\"""" % (key, value)
                     for key, value
-                    in kwargs.iteritems()
+                    in kwargs.items()
                 )
             )
             for css
@@ -713,7 +713,7 @@ class Server(object):
             attrs += tuple(
                 """%s="%s\"""" % (key, value)
                 for key, value
-                in kwargs.iteritems()
+                in kwargs.items()
             )
             scripts.append("<script %s></script>" % (" ".join(attrs),))
 

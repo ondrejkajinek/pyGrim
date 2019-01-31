@@ -60,7 +60,7 @@ def _dump_dict(source, nice, depth):
             _dumps(value, nice=nice, depth=depth + 1)
         )
         for key, value
-        in source.iteritems()
+        in source.items()
     )
 
     return "%s%s%s" % (lead, separator.join(items), trail)

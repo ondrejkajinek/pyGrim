@@ -131,7 +131,7 @@ class Route(RouteObject):
             query_params = {
                 key: params[key]
                 for key
-                in params.iterkeys()
+                in params.keys()
                 if key not in (param_names.union(optional_names))
             }
             url = readable % params
@@ -143,7 +143,7 @@ class Route(RouteObject):
             url += "?%s" % "&".join(
                 "{}={}".format(quote_plus(str(key)), quote_plus(str(value)))
                 for key, value
-                in query_params.iteritems()
+                in query_params.items()
             )
 
         log.debug("Route constructed url: %r for params: %r" % (url, params))

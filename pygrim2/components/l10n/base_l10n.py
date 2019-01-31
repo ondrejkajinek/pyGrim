@@ -70,7 +70,7 @@ class BaseL10n(AbstractL10n):
 
     def _load_locale_map(self, config):
         locale_map = config.get("pygrim:l10n:locale_map", {})
-        for shortcut, locale in locale_map.iteritems():
+        for shortcut, locale in locale_map.items():
             if locale in self._translations:
                 self._translations.add_shortcut(shortcut, locale)
 

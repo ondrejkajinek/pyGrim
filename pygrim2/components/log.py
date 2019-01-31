@@ -57,7 +57,7 @@ def initialize_loggers(config):
     main_logger.propagate = False
 
     try:
-        for logger_name in (config.get("logging:loggers") or {}).iterkeys():
+        for logger_name in (config.get("logging:loggers") or {}).keys():
             logger = getLogger(logger_name)
             logger.setLevel(config.get("logging:loggers:%s" % logger_name))
     except KeyError:

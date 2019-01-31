@@ -81,7 +81,7 @@ class Response(object):
         serialized = [
             (key, str(value))
             for key, value
-            in self.headers.iteritems()
+            in self.headers.items()
         ]
         serialized.extend((
             ("Set-Cookie", cookie)
@@ -116,5 +116,5 @@ class Response(object):
         ))
 
     def _serialized_cookies(self):
-        for name, cookie in self.cookies.iteritems():
+        for name, cookie in self.cookies.items():
             yield self._serialize_cookie(name, cookie)

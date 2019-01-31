@@ -115,7 +115,7 @@ class Context(object):
         self._response.headers.update(
             (k, v)
             for k, v
-            in headers.iteritems()
+            in headers.items()
         )
 
     def delete_cookie(
@@ -144,7 +144,7 @@ class Context(object):
             "environment": {
                 key: value
                 for key, value
-                in self._request.environment.iteritems()
+                in self._request.environment.items()
                 if not (key.startswith("wsgi.") or key.startswith("uwsgi."))
             },
             "cookies": self._request.cookies
