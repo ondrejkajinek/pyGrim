@@ -50,7 +50,7 @@ class FileSessionStorage(SessionStorage):
         try:
             session_file = self._get_path(session_id)
             if session_file and os_path.isfile(session_file):
-                with open(session_file, "r") as cin:
+                with open(session_file, "rb") as cin:
                     session = pickle_load(cin)
             else:
                 session = {}
@@ -62,7 +62,7 @@ class FileSessionStorage(SessionStorage):
 
     def save(self, session):
         try:
-            with open(self._get_path(session.get_id()), "w") as cout:
+            with open(self._get_path(session.get_id()), "wb") as cout:
                 pickle_dump(session.get_content(), cout, self.PROTOCOL)
         except IOError:
             log.exception("Saving session failed!")
