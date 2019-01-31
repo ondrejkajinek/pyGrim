@@ -87,7 +87,7 @@ class BaseExtension(Extension):
         if not value:
             return None
 
-        if isinstance(value, (int, long)):
+        if isinstance(value, int):
             value = str(value)
         elif isinstance(value, basestring):
             pass

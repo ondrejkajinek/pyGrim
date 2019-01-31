@@ -126,7 +126,7 @@ def _dumps(obj, nice=None, depth=0):
         output.write(_dump_boolean(obj))
     elif isinstance(obj, (Decimal, float)):
         output.write(_dump_number(float(obj)))
-    elif isinstance(obj, (int, long)):
+    elif isinstance(obj, int):
         output.write(_dump_number(obj))
     elif isinstance(obj, dict):
         output.write(_dump_dict(obj, nice, depth))
