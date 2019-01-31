@@ -1,3 +1,10 @@
+pygrim (0.2.21) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * missing context is not problem for canonical decorator now
+
+ -- Václav Pokluda <root@darky>  Thu, 31 Jan 2019 10:18:28 +0100
+
 pygrim (0.2.20) testing; urgency=medium
 
   * COMMIT MESSASGES
