@@ -1,7 +1,7 @@
 # coding: utf8
 
 
-class SessionBaseException(BaseException):
+class SessionBaseException(Exception):
     pass
 
 
