@@ -7,8 +7,7 @@ from urllib import quote_plus
 
 # local
 from ..utils import (
-    ensure_string, fix_trailing_slash, get_method_name, is_regex,
-    remove_trailing_slash
+    fix_trailing_slash, get_method_name, is_regex, remove_trailing_slash
 )
 from ...http.methods import GET, HEAD, METHODS
 

@@ -99,7 +99,7 @@ def visit_prefix_extends(self, node, frame):
 
     func_name = "get_or_select_template"
     if isinstance(node.template, nodes.Const):
-        if isinstance(node.template.value, basestring):
+        if isinstance(node.template.value, str):
             func_name = "get_template"
         elif isinstance(node.template.value, (tuple, list)):
             func_name = "select_template"

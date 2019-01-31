@@ -63,7 +63,7 @@ class BaseExtension(Extension):
         )
 
     def safe_title(self, text):
-        if not isinstance(text, basestring):
+        if not isinstance(text, str):
             text = str(text)
 
         res = "".join(
@@ -89,7 +89,7 @@ class BaseExtension(Extension):
 
         if isinstance(value, int):
             value = str(value)
-        elif isinstance(value, basestring):
+        elif isinstance(value, str):
             pass
         else:
             raise ValueError("int or string expected not %r" % (value,))

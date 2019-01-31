@@ -2,7 +2,6 @@
 
 # std
 from logging import getLogger
-from string import strip as string_strip
 
 log = getLogger("pygrim_start.components.connectors.redis")
 

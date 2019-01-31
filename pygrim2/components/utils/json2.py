@@ -6,15 +6,12 @@ from datetime import date, datetime, timedelta
 from decimal import Decimal
 from io import StringIO
 from types import GeneratorType
-from unicodedata import normalize as unicodedata_normalize
 from uuid import UUID
 
 # import everything from json to current namespace,
 # redefine functions as required
+from json import dumps as orig_dumps, loads as orig_loads
 from json import *
-
-# local
-from .functions import ensure_string
 
 # JSON does not support these values, so we mark them as invalid
 InvalidJsonFloatValues = tuple(float(inv) for inv in ("inf", "-inf", "NaN"))
@@ -56,7 +53,7 @@ def _dump_dict(source, nice, depth):
     ind += '%s:%s'
     items = (
         ind % (
-            _dumps(ensure_string(key), nice=nice, depth=depth),
+            _dumps(str(key), nice=nice, depth=depth),
             _dumps(value, nice=nice, depth=depth + 1)
         )
         for key, value
@@ -85,29 +82,11 @@ def _dump_number(source):
 
 
 def _dump_string(source):
-    return _dump_unicode(source.decode("utf8"))
+    return orig_dumps(source)
 
 
 def _dump_timedelta(source):
     return '"%s"' % source.total_seconds()
-
-
-def _dump_unicode(source):
-    norm = unicodedata_normalize("NFC", source)
-    norm = norm.replace('\\', '\\\\')
-    norm = norm.replace('\x1F', "")  # ^_ - Unit separator
-    norm = norm.replace('\x07', "")  # ^G - Bell, rings the bell...
-    norm = "".join(
-        ch if ord(ch) < 128 else "\u%04x" % ord(ch)
-        for ch
-        in norm
-    )
-    norm = norm.replace('"', '\\"')
-    norm = norm.replace('\n', '\\n')
-    norm = norm.replace("\r", "")
-    norm = norm.replace("\t", "")
-    norm = norm.replace(chr(7), "")
-    return '"%s"' % norm.encode("utf8")
 
 
 def _dump_uuid(source):
@@ -120,8 +99,6 @@ def _dumps(obj, nice=None, depth=0):
         output.write(_dump_none())
     elif isinstance(obj, str):
         output.write(_dump_string(obj))
-    elif isinstance(obj, unicode):
-        output.write(_dump_unicode(obj))
     elif isinstance(obj, bool):
         output.write(_dump_boolean(obj))
     elif isinstance(obj, (Decimal, float)):
@@ -130,7 +107,7 @@ def _dumps(obj, nice=None, depth=0):
         output.write(_dump_number(obj))
     elif isinstance(obj, dict):
         output.write(_dump_dict(obj, nice, depth))
-    # must be after str and unicode, since these are also iterable
+    # must be after str, since these are also iterable
     elif isinstance(obj, (GeneratorType, Iterable)):
         output.write(_dump_iterable(obj, nice, depth))
     elif isinstance(obj, UUID):
@@ -172,9 +149,15 @@ if __name__ == "__main__":
         "NNNNNNNNNNNNNNN": None,
         "FL": (2.0 / 3, 0.0),
         "Uvozovky": "'`\"",
+        # Czech alternative to "Quick brown fox jumps over lazy dog"
+        "text": "Příliš žluťoučký kůň úpěl ďábelské ódy"
     }
-    print test
-    print
-    print dumps2(test)
-    print dumps2(test, nice=True)
-    print loads(dumps2(test))
+    print("Original data:")
+    print(test)
+    print()
+    print("JSONified:")
+    print(dumps2(test))
+    print("Pretty JSONified:")
+    print(dumps2(test, nice=True))
+    print("deJSONified(JSONified):")
+    print(orig_loads(dumps2(test)))

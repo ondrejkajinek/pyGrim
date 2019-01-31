@@ -77,7 +77,7 @@ class FileSessionStorage(SessionStorage):
                 raise SessionInitializeError
 
     def _get_path(self, session_id):
-        if isinstance(session_id, basestring):
+        if isinstance(session_id, str):
             session_path = os_path.join(self._session_dir, session_id)
         else:
             log.error(

@@ -6,7 +6,6 @@ from inspect import getmembers, isclass, ismethod, getmro
 from locale import LC_ALL, setlocale
 from logging import getLogger
 from os import path
-from string import strip as string_strip
 from sys import exc_info
 
 # non-std

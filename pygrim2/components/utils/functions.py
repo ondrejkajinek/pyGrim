@@ -3,7 +3,6 @@
 # std
 from collections import Mapping
 from re import compile as re_compile
-from string import strip as string_strip
 from unicodedata import normalize as unicodedata_normalize
 
 REGEXP_TYPE = type(re_compile(r""))
@@ -27,7 +26,7 @@ def ensure_bool(a):
         res = a
     elif a is None:
         res = False
-    elif isinstance(a, basestring):
+    elif isinstance(a, str):
         res = (
             bool(int(a))
             if a.isdigit()
@@ -37,10 +36,6 @@ def ensure_bool(a):
         res = bool(a)
 
     return res
-
-
-def ensure_string(text):
-    return text.encode("utf8") if isinstance(text, unicode) else str(text)
 
 
 def ensure_tuple(variable):
@@ -89,15 +84,12 @@ def remove_trailing_slash(pattern):
 def split_to_iterable(value, separator=","):
     return (
         [part.strip() for part in value.split(separator)]
-        if isinstance(value, basestring)
+        if isinstance(value, str)
         else value
     )
 
 
 def strip_accent(text):
-    if isinstance(text, str):
-        text = unicode(text, "utf8")
-
     return "".join(
         c for c in unicodedata_normalize("NFKD", text) if ord(c) < 127
     )

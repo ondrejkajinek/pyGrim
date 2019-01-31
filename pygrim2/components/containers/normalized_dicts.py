@@ -2,7 +2,6 @@
 
 # local
 from .immutable_dict import ImmutableDict
-from ..utils import ensure_string
 
 
 class NormalizedDict(dict):
@@ -65,7 +64,7 @@ class NormalizedDict(dict):
         )
 
     def _normalize_key(self, key):
-        normalized = ensure_string(key).lower().replace("_", "-")
+        normalized = str(key).lower().replace("_", "-")
         if normalized.startswith("http-"):
             normalized = normalized[5:]
         elif normalized.startswith("x-"):

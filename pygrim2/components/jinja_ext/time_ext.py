@@ -25,17 +25,13 @@ class TimeExtension(Extension):
         environment.globals.update(self._get_functions())
 
     def as_date(self, date_, format_str=None):
-        if isinstance(date_, basestring):
+        if isinstance(date_, str):
             date_ = parse_dt(date_)
 
-        text = date_.strftime(format_str) if format_str else date_.isoformat()
-        if isinstance(text, str):
-            text = unicode(text, "utf8")
-
-        return text
+        return date_.strftime(format_str) if format_str else date_.isoformat()
 
     def date_format(self, source, format_str):
-        if isinstance(source, basestring):
+        if isinstance(source, str):
             obj = (
                 datetime.fromtimestamp(float(source))
                 if source.isdigit()
@@ -48,11 +44,7 @@ class TimeExtension(Extension):
         else:
             return None
 
-        text = obj.strftime(format_str)
-        if isinstance(text, str):
-            text = unicode(text, "utf8")
-
-        return text
+        return obj.strftime(format_str)
 
     def date_now(self):
         return date.today()

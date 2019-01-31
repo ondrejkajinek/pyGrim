@@ -3,7 +3,6 @@
 # std
 from logging import getLogger
 from re import compile as re_compile, IGNORECASE as re_IGNORECASE
-from string import strip as string_strip
 from urllib import unquote_plus
 
 # local
@@ -47,7 +46,7 @@ class Request(object):
                 data = {}
                 save = False
         elif attr == "RAW_POST":
-            data = "".join(part for part in self.environment["wsgi.input"])
+            data = b"".join(part for part in self.environment["wsgi.input"])
         elif attr in (GET, DELETE):
             data = self._parse_string(self.environment.get("query_string"))
         elif attr in (POST, PUT):

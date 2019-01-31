@@ -45,7 +45,7 @@ class Response(object):
             del self.headers["Content-Type"]
             self.body = ""
         else:
-            if isinstance(self.body, str):
+            if isinstance(self.body, bytes):
                 self.headers["Content-Length"] = len(self.body)
                 if is_head:
                     self.body = ""
@@ -93,7 +93,7 @@ class Response(object):
     def set_body(self, body):
         if isgeneratorfunction(body):
             self.body = body()
-        elif isinstance(body, unicode):
+        elif isinstance(body, str):
             self.body = body.encode("utf-8")
         else:
             self.body = body
