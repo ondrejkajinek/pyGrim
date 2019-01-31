@@ -556,14 +556,18 @@ class Server(object):
             if context.generates_response():
                 for part in context.get_response_body():
                     if not is_head:
-                        yield part
+                        yield(
+                            part
+                            if isinstance(part, bytes)
+                            else str(part).encode("utf8")
+                        )
             elif not is_head:
                 yield context.get_response_body()
         except HeadersAlreadySent as exc:
             yield "CRITICAL ERROR WHEN SENDING RESPONSE: %s" % exc
             for key, value in context.get_response_headers():
                 if key == "content-length":
-                    yield " " * int(value)
+                    yield(" " * int(value)).encode("utf8")
                     break
         else:
             context.save_session()
