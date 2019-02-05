@@ -6,9 +6,8 @@ from re import compile as re_compile, IGNORECASE as re_IGNORECASE
 from urllib.parse import unquote_plus
 
 # local
-from .methods import DELETE, GET, POST, PUT
 from ..components.containers import ImmutableDict, NormalizedImmutableDict
-from ..components.utils import get_instance_name
+from ..components.utils.decorators import lazy_property
 from ..components.utils.json2 import loads as json_loads
 
 log = getLogger("pygrim.http.request")
@@ -33,40 +32,58 @@ class Request(object):
         self._save_environment(environment)
         self.cookies = self._parse_string(self._headers.get("cookie"), ";")
 
-    def __getattr__(self, attr):
-        save = True
-        if (
-            attr == "JSON" and
-            self.content_type == "application/json"
-        ):
-            try:
-                data = json_loads(self.RAW_POST)
-            except BaseException:
-                log.exception("Error loding json data from request")
-                data = {}
-                save = False
-        elif attr == "RAW_POST":
-            data = b"".join(part for part in self.environment["wsgi.input"])
-        elif attr in (GET, DELETE):
-            data = self._parse_string(self.environment.get("query_string"))
-        elif attr in (POST, PUT):
-            if self.content_type in (
-                None, "application/x-www-form-urlencoded"
-            ):
-                data = self._parse_string(self.RAW_POST)
-            else:
-                data = {}
-        elif attr == "content_type":
-            data = self._get_content_type()
-        else:
-            raise AttributeError("%r object has no attribute %r" % (
-                get_instance_name(self), attr
-            ))
+    @lazy_property
+    def DELETE(self):
+        return self._GET()
 
-        if save:
-            setattr(self, attr, data)
+    @lazy_property
+    def GET(self):
+        return self._GET()
+
+    @property
+    def JSON(self):
+        if self.content_type != "application/json":
+            raise AttributeError()
+
+        try:
+            data = json_loads(self.RAW_POST)
+        except ValueError:
+            log.exception("Error loading JSON data from request")
+            data = {}
 
         return data
+
+    @lazy_property
+    def POST(self):
+        return self._POST()
+
+    @lazy_property
+    def PUT(self):
+        return self._POST()
+
+    @lazy_property
+    def RAW_POST(self):
+        return b"".join(part for part in self.environment["wsgi.input"])
+
+    @lazy_property
+    def content_type(self):
+
+        def _normalize_content_type(c_type):
+            return (
+                c_type.split(";", 1)[0].strip().lower() or None
+                if c_type
+                else None
+            )
+
+        c_type = _normalize_content_type(self._headers.get("content_type"))
+        # fallback for some special cases when content type is not present
+        #   in headers but can be found in environment without HTTP_ prefix
+        if not c_type:
+            c_type = _normalize_content_type(
+                self.environment.get("content_type")
+            )
+
+        return c_type or None
 
     def special_port(self, scheme, port):
         try:
@@ -76,26 +93,6 @@ class Request(object):
 
     def _accept_language(self, env):
         return env.pop("ACCEPT_LANGUAGE", "").split(",")
-
-    def _get_content_type(self):
-
-        def _normalize_content_type(c_type):
-            if c_type:
-                c_type = c_type.split(";", 1)[0].strip().lower()
-
-            return c_type or None
-
-        c_type = _normalize_content_type(
-            self._headers.get("content_type")
-        )
-        # fallback for some special cases when content type is not present
-        #   in headers but can be found in environment without HTTP_ prefix
-        if not c_type:
-            c_type = _normalize_content_type(
-                self.environment.get("content_type")
-            )
-
-        return c_type or None
 
     def _get_host(self, env):
         try:
@@ -168,3 +165,16 @@ class Request(object):
         env["server_port"] = self._get_port(env)
         env["accept_language"] = self._accept_language(env)
         self.environment = NormalizedImmutableDict(**env)
+
+    def _GET(self):
+        return self._parse_string(self.environment.get("query_string"))
+
+    def _POST(self):
+        if self.content_type in (
+            None, "application/x-www-form-urlencoded"
+        ):
+            data = self._parse_string(self.RAW_POST)
+        else:
+            data = {}
+
+        return data
