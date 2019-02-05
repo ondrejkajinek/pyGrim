@@ -58,14 +58,14 @@ class Second(object):
         context.set_response_body((
             str(i) * 100 + "<br />"
             for i
-            in xrange(4)
+            in range(4)
         ))
 
     @route(GET, name="generator_function")
     def generator_fction(self, context):
 
         def fction():
-            for i in xrange(10):
+            for i in range(10):
                 yield str(i) * 100 + "<br />"
                 sleep(2)
 
@@ -76,7 +76,7 @@ class Second(object):
     def broken_generator_fction(self, context):
 
         def fction():
-            for i in xrange(10):
+            for i in range(10):
                 yield str(i) * 100 + "<br />"
             raise RuntimeError()
 
