@@ -7,11 +7,9 @@ from jinja2.ext import Extension
 from time import gmtime, strftime
 from ..formater import Formater
 
-DTS = (
-    type(datetime.min),
-    type(date.min),
-)
-DTT = type(time.min)
+DT = type(date.min)
+DTT = type(datetime.min)
+TT = type(time.min)
 
 months = {
     "cs": [
@@ -60,20 +58,12 @@ class TimeExtension(Extension):
         return text
 
     def date_format(self, source, format_str, locale=None):
-        if isinstance(source, basestring):
-            obj = (
-                datetime.fromtimestamp(float(source))
-                if source.isdigit()
-                else parse_dt(source)
-            )
-        elif isinstance(source, (int, long)):
-            obj = datetime.fromtimestamp(source)
-        elif isinstance(source, DTS):
-            obj = source
-        else:
-            return None
-
-        return self._format_datetime(obj, format_str, locale)
+        obj = self.parse_datetime(source)
+        return (
+            None
+            if obj is None
+            else self._format_datetime(obj, format_str, locale)
+        )
 
     def date_now(self):
         return date.today()
@@ -84,15 +74,53 @@ class TimeExtension(Extension):
     def minutes_from_seconds(self, seconds):
         return "%d:%d" % (seconds // 60, seconds % 60)
 
-    def time_format(self, source, format_str, locale=None):
+    def parse_date(self, source):
         if isinstance(source, basestring):
-            obj = parse_dt(source).time()
-        elif isinstance(source, DTS):
-            obj = source.time()
+            obj = parse_dt(source).date()
         elif isinstance(source, DTT):
+            obj = source.date()
+        elif isinstance(source, DT):
             obj = source
         else:
-            return None
+            obj = None
+
+        return obj
+
+    def parse_datetime(self, source):
+        if isinstance(source, basestring):
+            obj = (
+                datetime.fromtimestamp(float(source))
+                if source.isdigit()
+                else parse_dt(source)
+            )
+        elif isinstance(source, (int, long)):
+            obj = datetime.fromtimestamp(source)
+        elif isinstance(source, (DTT, DT)):
+            obj = source
+        else:
+            obj = None
+
+        return obj
+
+    def parse_time(self, source):
+        if isinstance(source, basestring):
+            obj = parse_dt(source).time()
+        elif isinstance(source, (DTT, DT)):
+            obj = source.time()
+        elif isinstance(source, TT):
+            obj = source
+        else:
+            obj = None
+
+        return obj
+
+    def time_format(self, source, format_str, locale=None):
+        obj = self.parse_time(source)
+        return (
+            None
+            if obj is None
+            else self._format_datetime(obj, format_str, locale)
+        )
 
         return self._format_datetime(obj, format_str, locale)
 
@@ -136,5 +164,8 @@ class TimeExtension(Extension):
         return {
             "date_now": self.date_now,
             "datetime_now": self.datetime_now,
-            "month_name": self.month_name
+            "month_name": self.month_name,
+            "parse_date": self.parse_date,
+            "parse_datetime": self.parse_datetime,
+            "parse_time": self.parse_time
         }
