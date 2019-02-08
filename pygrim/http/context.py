@@ -283,6 +283,8 @@ class Context(object):
                 log.warning(
                     "Language %r is supported only in debugmode", language
                 )
+                self._language = self._default_language
+                return
             if self.formater:
                 self.formater._set_locale(language)
             else:
@@ -293,6 +295,7 @@ class Context(object):
             )
         else:
             log.warning("Language %r is not supported", language)
+            self._language = self._default_language
 
     def set_response_body(self, body):
         self._response.body = body
@@ -340,7 +343,7 @@ class Context(object):
 
         return value
 
-    def _select_language(self):
+    def _select_language(self, debug=False):
         language = self._language_map.get(self.GET(self._lang_switch))
         if language is None:
             cookieval = self._request.cookies.get(self._lang_key)
@@ -365,11 +368,8 @@ class Context(object):
                     next((lang for lang in accept_languages if lang), None) or
                     self._default_language
                 )
-        else:
-            # lang was in url or in get => create or prolong lang cookie
-            self.set_language(language)
-
-        return language
+        self.set_language(language, debug=debug)
+        return self._language
 
     def get_canonical_url(self, _raise_on_error=False, **args):
         def get_in(where, keys):
