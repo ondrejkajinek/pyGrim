@@ -1,3 +1,10 @@
+pygrim (0.2.22) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * OndraK: added functions for parsing date, datetime and time
+
+ -- Václav Pokluda <root@darky>  Fri, 08 Feb 2019 11:53:13 +0100
+
 pygrim (0.2.21) testing; urgency=medium
 
   * COMMIT MESSASGES
