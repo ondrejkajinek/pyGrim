@@ -46,6 +46,7 @@ class Context(object):
         self._language = self._default_language
         self._lang_key = None
         self._languages = (self._default_language,)
+        self._debug_languages = ()
         self._language_map = {}
         if self.config.get("pygrim:i18n", False):
             self._initialize_localization()
@@ -167,8 +168,16 @@ class Context(object):
             ret = None
         return ret
 
-    def get_available_languages(self):
-        return tuple(self._languages)
+    def get_available_languages(self, debug=False):
+        debug = debug or self._debug
+        if debug:
+            return tuple(self._languages)
+        else:
+            return tuple(
+                language
+                for language in self._languages
+                if language not in self._debug_languages
+            )
 
     def get_request_content_type(self):
         return self._request.environment["content_type"]
@@ -266,9 +275,14 @@ class Context(object):
     def session_loaded(self):
         return self._session_loaded
 
-    def set_language(self, language):
+    def set_language(self, language, debug=False):
+        debug = debug or self._debug
         language = self._language_map.get(language)
         if language in self._languages:
+            if not debug and language in self._debug_languages:
+                log.warning(
+                    "Language %r is supported only in debugmode", language
+                )
             if self.formater:
                 self.formater._set_locale(language)
             else:
@@ -298,6 +312,9 @@ class Context(object):
             "pygrim:i18n:cookie_key", "site_language"
         )
         self._languages = self.config.get("pygrim:i18n:locales")
+        self._debug_languages = (
+            self.config.get("pygrim:i18n:debug_locales") or ()
+        )
         self._language_map = {
             lang: lang
             for lang
