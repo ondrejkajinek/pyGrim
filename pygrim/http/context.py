@@ -316,7 +316,7 @@ class Context(object):
         )
         self._languages = self.config.get("pygrim:i18n:locales")
         self._debug_languages = (
-            self.config.get("pygrim:i18n:debug_locales") or ()
+            self.config.get("pygrim:i18n:debug_locales", None) or ()
         )
         self._language_map = {
             lang: lang
