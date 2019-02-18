@@ -4,7 +4,7 @@ from .components.exceptions import (
     WrongConfigBase, WrongRouterBase, WrongSessionHandlerBase, WrongViewBase
 )
 from .components.log import initialize_loggers
-from .components.routing import AbstractRouter, Router
+from .components.routing import AbstractRouter, Route, Router
 from .components.routing import (
     DispatchFinished, MissingRouteHandle, RouteNotRegistered, RoutePassed
 )
@@ -15,10 +15,12 @@ from .components.session import (
 from .components.utils import ensure_tuple, get_class_name, get_method_name
 from .components.utils import remove_trailing_slash
 from .components.view import AbstractView, DummyView, JinjaView
+from .decorators import method
 from .http import Context, Request, Response
 
 from inspect import getmembers, ismethod, getmro
 from jinja2 import escape, Markup
+from json import dumps as json_dumps
 from locale import LC_ALL, setlocale
 from logging import getLogger
 from os import path
@@ -274,6 +276,13 @@ class Server(object):
 
     def load_session(self, context):
         context.load_session(self.session_handler)
+
+    @method(session=False)
+    def status_alive(self, context):
+        context.set_response_content_type("application/json")
+        context.set_response_body(json_dumps({
+            "alive": True
+        }))
 
     def _handle_by_route(self, route, context):
         if route.requires_session():
@@ -534,6 +543,21 @@ class Server(object):
         if locale:
             log.debug("Setting locale 'LC_ALL' to %r", locale)
             setlocale(LC_ALL, str(locale))
+
+        try:
+            system_alive = self.config.get("pygrim:system_alive")
+        except KeyError:
+            log.warning(
+                "pygrim:system_alive is not configured! "
+                "Default /system_alive will be used. "
+                "Please check if there is no route clash."
+            )
+            system_alive = "system_alive"
+
+        if system_alive:
+            self.router.map(Route(
+                ("GET", "POST"), "/" + system_alive, "status_alive"
+            ))
 
     def _set_internal_class(self, attr_name, new_class, required_parent):
         if issubclass(new_class, required_parent):
