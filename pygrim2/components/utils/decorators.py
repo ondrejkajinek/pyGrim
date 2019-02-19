@@ -1,6 +1,6 @@
 # coding: utf8
 
-from functools import wraps
+from functools import update_wrapper, wraps
 from locale import LC_ALL, getlocale, setlocale
 
 
@@ -20,3 +20,18 @@ def c_locale(func):
             return res
 
     return wrapper
+
+
+class lazy_property:
+
+    def __init__(self, fun):
+        self.fun = fun
+        update_wrapper(self, fun)
+
+    def __get__(self, obj, cls=None):
+        if obj is None:
+            return self
+
+        value = self.fun(obj)
+        setattr(obj, self.fun.__name__, value)
+        return value

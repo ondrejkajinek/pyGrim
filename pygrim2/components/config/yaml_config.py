@@ -1,8 +1,5 @@
 # coding: utf8
 
-# std
-from __future__ import print_function
-
 # non-std
 try:
     from uwsgi import log as uwsgi_log

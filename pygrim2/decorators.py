@@ -1,7 +1,6 @@
 # coding: utf8
 
 # std
-from __future__ import print_function
 from functools import wraps
 from logging import getLogger
 from re import compile as re_compile

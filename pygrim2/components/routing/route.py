@@ -199,7 +199,7 @@ class NoRoute(Route):
         self._methods = ()
         self._name = "<no route>"
 
-    def __nonzero__(self):
+    def __bool__(self):
         return False
 
     def get_handle_name(self):
