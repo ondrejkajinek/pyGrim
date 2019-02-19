@@ -673,7 +673,9 @@ class Server(object):
     def _status_alive(self, context):
         self._set_json_view(context, "json")
         context.view_data = {
-            "alive": True
+            "status": 200,
+            "status_message": "OK",
+            "system_alive": 1
         }
 
     def _use_dump_view(self, context):
