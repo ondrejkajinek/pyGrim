@@ -70,7 +70,7 @@ def get_method_name(method):
 
 
 def is_regex(pattern):
-    return type(pattern) == REGEXP_TYPE
+    return isinstance(pattern, REGEXP_TYPE)
 
 
 def remove_trailing_slash(pattern):
