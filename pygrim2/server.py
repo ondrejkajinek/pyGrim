@@ -382,9 +382,7 @@ class Server(object):
                     self._default_not_found_handler(context=context, exc=exc)
                 else:
                     self._handle_not_found(context=context, exc=exc)
-
-                self._prepare_output(context)
-            else:
+            finally:
                 self._prepare_output(context)
         except StopDispatch:
             pass
