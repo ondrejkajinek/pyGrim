@@ -1,3 +1,12 @@
+pygrim2 (2.2.0) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * pyGrim's route /system_alive (url configurable via
+    pygrim:status_alive, can be turned off via pygrim:status_alive =
+    false). Returns {alive: true}
+
+ -- OndraK <ondrej.kajinek@gmail.com>  Tue, 19 Feb 2019 10:49:53 +0100
+
 pygrim2 (2.1.6) testing; urgency=medium
 
   * COMMIT MESSASGES
