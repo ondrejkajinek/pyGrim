@@ -1,7 +1,6 @@
 # coding: utf8
 
 # std
-from __future__ import print_function
 from json import loads as json_loads
 
 # non-std
