@@ -1,3 +1,11 @@
+pygrim (0.3.1) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * #52746: changed result of status_alive function
+  * #52746: fixed configured value of system_alive
+
+ -- OndraK <root@ondrak>  Tue, 19 Feb 2019 11:42:02 +0100
+
 pygrim (0.3.0) testing; urgency=medium
 
   * COMMIT MESSASGES
