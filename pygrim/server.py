@@ -545,18 +545,20 @@ class Server(object):
             setlocale(LC_ALL, str(locale))
 
         try:
-            system_alive = self.config.get("pygrim:system_alive")
-        except KeyError:
+            system_alive = (
+                "/" + self.config.get("pygrim:system_alive").lstrip("/")
+            )
+        except (AttributeError, KeyError):
             log.warning(
                 "pygrim:system_alive is not configured! "
                 "Default /system_alive will be used. "
                 "Please check if there is no route clash."
             )
-            system_alive = "system_alive"
+            system_alive = "/system_alive"
 
         if system_alive:
             self.router.map(Route(
-                ("GET", "POST"), "/" + system_alive, "status_alive"
+                ("GET", "POST"), system_alive, "status_alive"
             ))
 
     def _set_internal_class(self, attr_name, new_class, required_parent):
