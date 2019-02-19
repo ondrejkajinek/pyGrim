@@ -1,6 +1,3 @@
-# coding: utf8
-
-
 def yaml_load(text, Loader):
     return {}
 

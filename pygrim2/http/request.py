@@ -1,5 +1,3 @@
-# coding: utf8
-
 # std
 from logging import getLogger
 from re import compile as re_compile, IGNORECASE as re_IGNORECASE

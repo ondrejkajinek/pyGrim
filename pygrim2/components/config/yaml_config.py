@@ -1,5 +1,3 @@
-# coding: utf8
-
 # non-std
 try:
     from uwsgi import log as uwsgi_log

@@ -1,5 +1,3 @@
-# coding: utf8
-
 from .abstract_l10n import AbstractL10n
 
 

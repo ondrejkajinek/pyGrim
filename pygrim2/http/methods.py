@@ -1,5 +1,3 @@
-# coding: utf8
-
 DELETE = "DELETE"
 GET = "GET"
 HEAD = "HEAD"

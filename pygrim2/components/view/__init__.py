@@ -1,5 +1,3 @@
-# coding: utf8
-
 from .abstract_view import AbstractView
 from .dummy_view import DummyView
 from .dump_view import DumpView

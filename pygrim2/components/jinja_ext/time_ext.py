@@ -1,5 +1,3 @@
-# coding: utf8
-
 # std
 from datetime import date, datetime
 from time import gmtime, strftime

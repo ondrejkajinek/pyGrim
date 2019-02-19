@@ -1,5 +1,3 @@
-# coding: utf8
-
 from gettext import translation as gettext_translation
 
 # local

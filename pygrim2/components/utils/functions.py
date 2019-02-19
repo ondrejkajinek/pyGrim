@@ -1,5 +1,3 @@
-# coding: utf8
-
 # std
 from collections import Mapping
 from re import compile as re_compile

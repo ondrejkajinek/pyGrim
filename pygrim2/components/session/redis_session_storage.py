@@ -1,5 +1,3 @@
-# coding: utf8
-
 # std
 from logging import getLogger
 from pickle import HIGHEST_PROTOCOL

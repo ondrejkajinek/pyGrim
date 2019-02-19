@@ -1,6 +1,3 @@
-# coding: utf8
-
-
 class AttributeDict(dict):
 
     def __init__(self, *args, **kwargs):

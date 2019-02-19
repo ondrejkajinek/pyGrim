@@ -1,5 +1,3 @@
-# coding: utf8
-
 # std
 from collections import Iterable
 from datetime import date, datetime, timedelta

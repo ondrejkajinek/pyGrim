@@ -1,5 +1,3 @@
-# coding: utf8
-
 from .components.routing import RouteGroup, RoutePassed
 from .decorators import error_handler, not_found_handler
 from .decorators import json_method

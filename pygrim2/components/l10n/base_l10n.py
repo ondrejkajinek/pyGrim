@@ -1,5 +1,3 @@
-# coding: utf8
-
 from logging import getLogger
 from os import path
 

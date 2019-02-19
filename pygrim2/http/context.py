@@ -1,5 +1,3 @@
-# coding: utf8
-
 # std
 from inspect import isgenerator
 from json import dumps as json_dumps

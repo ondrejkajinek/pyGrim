@@ -1,5 +1,3 @@
-# coding: utf8
-
 # std
 from logging import error as log_error, exception as log_exception
 from logging import Formatter, getLogger, handlers

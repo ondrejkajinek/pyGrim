@@ -1,5 +1,3 @@
-# coding: utf8
-
 from .counter import Counter
 from .functions import (
     deep_update, ensure_tuple, fix_trailing_slash,

@@ -1,5 +1,3 @@
-# coding: utf8
-
 # std
 from logging import getLogger
 from uuid import uuid4

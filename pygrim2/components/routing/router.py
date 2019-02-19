@@ -1,5 +1,3 @@
-# coding: utf8
-
 # std
 from re import compile as re_compile
 

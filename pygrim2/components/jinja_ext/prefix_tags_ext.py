@@ -1,5 +1,3 @@
-# coding: utf8
-
 # std
 
 # non-std

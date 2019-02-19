@@ -1,5 +1,3 @@
-# coding: utf8
-
 # local
 from .config import AbstractConfig
 from .l10n import AbstractL10n

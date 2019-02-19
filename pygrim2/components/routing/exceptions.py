@@ -1,6 +1,3 @@
-# coding: utf8
-
-
 class BaseRoutingException(Exception):
     pass
 

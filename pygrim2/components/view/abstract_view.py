@@ -1,6 +1,3 @@
-# coding: utf8
-
-
 class AbstractView(object):
 
     def __init__(self, config, **kwargs):

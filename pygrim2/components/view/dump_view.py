@@ -1,5 +1,3 @@
-# coding: utf8
-
 # local
 from .base_view import BaseView
 from ..utils.json2 import dumps as json_dumps

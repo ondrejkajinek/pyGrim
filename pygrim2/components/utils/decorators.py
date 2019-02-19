@@ -1,5 +1,3 @@
-# coding: utf8
-
 from functools import update_wrapper, wraps
 from locale import LC_ALL, getlocale, setlocale
 

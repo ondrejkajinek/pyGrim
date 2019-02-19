@@ -1,5 +1,3 @@
-# coding: utf8
-
 from jinja2.nodes import List, Tuple
 
 

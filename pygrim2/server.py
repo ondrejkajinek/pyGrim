@@ -1,5 +1,3 @@
-# coding: utf8
-
 # std
 from collections import OrderedDict
 from inspect import getmembers, isclass, ismethod, getmro

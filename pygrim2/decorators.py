@@ -1,5 +1,3 @@
-# coding: utf8
-
 # std
 from functools import wraps
 from logging import getLogger

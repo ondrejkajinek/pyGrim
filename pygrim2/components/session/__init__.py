@@ -1,5 +1,3 @@
-# coding: utf8
-
 from .dummy_session import DummySession
 from .file_session_storage import FileSessionStorage
 from .redis_session_storage import RedisSessionStorage

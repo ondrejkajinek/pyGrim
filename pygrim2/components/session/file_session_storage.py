@@ -1,5 +1,3 @@
-# coding: utf8
-
 # std
 from logging import getLogger
 from os import mkdir as os_mkdir, path as os_path, remove as os_remove

@@ -1,6 +1,3 @@
-# coding: utf8
-
-
 class AbstractL10n(object):
 
     def __init__(self, config, *args, **kwargs):

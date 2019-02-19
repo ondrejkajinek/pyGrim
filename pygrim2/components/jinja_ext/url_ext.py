@@ -1,5 +1,3 @@
-# coding: utf8
-
 from os import path
 
 from jinja2.ext import Extension

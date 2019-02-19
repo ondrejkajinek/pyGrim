@@ -1,5 +1,3 @@
-# coding: utf8
-
 # std
 from json import loads as json_loads
 

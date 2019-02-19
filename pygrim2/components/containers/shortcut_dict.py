@@ -1,6 +1,3 @@
-# -*- coding: utf8 -*-
-
-
 class ShortcutDict(dict):
 
     def __init__(self, *args, **kwargs):

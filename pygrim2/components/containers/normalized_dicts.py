@@ -1,5 +1,3 @@
-# coding: utf8
-
 # local
 from .immutable_dict import ImmutableDict
 

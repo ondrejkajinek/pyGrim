@@ -1,6 +1,3 @@
-# coding: utf8
-
-
 class HeadersAlreadySent(RuntimeError):
 
     def __init__(self, reason):

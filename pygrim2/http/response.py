@@ -1,5 +1,3 @@
-# coding: utf8
-
 # std
 from datetime import datetime, timedelta
 from inspect import isgenerator, isgeneratorfunction
