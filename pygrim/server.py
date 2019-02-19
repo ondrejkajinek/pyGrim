@@ -281,7 +281,9 @@ class Server(object):
     def status_alive(self, context):
         context.set_response_content_type("application/json")
         context.set_response_body(json_dumps({
-            "alive": True
+            "status": 200,
+            "status_message": "OK",
+            "system_alive": 1
         }))
 
     def _handle_by_route(self, route, context):
