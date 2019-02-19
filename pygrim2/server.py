@@ -486,7 +486,8 @@ class Server(object):
 
             self._router.map(route)
             start_log.debug(
-                "Method %r registered to handle route %s", handle, route
+                "Method %r registered to handle route %s",
+                get_method_name(handle), route
             )
 
     def _register_l10n(self):
@@ -496,7 +497,7 @@ class Server(object):
             raise WrongL10nBase(l10n)
 
         self._l10n = l10n
-        start_log.debug("Registered L10n class: %r", self._l10n)
+        start_log.debug("Registered L10n class %r", get_instance_name(l10n))
 
     def _register_router(self):
         router_class = self._find_router_class()
