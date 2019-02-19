@@ -537,7 +537,7 @@ class Server(object):
             )
 
     def _route_dump(self, context):
-        self._set_dump_view(context)
+        self._set_json_view(context, "json")
         context.view_data = {
             "routes": [
                 route._asdict()
@@ -571,12 +571,12 @@ class Server(object):
         else:
             context.save_session()
 
-    def _set_dump_view(self, context):
-        context.set_response_content_type("application/json")
-        context.set_view("dump")
-
     def _set_fallback_view(self, context):
         context.set_view("dummy" if self._view_disabled() else "raw")
+
+    def _set_json_view(self, context, view):
+        context.set_response_content_type("application/json")
+        context.set_view(view)
 
     def _setup_env(self):
         self._debug = self.config.getbool("pygrim:debug", True)
@@ -617,6 +617,21 @@ class Server(object):
                 ("GET", "POST"), "/" + route_dump.lstrip("/"), self._route_dump
             ))
 
+        try:
+            system_alive = self.config.get("pygrim:system_alive")
+        except KeyError:
+            log.warning(
+                "pygrim:system_alive is not configured! "
+                "Default /system_alive will be used. "
+                "Please check if there is no route clash."
+            )
+            system_alive = "system_alive"
+
+        if system_alive:
+            self._router.map(Route(
+                ("GET", "POST"), "/" + system_alive, self._status_alive
+            ))
+
         start_log.debug("PyGrim environment set up.")
 
     def _set_internal_class(self, attr_name, new_class, required_parent):
@@ -655,6 +670,12 @@ class Server(object):
 
         return abs_path
 
+    def _status_alive(self, context):
+        self._set_json_view(context, "json")
+        context.view_data = {
+            "alive": True
+        }
+
     def _use_dump_view(self, context):
         context.view_data["content_type"] = context._response.headers.get(
             "Content-Type"
@@ -667,7 +688,7 @@ class Server(object):
         if context.session_loaded():
             context.view_data["session"] = context.session
 
-        self._set_dump_view(context)
+        self._set_json_view(context, "dump")
 
     def _versioned_file(self, static_file):
         abs_path = self._static_file_abs_path(static_file)
