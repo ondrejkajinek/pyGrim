@@ -619,18 +619,20 @@ class Server(object):
             ))
 
         try:
-            system_alive = self.config.get("pygrim:system_alive")
+            system_alive = (
+                "/" + self.config.get("pygrim:system_alive").lstrip("/")
+            )
         except KeyError:
             log.warning(
                 "pygrim:system_alive is not configured! "
                 "Default /system_alive will be used. "
                 "Please check if there is no route clash."
             )
-            system_alive = "system_alive"
+            system_alive = "/system_alive"
 
         if system_alive:
             self._router.map(Route(
-                ("GET", "POST"), "/" + system_alive, self._status_alive
+                ("GET", "POST"), system_alive, self._status_alive
             ))
 
         start_log.debug("PyGrim environment set up.")
