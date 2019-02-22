@@ -45,7 +45,7 @@ class NormalizedImmutableDict(ImmutableDict):
         )
 
     def _normalize_key(self, key):
-        normalized = key.lower().replace("-", "_")
+        normalized = key.lower().replace("-", "-")
         if normalized.startswith("http_"):
             normalized = normalized[5:]
         elif normalized.startswith("x_"):

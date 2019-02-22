@@ -88,12 +88,12 @@ class BaseExtension(Extension):
             text = str(text)
 
         res = "".join(
-            c
+            c.lower()
             for c
-            in strip_accent(text).replace(" ", "_")
+            in strip_accent(text).replace(" ", "-")
             if c.isalnum() or c in "_-.:"
         )
-        return res or "_"
+        return res or "-"
 
     def seo(self, text, replace_char="-"):
         ret = self.DASH_SQUEEZER.sub(
