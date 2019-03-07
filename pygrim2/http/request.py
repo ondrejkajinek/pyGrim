@@ -1,7 +1,7 @@
 # std
 from logging import getLogger
 from re import compile as re_compile, IGNORECASE as re_IGNORECASE
-from urllib.parse import unquote_plus
+from urllib.parse import parse_qs
 
 # local
 from ..components.containers import ImmutableDict, NormalizedImmutableDict
@@ -28,7 +28,13 @@ class Request(object):
     def __init__(self, environment):
         self._parse_headers(environment)
         self._save_environment(environment)
-        self.cookies = self._parse_string(self._headers.get("cookie"), ";")
+        self.cookies = self._parse_string(
+            "&".join(
+                part.strip()
+                for part
+                in self._headers.get("cookie").split(";")
+            )
+        )
 
     @lazy_property
     def DELETE(self):
@@ -137,21 +143,11 @@ class Request(object):
 
         self._headers = NormalizedImmutableDict(**headers)
 
-    def _parse_string(self, source, pairs_separator="&"):
-        source = source or ""
-        parts = (item for item in source.split(pairs_separator) if item)
-        parsed = {}
-        for part in parts:
-            key, value = (
-                [unquote_plus(i).strip() for i in part.split("=", 1)]
-                if "=" in part
-                else (unquote_plus(part.strip()), None)
-            )
-            parsed.setdefault(key, []).append(value)
-
-        for key in parsed.keys():
-            if len(parsed[key]) == 1:
-                parsed[key] = parsed[key][0]
+    def _parse_string(self, source):
+        parsed = parse_qs(source or "")
+        for key, value in parsed.items():
+            if len(value) == 1:
+                parsed[key] = value[0]
 
         return ImmutableDict(parsed)
 
