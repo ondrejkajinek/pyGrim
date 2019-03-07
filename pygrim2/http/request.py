@@ -32,7 +32,7 @@ class Request(object):
             "&".join(
                 part.strip()
                 for part
-                in self._headers.get("cookie").split(";")
+                in (self._headers.get("cookie") or "").split(";")
             )
         )
 
