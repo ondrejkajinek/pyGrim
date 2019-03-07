@@ -171,7 +171,7 @@ class Request(object):
         if self.content_type in (
             None, "application/x-www-form-urlencoded"
         ):
-            data = self._parse_string(self.RAW_POST)
+            data = self._parse_string(str(self.RAW_POST, "utf8"))
         else:
             data = {}
 
