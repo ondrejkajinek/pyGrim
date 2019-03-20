@@ -9,6 +9,7 @@ from .exceptions import HeadersAlreadySent
 from .methods import DELETE, GET, HEAD, POST, PUT
 from ..components.routing import StopDispatch
 from ..components.containers import ImmutableDict, NormalizedDict
+from ..components.utils.decorators import lazy_property
 
 log = getLogger("pygrim.http.context")
 
@@ -25,13 +26,13 @@ class Context(object):
         self.template = None
         self.view_data = {}
 
-        super(Context, self).__setattr__("_can_create_session", True)
+        self._can_create_session = True
         self._force_https = config.getbool("context:force_https", False)
         self._request = request
         self._response = response
         self._session_handler = session_handler
-        super(Context, self).__setattr__("_save_session", False)
-        super(Context, self).__setattr__("_session_loaded", False)
+        self._save_session = False
+        self._session_loaded = False
         self._suppress_port = config.getbool("context:suppress_port", False)
         self._uses_flash = config.getbool("session:flash", True)
         self._view = None
@@ -40,24 +41,34 @@ class Context(object):
         self._initialize_localization()
         self.set_route_params()
 
-    def __getattr__(self, key):
-        if key == "session":
-            if (
-                self._can_create_session is False and
-                self._request.cookies.get("SESS_ID") is None
-            ):
-                raise HeadersAlreadySent("can't create new session!")
+    @property
+    def can_crate_session(self):
+        return self._can_create_session
 
-            self.load_session()
-            return self.session
+    @property
+    def save_session(self):
+        return self._save_session
 
-        raise AttributeError(key)
+    @save_session.setter
+    def save_session(self, value):
+        if value is True or value is False:
+            self._save_session = value
+        else:
+            raise ValueError("save_session must be boolean")
 
-    def __setattr__(self, key, value):
-        if key in ("_can_create_session", "_session_loaded", "_save_session"):
-            raise RuntimeError("%r is read-only!" % key)
+    @lazy_property
+    def session(self):
+        if self._can_create_session is False:
+            raise HeadersAlreadySent("Can't create new session!")
 
-        super(Context, self).__setattr__(key, value)
+        session = self._load_session()
+        self._save_session = True
+        self._session_loaded = True
+        return session
+
+    @property
+    def session_loaded(self):
+        return self._session_loaded
 
     def DELETE(self, key=None, fallback=None):
         return self._request_param(DELETE, key, fallback)
@@ -150,7 +161,7 @@ class Context(object):
 
     def finalize_response(self):
         self._response.finalize(is_head=self.is_request_head())
-        super(Context, self).__setattr__("_can_create_session", False)
+        self._can_create_session = False
 
     def flash(self, type_, message):
         if "_flash" in self.session:
@@ -245,38 +256,19 @@ class Context(object):
     def is_request_post(self):
         return self._request.environment["request_method"] == POST
 
-    def load_session(self):
-        if self._session_loaded is False:
-            self.session = self._session_handler.load(self._request)
-            super(Context, self).__setattr__("_session_loaded", True)
-            super(Context, self).__setattr__("_save_session", True)
-            self.add_cookie(**self._session_handler.cookie_for(self.session))
-            log.debug(
-                "Session handler: %r loaded session: %r",
-                type(self._session_handler), self.session
-            )
-            if self._uses_flash and "_flash" not in self.session:
-                self.session["_flash"] = []
-
     def redirect(self, url, status=302):
         self._response.status = status
         self._response.headers["Location"] = url
         raise StopDispatch()
 
     def save_session(self):
-        if self._session_loaded and self._save_session:
+        if self.session_loaded and self.save_session:
             self._session_handler.save(self.session)
-
-    def session_loaded(self):
-        return self._session_loaded
 
     def set_language(self, language):
         if self._check_language(language):
             self._language = language
             self._save_language_cookie()
-
-    def set_save_session(self, save):
-        super(Context, self).__setattr__("_save_session", save)
 
     def set_temp_language(self, language):
         if self._check_language(language):
@@ -311,6 +303,18 @@ class Context(object):
         self._language, save_cookie = self.l10n.select_language(self)
         if save_cookie:
             self._save_language_cookie()
+
+    def _load_session(self):
+        session = self._session_handler.load(self._request)
+        self.add_cookie(**self._session_handler.cookie_for(session))
+        log.debug(
+            "Session handler: %r loaded session: %r",
+            type(self._session_handler), session
+        )
+        if self._uses_flash and "_flash" not in session:
+            session["_flash"] = []
+
+        return session
 
     def _request_param(self, method, key=None, fallback=None):
         try:

@@ -358,7 +358,7 @@ class Server(object):
                 get_class_name(exc.__class__), get_method_name(handler)
             )
             if getattr(handler, "_save_session", False):
-                context.set_save_session(True)
+                context.save_session = True
 
             break
 
@@ -391,7 +391,7 @@ class Server(object):
                     context.current_route.get_handle_name()
                 )
                 context.current_route = NoRoute()
-                context.set_save_session(False)
+                context.save_session = False
                 self._handle_error(context=context, exc=exc_info()[1])
             except StopDispatch:
                 pass
@@ -687,7 +687,7 @@ class Server(object):
             for key
             in ("current_route", "template", "_route_params")
         )
-        if context.session_loaded():
+        if context.session_loaded:
             context.view_data["session"] = context.session
 
         self._set_json_view(context, "dump")
