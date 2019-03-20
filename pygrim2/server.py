@@ -76,19 +76,6 @@ def register_view_class(name, cls):
     _register_component_type(name, cls, "View", "KNOWN_VIEW_CLASSES")
 
 
-class ResponseWrap(object):
-    def __init__(self, start_response):
-        self._start_response = start_response
-
-    def __call__(self, status, headers):
-        log.debug("Starting response with: %r: %r", status, headers)
-        self._start_response(status, headers)
-        self._start_response = self.noop
-
-    def noop(self, status, headers):
-        pass
-
-
 class Server(object):
 
     KNOWN_CONFIG_FORMATS = {
@@ -148,7 +135,6 @@ class Server(object):
         else:
             context.finalize_response()
 
-        start_response = ResponseWrap(start_response)
         start_response(
             context.get_response_status_code(),
             context.get_response_headers()
