@@ -35,17 +35,20 @@ class RouteObject(object):
 class RouteGroup(RouteObject):
 
     def __add__(self, other):
-        if not isinstance(other, RouteObject):
-            raise NotImplemented()
-
         if isinstance(other, RouteGroup):
             result = RouteGroup(self._concat_pattern(other))
-        else:
+        elif isinstance(other, Route):
             result = Route(
                 other._methods,
                 self._concat_pattern(other),
                 other._handle,
                 other._name
+            )
+        else:
+            raise TypeError(
+                "unsupported operand type(s) for +: 'RouteGroup' and '%s'" % (
+                    type(other),
+                )
             )
 
         return result
