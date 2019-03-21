@@ -144,7 +144,7 @@ class Request(object):
         self._headers = NormalizedImmutableDict(**headers)
 
     def _parse_string(self, source):
-        parsed = parse_qs(source or "")
+        parsed = parse_qs(source or "", keep_blank_values=True)
         for key, value in parsed.items():
             if len(value) == 1:
                 parsed[key] = value[0]
