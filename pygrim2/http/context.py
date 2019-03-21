@@ -46,11 +46,12 @@ class Context(object):
         return self._can_create_session
 
     @property
-    def save_session(self):
+    def session_changed(self):
         return self._save_session
 
-    @save_session.setter
-    def save_session(self, value):
+    @session_changed.setter
+    def session_changed(self, value):
+        # a bit faster than isinstance(value, boolean)
         if value is True or value is False:
             self._save_session = value
         else:
@@ -262,7 +263,7 @@ class Context(object):
         raise StopDispatch()
 
     def save_session(self):
-        if self.session_loaded and self.save_session:
+        if self.session_loaded and self.session_changed:
             self._session_handler.save(self.session)
 
     def set_language(self, language):
