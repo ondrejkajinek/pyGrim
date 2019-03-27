@@ -4,7 +4,6 @@ from __future__ import unicode_literals
 from datetime import date, datetime, timedelta, time
 from dateutil.parser import parse as parse_dt
 from jinja2.ext import Extension
-from time import gmtime, strftime
 from ..formater import Formater
 
 DT = type(date.min)
@@ -72,7 +71,7 @@ class TimeExtension(Extension):
         return datetime.now()
 
     def minutes_from_seconds(self, seconds):
-        return "%d:%d" % (seconds // 60, seconds % 60)
+        return "%02d:%02d" % divmod(seconds, 60)
 
     def parse_date(self, source):
         if isinstance(source, basestring):
@@ -130,7 +129,9 @@ class TimeExtension(Extension):
                 timedelta(seconds=seconds), locale=locale
             )
         else:
-            return strftime("%H:%M:%S", gmtime(seconds))
+            minutes, seconds = divmod(seconds, 60)
+            hours, minutes = divmod(minutes, 60)
+            return "%02d:%02d:%02d" % (hours, minutes, seconds)
 
     def month_name(self, case, locale, number, source_date):
         if locale not in months:
