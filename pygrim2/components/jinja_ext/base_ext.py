@@ -82,15 +82,18 @@ class BaseExtension(Extension):
         )
 
     def split_to_length(self, value, length):
-        if not value:
-            return None
-
-        if isinstance(value, int):
+        # bool is subtype of int
+        if isinstance(value, bool):
+            raise TypeError("int or string expected not bool")
+        elif isinstance(value, int):
             value = str(value)
         elif isinstance(value, str):
             pass
         else:
-            raise ValueError("int or string expected not %r" % (value,))
+            raise TypeError("int or string expected not %r" % (value,))
+
+        if not value:
+            return Undefined()
 
         return wrap(value, length)
 

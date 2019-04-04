@@ -1,6 +1,5 @@
 # std
 from datetime import date, datetime
-from time import gmtime, strftime
 
 # non-std
 from dateutil.parser import parse as parse_dt
@@ -51,10 +50,12 @@ class TimeExtension(Extension):
         return datetime.now()
 
     def minutes_from_seconds(self, seconds):
-        return "%d:%d" % (seconds // 60, seconds % 60)
+        return "%02d:%02d" % divmod(seconds, 60)
 
     def time_from_seconds(self, seconds):
-        return strftime("%H:%M:%S", gmtime(seconds))
+        minutes, seconds = divmod(seconds, 60)
+        hours, minutes = divmod(minutes, 60)
+        return "%02d:%02d:%02d" % (hours, minutes, seconds)
 
     def _get_filters(self):
         return {
