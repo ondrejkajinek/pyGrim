@@ -113,6 +113,9 @@ class TimeExtension(Extension):
 
         return obj
 
+    def create_timedelta(self, **kwargs):
+        return timedelta(**kwargs)
+
     def time_format(self, source, format_str, locale=None):
         obj = self.parse_time(source)
         return (
@@ -168,5 +171,6 @@ class TimeExtension(Extension):
             "month_name": self.month_name,
             "parse_date": self.parse_date,
             "parse_datetime": self.parse_datetime,
-            "parse_time": self.parse_time
+            "parse_time": self.parse_time,
+            "create_timedelta": self.create_timedelta
         }
