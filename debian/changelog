@@ -1,3 +1,12 @@
+pygrim (0.3.2) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * funkce timedelta
+  * Added support for %m and %-m in babel formatting
+  * nahrazeni podtrzitek za pomlcky a lowercase
+
+ -- Václav Pokluda <root@darky>  Tue, 09 Apr 2019 12:07:56 +0200
+
 pygrim (0.3.1) testing; urgency=medium
 
   * COMMIT MESSASGES
