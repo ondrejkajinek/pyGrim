@@ -9,6 +9,7 @@ try:
     from yaml import SafeLoader, MappingNode
     from yaml.constructor import ConstructorError
 except ImportError:
+    print("Failed to import PyYAML. Please make sure you don't need it")
     from .dummy_yaml import yaml_load, yaml_parser
     from .dummy_yaml import ConstructorError, SafeLoader, MappingNode
 
