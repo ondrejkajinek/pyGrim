@@ -1,4 +1,8 @@
+import itertools
+
 from jinja2.ext import InternationalizationExtension
+from jinja2.runtime import Undefined
+from jinja2.utils import contextfunction
 
 
 def gettext_factory(method):
@@ -30,7 +34,61 @@ def ngettext_factory(method):
     return ngettext
 
 
+def lang_text_factory():
+
+    @contextfunction
+    def lang_text(context, source):
+        if isinstance(source, dict) and source:
+            lang = context.get("context").get_language()
+            used = set()
+            parts = (
+                part
+                for part
+                in itertools.chain(*[
+                    # orig, lowered and uppered locale name
+                    (i, i.lower(), i.upper())
+                    for i
+                    # take every possible varint of lang
+                    # <lang>_<territory>.<encoding>@<variant>
+                    # <lang>_<territory>.<encoding>
+                    # <lang>_<territory>
+                    # <lang>
+                    in (
+                        lang,
+                        lang.split("@", 1)[0],
+                        lang.split(".", 1)[0],
+                        lang.split("_", 1)[0]
+                    )
+                ])
+                # don't add duplicate locale names
+                if part not in used and (used.add(part) or True)
+            )
+            for part in parts:
+                if part in source:
+                    text = source[part]
+                    break
+            else:
+                text = Undefined()
+        elif isinstance(source, str):
+            text = source
+        else:
+            text = Undefined()
+
+        return text
+
+    return lang_text
+
+
 class I18NExtension(InternationalizationExtension):
+
+    def __init__(self, environment):
+        super().__init__(environment)
+        environment.globals.update(self._get_functions())
+
+    def _get_functions(self):
+        return {
+            "lang_text": lang_text_factory()
+        }
 
     def _install(self, translations, newstyle=None):
         gettext = getattr(translations, 'ugettext', None)
