@@ -104,4 +104,5 @@ class I18NExtension(InternationalizationExtension):
             newstyle
         )
 
+
 i18n = I18NExtension
