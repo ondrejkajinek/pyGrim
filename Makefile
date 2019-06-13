@@ -1,7 +1,7 @@
-VERSION=$(shell python setup.py --version)
-AUTHOR=$(shell python setup.py --author)
-AUTHOR_EMAIL=$(shell python setup.py --author-email)
-PACKAGE_NAME=$(shell python setup.py --name)
+VERSION=$(shell python3 setup.py --version)
+AUTHOR=$(shell python3 setup.py --author)
+AUTHOR_EMAIL=$(shell python3 setup.py --author-email)
+PACKAGE_NAME=$(shell python3 setup.py --name)
 
 VERSIONED_NAME=${PACKAGE_NAME}-${VERSION}
 ARCHIVE=${VERSIONED_NAME}.tar.gz
@@ -10,7 +10,7 @@ FULL_PKG_NAME=${PACKAGE_NAME}_${VERSION}_all.deb
 PACKAGES_REMOTE_DIR="/var/aptly/packages/"
 ENV=DEBFULLNAME="$(AUTHOR)" DEBEMAIL=$(AUTHOR_EMAIL) EDITOR=vim
 
-PY_VERSION=`python -c 'import sys; print(sys.version.split(" ",1)[0].rsplit(".",1)[0])'`
+PY_VERSION=`python3 -c 'import sys; print(sys.version.split(" ",1)[0].rsplit(".",1)[0])'`
 
 all: deb
 
@@ -22,13 +22,13 @@ prePackCheck:
 deb: prePackCheck clean buildDeb
 
 gitCheck:
-	python setup.py check
+	python3 setup.py check
 
 buildDeb: gitCheck sdist
 	mkdir build \
 	&& cp dist/${ARCHIVE} build/${ORIG_ARCHIVE} \
 	&& tar -xf build/${ORIG_ARCHIVE} -C build/ \
-	&& python setup.py changelog \
+	&& python3 setup.py changelog \
 	&& cp -r debian build/${VERSIONED_NAME} \
 	&& cd build/${VERSIONED_NAME} \
 	&& $(ENV) debuild -us -uc
@@ -36,7 +36,7 @@ buildDeb: gitCheck sdist
 pkg: deb
 
 debtest: deb
-	python setup.py create_tag \
+	python3 setup.py create_tag \
 	&& scp build/${FULL_PKG_NAME} debian.ats:${PACKAGES_REMOTE_DIR} \
 	&& ssh aptly@debian.ats bash pkg-to-testing ${PACKAGES_REMOTE_DIR}${FULL_PKG_NAME} jessie \
 	&& scp build/${FULL_PKG_NAME} debian.ats:${PACKAGES_REMOTE_DIR} \
@@ -48,10 +48,10 @@ clean:
 	rm -rf *.egg-info
 
 sdist: gitCheck
-	python setup.py sdist
+	python3 setup.py sdist
 
 install:
-	python setup.py install
+	python3 setup.py install
 
 linkItems:
 	ln -sf `pwd`/pygrim2 /usr/local/lib/python${PY_VERSION}/dist-packages/pygrim2
