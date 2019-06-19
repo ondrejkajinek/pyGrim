@@ -2,7 +2,7 @@ import itertools
 
 from jinja2.ext import InternationalizationExtension
 from jinja2.runtime import Undefined
-from jinja2.utils import contextfunction
+from jinja2.filters import contextfilter
 
 
 def gettext_factory(method):
@@ -36,7 +36,7 @@ def ngettext_factory(method):
 
 def lang_text_factory():
 
-    @contextfunction
+    @contextfilter
     def lang_text(context, source):
         if isinstance(source, dict) and source:
             lang = context.get("context").get_language()
@@ -83,9 +83,9 @@ class I18NExtension(InternationalizationExtension):
 
     def __init__(self, environment):
         super().__init__(environment)
-        environment.globals.update(self._get_functions())
+        environment.filters.update(self._get_filters())
 
-    def _get_functions(self):
+    def _get_filters(self):
         return {
             "lang_text": lang_text_factory()
         }
