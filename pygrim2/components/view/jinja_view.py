@@ -1,4 +1,5 @@
 # std
+import logging
 from os import getcwd, path
 
 # non-std
@@ -8,6 +9,10 @@ from jinja2 import Environment, FileSystemLoader, select_autoescape
 from .base_view import BaseView
 from ..jinja_ext import i18n
 from ..utils import get_class_name
+
+
+log = logging.getLogger("pygrim2.components.view.jinja_view")
+
 
 I18N_EXT_NAME = get_class_name(i18n)
 
@@ -67,14 +72,34 @@ class JinjaView(BaseView):
         return env
 
     def _get_extensions(self, config):
+        try:
+            import babel
+        except ImportError:
+            babel = None
+
         extensions = set((
             "pygrim2.components.jinja_ext.BaseExtension",
-            "pygrim2.components.jinja_ext.TimeExtension",
             "pygrim2.components.jinja_ext.UrlExtension",
         ))
-        extensions.update(
-            config.get("jinja:extensions", ())
+        extensions.add(
+            "pygrim2.components.jinja_ext.BabelExtension"
+            if babel
+            else "pygrim2.components.jinja_ext.TimeExtension"
         )
+
+        extra_extensions = config.get("jinja:extensions", ())
+        if "pygrim2.components.jinja_ext.BabelExtensionu" in extra_extensions:
+            if babel is None:
+                log.error("Can't import babel. Using TimeExtension instead")
+                extensions.add("pygrim2.components.jinja_ext.TimeExtension")
+                extensions.remove(
+                    "pygrim2.components.jinja_ext.BabelExtension")
+            else:
+                extensions.discard(
+                    "pygrim2.components.jinja_ext.TimeExtension")
+
+        extensions.update(extra_extensions)
+
         if (
             config.getboolean("pygrim:l10n", False) and
             config.get("pygrim:l10n:type") == "gettext"

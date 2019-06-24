@@ -1,3 +1,4 @@
+from .babel_ext import BabelExtension
 from .base_ext import BaseExtension
 from .i18n_ext import I18NExtension, i18n
 from .prefix_tags_ext import PrefixTags
