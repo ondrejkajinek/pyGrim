@@ -1,3 +1,11 @@
+pygrim (0.3.3) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * SeoHelper as standalone class, which can be imported as a lib
+  * Seo filter: remove asterisk
+
+ -- Václav Pokluda <root@darky>  Mon, 22 Jul 2019 07:28:35 +0200
+
 pygrim (0.3.2) testing; urgency=medium
 
   * COMMIT MESSASGES
