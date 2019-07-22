@@ -9,15 +9,54 @@ from jinja2.runtime import Undefined
 from logging import getLogger
 from re import compile as re_compile
 from textwrap import wrap
+try:
+    from seo_helper import SeoHelper
+except ImportError:
+    class SeoHelper(object):
+        DASH_SQUEEZER = re_compile("r/-{2,}")
+        SEO_DASHED = (" ", "/", "\\", ":")
+        SEO_REMOVED = ("*", "?", "\"", "<", ">", "|", ",", "%", "!", )
+
+        def safe_title(self, text):
+            if not isinstance(text, basestring):
+                text = str(text)
+
+            res = "".join(
+                c.lower()
+                for c
+                in strip_accent(text).replace(" ", "-")
+                if c.isalnum() or c in "_-.:"
+            )
+            return res or "-"
+
+        def seo(self, text, replace_char="-"):
+            ret = self.DASH_SQUEEZER.sub(
+                replace_char,
+                self._seo_dashize(
+                    self._seo_remove(strip_accent(text).lower()),
+                    replace_char
+                )
+            )
+            if not ret and replace_char:
+                ret = replace_char
+            return ret
+
+    def _seo_dashize(self, text, replace_char):
+        return "".join(
+            replace_char
+            if c in self.SEO_DASHED
+            else c
+            for c in text or ""
+        )
+
+    def _seo_remove(self, text):
+        return "".join("" if c in self.SEO_REMOVED else c for c in text or "")
 
 log = getLogger("pygrim.components.jinja_ext.base")
 
 
 class BaseExtension(Extension):
 
-    DASH_SQUEEZER = re_compile("r/-{2,}")
-    SEO_DASHED = (" ", "/", "\\", ":")
-    SEO_REMOVED = ("*", "?", "\"", "<", ">", "|", ",", "%", "!", )
     IEC_SIZE_PREFIXES = ("", "ki", "Mi", "Gi", "Ti")
     SI_SIZE_PREFIXES = ("", "k", "M", "G", "T")
 
@@ -86,26 +125,11 @@ class BaseExtension(Extension):
     def safe_title(self, text):
         if not isinstance(text, basestring):
             text = str(text)
-
-        res = "".join(
-            c.lower()
-            for c
-            in strip_accent(text).replace(" ", "-")
-            if c.isalnum() or c in "_-.:"
-        )
-        return res or "-"
+        c = getattr(SeoHelper, "safe_title", SeoHelper.seo)
+        return c(text)
 
     def seo(self, text, replace_char="-"):
-        ret = self.DASH_SQUEEZER.sub(
-            replace_char,
-            self._seo_dashize(
-                self._seo_remove(strip_accent(text).lower()),
-                replace_char
-            )
-        )
-        if not ret and replace_char:
-            ret = replace_char
-        return ret
+        return SeoHelper.seo(text, replace_char=replace_char)
 
     def split_to_length(self, value, length):
         if not value:
@@ -176,14 +200,3 @@ class BaseExtension(Extension):
             index += 1
 
         return ("%%0.%df %%sB" % precision) % (size, prefixes[index])
-
-    def _seo_dashize(self, text, replace_char):
-        return "".join(
-            replace_char
-            if c in self.SEO_DASHED
-            else c
-            for c in text or ""
-        )
-
-    def _seo_remove(self, text):
-        return "".join("" if c in self.SEO_REMOVED else c for c in text or "")
