@@ -137,9 +137,11 @@ class Context(object):
         }
         environment.update((
             ("RAW_POST", self._request.RAW_POST),
-            ("POST", self._request.POST),
-            ("JSON", self._request.JSON)
+            ("POST", self._request.POST)
         ))
+        if self.get_request_content_type() == "application/json":
+            environment["JSON"] = self._request.JSON
+
         return json_dumps({
             "environment": environment,
             "cookies": self._request.cookies
