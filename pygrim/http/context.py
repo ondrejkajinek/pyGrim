@@ -188,7 +188,7 @@ class Context(object):
             )
 
     def get_request_content_type(self):
-        return self._request.environment["content_type"]
+        return self._request.content_type
 
     def get_request_host(self):
         return self._request.environment["host"]
