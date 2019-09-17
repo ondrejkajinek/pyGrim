@@ -129,13 +129,19 @@ class Context(object):
             }
 
     def dump_request(self):
+        environment = {
+            key: value
+            for key, value
+            in self._request.environment.iteritems()
+            if not key.startswith(("wsgi.", "uwsgi."))
+        }
+        environment.update((
+            ("RAW_POST", self._request.RAW_POST),
+            ("POST", self._request.POST),
+            ("JSON", self._request.JSON)
+        ))
         return json_dumps({
-            "environment": {
-                key: value
-                for key, value
-                in self._request.environment.iteritems()
-                if not (key.startswith("wsgi.") or key.startswith("uwsgi."))
-            },
+            "environment": environment,
             "cookies": self._request.cookies
         })
 
