@@ -2,6 +2,7 @@
 
 
 class AbstractView(object):
+    """Defines interface for View classes"""
 
     def __init__(self, config, **kwargs):
         raise NotImplementedError(
@@ -9,10 +10,15 @@ class AbstractView(object):
         )
 
     def display(self, context):
-        context.set_response_body(self.render(context))
+        """Displays data given to context"""
+        raise NotImplementedError()
 
     def get_template_directory(self):
-        return ""
+        """Returns directory in which templates are searched"""
+        raise NotImplementedError()
 
     def render(self, context):
-        return ""
+        """
+        Renders a template. Template's path and data are taken from context
+        """
+        raise NotImplementedError()

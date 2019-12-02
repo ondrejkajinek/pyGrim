@@ -706,9 +706,20 @@ class Server(object):
         return url
 
     def _versioned_file(self, static_file):
-        abs_path = self._static_file_abs_path(static_file)
+        timestamp = (
+            None
+            if self.view._debug
+            else self.view.timestamp_cache.get(static_file)
+        )
+        if timestamp is None:
+            abs_path = self._static_file_abs_path(static_file)
+            if abs_path and path.isfile(abs_path):
+                timestamp = int(path.getmtime(abs_path))
+                if not self.view._debug:
+                    self.view.timestamp_cache[static_file] = timestamp
+
         return (
-            "%s?v=%d" % (escape(static_file), int(path.getmtime(abs_path)))
-            if abs_path and path.isfile(abs_path)
+            "%s?v=%d" % (escape(static_file), timestamp)
+            if timestamp
             else escape(static_file)
         )
