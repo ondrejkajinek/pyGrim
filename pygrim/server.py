@@ -228,14 +228,14 @@ class Server(object):
             except KeyError:
                 raise MissingRouteHandle(
                     route._handle_name,
-                    route.get_name() or route.get_pattern()
+                    route.get_name() or route.pattern
                 )
             else:
                 route.assign_method(method)
                 log.debug(
                     "Method '%s' registered to handle route '%s'",
                     get_method_name(method),
-                    route.get_pattern()
+                    route.pattern
                 )
 
     def _find_config_class(self):

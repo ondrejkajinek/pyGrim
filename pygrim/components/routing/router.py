@@ -22,9 +22,9 @@ class Router(AbstractRouter):
     def map(self, route):
         if isinstance(route, Route):
             full_pattern = self._join(
-                self._group_pattern(), route.get_pattern().strip("/")
+                self._group_pattern(), route.pattern.strip("/")
             )
-            route.set_pattern(
+            route.pattern = (
                 re_compile("^" + full_pattern.lstrip("^"))
                 if route.is_regex() or self._is_group_regular()
                 else full_pattern
@@ -78,7 +78,7 @@ class Router(AbstractRouter):
     def _group_pattern(self):
         pattern = (
             self._join(*tuple(
-                group.get_pattern()
+                group.pattern
                 for group
                 in self._route_groups
             ))
