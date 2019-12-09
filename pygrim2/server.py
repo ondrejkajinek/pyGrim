@@ -310,7 +310,7 @@ class Server(object):
             raise RouteNotFound()
 
         log.debug(
-            "Request handled by route %s.", context.current_route.get_pattern()
+            "Request handled by route %s.", context.current_route.pattern
         )
 
     def _handle_error(self, context, exc):

@@ -1,6 +1,6 @@
 # std
 from logging import getLogger
-from re import compile as re_compile
+import re
 from urllib.parse import quote_plus
 
 # local
@@ -16,20 +16,30 @@ class RouteObject(object):
 
     def __init__(self, pattern, *args, **kwargs):
         super(RouteObject, self).__init__(*args, **kwargs)
-        self.set_pattern(pattern)
+        self.__pattern = None
+        self.pattern = pattern
 
-    def get_pattern(self):
+    @property
+    def pattern(self):
         return (
-            self._pattern.pattern
+            self.__pattern.pattern
             if self.is_regular()
-            else self._pattern
+            else self.__pattern
         )
 
-    def is_regular(self):
-        return is_regex(self._pattern)
+    @pattern.setter
+    def pattern(self, pattern):
+        self._set_pattern(pattern)
 
-    def set_pattern(self, pattern):
-        self._pattern = fix_trailing_slash(pattern)
+    @property
+    def _raw_pattern(self):
+        return self.__pattern
+
+    def is_regular(self):
+        return is_regex(self.__pattern)
+
+    def _set_pattern(self, pattern):
+        self.__pattern = fix_trailing_slash(pattern)
 
 
 class RouteGroup(RouteObject):
@@ -53,25 +63,25 @@ class RouteGroup(RouteObject):
 
         return result
 
-    def set_pattern(self, pattern):
-        self._pattern = remove_trailing_slash(pattern)
-
     def _concat_pattern(self, other):
         full_pattern = "/".join((
-            remove_trailing_slash(self.get_pattern()),
-            other.get_pattern().lstrip("/")
+            remove_trailing_slash(self.pattern),
+            other.pattern.lstrip("/")
         ))
         if any(i.is_regular() for i in (self, other)):
-            full_pattern = re_compile(full_pattern)
+            full_pattern = re.compile(full_pattern)
 
         return full_pattern
+
+    def _set_pattern(self, pattern):
+        super()._set_pattern(remove_trailing_slash(pattern))
 
 
 class Route(RouteObject):
 
-    URL_FORMAT_REGEXP = re_compile("%\(([^)]+)\)s")
-    URL_OPTIONAL_REGEXP = re_compile("([^%])\((/?)(.*?)\)\?")
-    URL_PARAM_REGEXP = re_compile("\(\?P<([^>]+)>[^)]+\)")
+    URL_FORMAT_REGEXP = re.compile(r"%\(([^)]+)\)s")
+    URL_OPTIONAL_REGEXP = re.compile(r"\(([^)]*?)(%\(([^)]+)\)s)([^)]*?)\)\?")
+    URL_PARAM_REGEXP = re.compile(r"\(\?P<([^>]+)>[^)]+\)")
 
     def __init__(self, methods, pattern, handle, name=None):
         if pattern is None:
@@ -84,6 +94,10 @@ class Route(RouteObject):
         if GET in methods and HEAD not in methods:
             methods += (HEAD,)
 
+        self._readable_pattern = ""
+        self._required_params = set()
+        self._optional_params = {}
+
         super(Route, self).__init__(pattern)
         self._handle = handle
         self._methods = tuple(
@@ -93,7 +107,7 @@ class Route(RouteObject):
 
     def __eq__(self, other):
         return (
-            self.get_pattern() == other.get_pattern() and
+            self.pattern == other.pattern and
             set(self._methods).intersection(other._methods)
         )
 
@@ -117,26 +131,30 @@ class Route(RouteObject):
 
     def specificity(self):
         return (
-            self.URL_PARAM_REGEXP.sub("", self.get_pattern()).count("/")
+            self.URL_PARAM_REGEXP.sub("", self.pattern).count("/")
             if self.is_regular()
-            else self.get_pattern().count("/")
+            else self.pattern.count("/")
         )
 
     def url_for(self, params):
         if self.is_regular():
-            readable, param_names, optional_names = self._pattern_to_readable()
-            for name in optional_names:
-                params.setdefault(name, "")
+            for name in self._optional_params:
+                if params.get(name):
+                    params[name] = self._optional_params[name] % params[name]
+                else:
+                    params[name] = ""
 
             query_params = {
                 key: params[key]
                 for key
                 in params.keys()
-                if key not in (param_names.union(optional_names))
+                if key not in (
+                    self._required_params.union(self._optional_params.keys())
+                )
             }
-            url = readable % params
+            url = self._readable_pattern % params
         else:
-            url = self._pattern
+            url = self.pattern
             query_params = params
 
         if query_params:
@@ -146,7 +164,7 @@ class Route(RouteObject):
                 in query_params.items()
             )
 
-        log.debug("Route constructed url: %r for params: %r" % (url, params))
+        log.debug("Route constructed url: %r for params: %r", url, params)
         return "/%s" % url.strip("/")
 
     def _asdict(self):
@@ -154,40 +172,54 @@ class Route(RouteObject):
             "handle_name": get_method_name(self._handle),
             "methods": self._methods,
             "name": self.get_name(),
-            "pattern": self.get_pattern(),
+            "pattern": self.pattern,
             "regular": self.is_regular()
         }
 
     def _pattern_to_readable(self):
-        param_names = self.URL_PARAM_REGEXP.findall(self._pattern.pattern)
-        readable = self.URL_PARAM_REGEXP.sub(r"%(\1)s", self._pattern.pattern)
-        optional_names = set()
-        for optional in self.URL_OPTIONAL_REGEXP.findall(readable):
-            optional_names.update(self.URL_FORMAT_REGEXP.findall(optional[2]))
+        if self.is_regular():
+            param_names = self.URL_PARAM_REGEXP.findall(self.pattern)
+            readable = self.URL_PARAM_REGEXP.sub(r"%(\1)s", self.pattern)
+            optional_names = {
+                optional[2]: "%s%%s%s" % (optional[0], optional[3])
+                for optional
+                in self.URL_OPTIONAL_REGEXP.findall(readable)
+            }
 
-        readable = self.URL_OPTIONAL_REGEXP.sub(r"\1\2\3", readable)
-        readable = remove_trailing_slash(readable).lstrip("^")
-        readable = readable.replace("\.", ".")
-        mandatory_names = set(param_names) - set(optional_names)
-        if len(mandatory_names) + len(optional_names) < len(param_names):
-            raise RuntimeError(
-                "Some keys are duplicate in route %r" % self._pattern.pattern
-            )
+            readable = self.URL_OPTIONAL_REGEXP.sub(r"\2", readable)
+            readable = remove_trailing_slash(readable).lstrip("^")
+            readable = readable.replace(r"\.", ".")
+            required_names = set(param_names) - set(optional_names)
+            if len(required_names) + len(optional_names) < len(param_names):
+                raise RuntimeError(
+                    "Some keys are duplicate in route %r" % self.pattern
+                )
+        else:
+            readable = self.pattern
+            required_names = set()
+            optional_names = set()
 
-        return readable, mandatory_names, optional_names
+        return readable, required_names, optional_names
+
+    def _set_pattern(self, pattern):
+        super(Route, self)._set_pattern(fix_trailing_slash(pattern))
+        readable, req_params, optional_params = self._pattern_to_readable()
+        self._readable_pattern = readable
+        self._required_params = req_params
+        self._optional_params = optional_params
 
     def _supports_http_method(self, method):
         return method in self._methods
 
     def _uri_matches(self, context):
         uri = context.get_request_uri()
-        log.debug("matching %r with %r", self.get_pattern(), uri)
+        log.debug("matching %r with %r", self.pattern, uri)
         if self.is_regular():
-            matches = self._pattern.match(uri)
+            matches = self._raw_pattern.match(uri)
             match = matches is not None
             context.set_route_params(matches.groupdict() if match else {})
         else:
-            match = self._pattern == uri
+            match = self.pattern == uri
             context.set_route_params()
 
         return match

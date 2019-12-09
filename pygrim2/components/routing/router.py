@@ -27,8 +27,8 @@ class Router(AbstractRouter):
         if route_name in self._named_routes:
             raise RouteAlreadyExists(route)
 
-        if any(filter(lambda existing: existing == route, self._routes)):
-            raise PatternAlreadyExists(route.get_pattern())
+        if any((existing for existing in self._routes if existing == route)):
+            raise PatternAlreadyExists(route.pattern)
 
         specificity = route.specificity()
         index = next(
