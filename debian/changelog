@@ -1,3 +1,15 @@
+pygrim (0.3.4) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * json2 added support for time.struct_time
+  * #65942: cachování timestampů verzovaných statických filů
+  * fixed context.get_request_content_type
+  * fix for previous commit
+  * when dumping Request during _handle_error, RAW_POST, POST and JSON
+    data are dumped, too
+
+ -- Václav Pokluda <root@darky>  Thu, 12 Dec 2019 15:30:17 +0100
+
 pygrim (0.3.3) testing; urgency=medium
 
   * COMMIT MESSASGES
