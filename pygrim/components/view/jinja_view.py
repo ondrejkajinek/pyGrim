@@ -5,7 +5,7 @@ import traceback
 
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
-from .abstract_view import AbstractView
+from .base_view import BaseView
 from ..utils.json2 import dumps as json_dumps
 
 I18N_EXT_NAME = "pygrim.components.jinja_ext.i18n.I18NExtension"
@@ -22,9 +22,10 @@ def _suppress_none(self, variable):
 _suppress_none.contextfunction = True
 
 
-class JinjaView(AbstractView):
+class JinjaView(BaseView):
 
     def __init__(self, config, extra_functions, translations=None, **kwargs):
+        super(JinjaView, self).__init__(config, **kwargs)
         self._debug = config.getbool("jinja:debug", False)
         self._dump_switch = config.get("jinja:dump_switch", "jkxd")
         self._env = Environment(

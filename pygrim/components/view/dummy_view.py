@@ -1,9 +1,9 @@
 # coding: utf8
 
-from .abstract_view import AbstractView
+from .base_view import BaseView
 
 
-class DummyView(AbstractView):
+class DummyView(BaseView):
 
     def __init__(self, config, **kwargs):
-        pass
+        super(DummyView).__init__(config, **kwargs)
