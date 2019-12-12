@@ -7,6 +7,7 @@ from decimal import Decimal
 from types import GeneratorType
 from unicodedata import normalize as unicodedata_normalize
 from uuid import UUID
+import time
 
 # import everything from json to current namespace
 # redefine functions as required
@@ -117,6 +118,8 @@ def _dump_uuid(source):
 
 def _dumps(obj, nice=None, depth=0):
     output = StringIO()
+    if isinstance(obj, time.struct_time):
+        obj = datetime.fromtimestamp(time.mktime(obj))
     if obj is None:
         output.write(_dump_none())
     elif isinstance(obj, str):
