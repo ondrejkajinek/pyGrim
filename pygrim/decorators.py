@@ -53,6 +53,19 @@ class BaseDecorator(object):
             func._exposed = True
 
 
+class force_content_length(BaseDecorator):
+    """
+    Forces method to send Content-Length response header even if server
+    is configured not to do so (this enables optimization when sending
+    view result)
+    """
+
+    def post_call(self, fun, args, kwargs, ret):
+        context = kwargs.get("context")
+        context.disable_content_length = False
+        return super(force_content_length, self).post_call(fun, args, kwargs, ret)
+
+
 class method(BaseDecorator):
     """
     Exposes method to server so that it can be used for route handling.

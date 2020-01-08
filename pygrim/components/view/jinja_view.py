@@ -105,7 +105,12 @@ class JinjaView(BaseView):
             context.view_data.update({
                 "context": context
             })
-            result = template.render(**context.view_data)
+            if context.disable_content_length:
+                stream = template.stream(**context.view_data)
+                stream.enable_buffering(30)
+                result = (part for part in stream)
+            else:
+                result = template.render(**context.view_data)
 
             if context.session is not None:
                 context.session.del_flashes()

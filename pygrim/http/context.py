@@ -29,6 +29,7 @@ class Context(object):
         self._default_headers = config.get("context:default_headers", None)
         self._lang_switch = config.get("pygrim:i18n:locale_switch", "lang")
 
+        self.disable_content_length = config.get("view:disable_content_length", False)
         self.current_route = None
         self.session = None
         self.template = None
@@ -151,7 +152,10 @@ class Context(object):
         self._response.finalize()
 
     def generates_response(self):
-        return self._response.is_generator_function
+        return (
+            self._response.is_generator or
+            self._response.is_generator_function
+        )
 
     def get_cookie(self, key):
         return self._request.cookies.get(key)
@@ -244,6 +248,9 @@ class Context(object):
         return "%d %s" % (
             self._response.status, http_responses[self._response.status]
         )
+
+    def is_generator_function(self):
+        return self._response.is_generator_function
 
     def is_request_get(self):
         return self._request.environment["request_method"] == "GET"

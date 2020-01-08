@@ -116,7 +116,8 @@ class Server(object):
             body = context.get_response_body()
             if context.generates_response():
                 do_yield = not context.is_request_head()
-                for part in body():
+                parts = body() if context.is_generator_function() else body
+                for part in parts:
                     if do_yield:
                         yield part
             elif context.is_request_head():

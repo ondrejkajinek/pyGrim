@@ -6,8 +6,20 @@ from logging import getLogger
 from os import SEEK_END
 from urllib import quote_plus as url_quoteplus
 from locale import getlocale, LC_ALL
+import types
 
 log = getLogger("pygrim.http.response")
+
+
+NO_CONTENT_STATUSES = (204, 304)
+
+
+def ensure_string(value):
+    return (
+        value.encode("utf-8")
+        if isinstance(value, unicode)
+        else str(value) if value else value
+    )
 
 
 class Response(object):
@@ -32,49 +44,55 @@ class Response(object):
         lambda c: "Secure" if c.get("secure") else None
     )
 
-    NO_CONTENT_STATUSES = (204, 304)
-
     def __init__(self):
-        self.body = ""
+        self._body = ""
         self.cookies = {}
         self.headers = {
             "Content-Type": "text/html"
         }
         self.status = 200
+        self.is_generator = False
         self.is_generator_function = False
 
-    def finalize(self):
-        if self.status in self.NO_CONTENT_STATUSES:
-            del self.headers["Content-Type"]
-            self.body = ""
+    @property
+    def body(self):
+        return self._body
+
+    @body.setter
+    def body(self, body):
+        is_generator = False
+        if body is None:
+            body = ""
+        elif isinstance(body, str):
+            pass
+        elif isinstance(body, unicode):
+            body = body.encode("utf-8")
+        elif isinstance(body, types.GeneratorType):
+            body = (ensure_string(part) for part in body)
+            is_generator = True
+        elif isgeneratorfunction(body):
+            body = (ensure_string(part) for part in body())
+            is_generator = True
         else:
-            if isinstance(self.body, unicode):
-                self.body = self.body.encode("utf-8")
+            try:
+                body.seek(0)
+                body = body.read()
+            except AttributeError:
+                body = ""
+                log.critical("Cannot read value from given body content!")
+                log.exception("Cannot read value from given body content!")
 
-            if isinstance(self.body, str):
-                self.headers["Content-Length"] = len(self.body)
-            elif isgeneratorfunction(self.body):
-                self.is_generator_function = True
-            else:
-                if "Content-Length" not in self.headers:
-                    if (
-                        hasattr(self.body, "seek") and
-                        hasattr(self.body, "tell")
-                    ):
-                        self.body.seek(0, SEEK_END)
-                        self.headers["Content-Length"] = self.body.tell()
-                        self.body.seek(0)
-                    else:
-                        log.warning(
-                            "Unable to get Content-Length for type %r",
-                            type(self.body)
-                        )
+        if body and not is_generator:
+            self.headers["Content-Length"] = len(body)
+        else:
+            self.headers.pop("Content-Length", None)
 
-                try:
-                    self.body = self.body.read()
-                except AttributeError:
-                    log.critical("Can't read read response body content!")
-                    log.exception("Can't read read response body content!")
+        self.is_generator = is_generator
+        self._body = body
+
+    def finalize(self):
+        if self.status in NO_CONTENT_STATUSES:
+            self.body = None
 
         self.headers = [
             (key, str(value))
@@ -86,28 +104,18 @@ class Response(object):
             for cookie in self._serialized_cookies():
                 self.headers.append(("Set-Cookie", cookie))
 
-    def _to_str(self, value):
-        if not value:
-            ret = value
-        elif not isinstance(value, unicode):
-            ret = str(value)
-        else:
-            ret = value.encode('utf8')
-        return ret
-
     def _serialize_cookie(self, name, cookie):
         params = (
-            self._to_str(part_formatter(cookie))
+            ensure_string(part_formatter(cookie))
             for part_formatter
             in self.COOKIE_PARTS
         )
-        cookie_params = "; ".join(filter(None, params))
+        cookie_params = "; ".join(param for param in params if param)
 
         name_part = url_quoteplus(name)
         value_part = url_quoteplus(str(cookie["value"]))
         params_part = "; {}".format(cookie_params)
-        ret = "{}={}{}".format(name_part, value_part, params_part)
-        return ret
+        return "{}={}{}".format(name_part, value_part, params_part)
 
     def _serialized_cookies(self):
         for name, cookie in self.cookies.iteritems():
