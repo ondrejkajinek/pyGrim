@@ -130,11 +130,11 @@ class JinjaView(BaseView):
             )
             if canonical_url is not None:
                 dump_data["canonical_url"] = canonical_url
-        except KeyError as e:
+        except KeyError as exc:
             dump_data["canonical_url"] = "Missing route argument:%r" % (
-                e.args[0],
+                exc.args[0],
             )
-        except:
+        except BaseException:
             dump_data["canonical_url"] = traceback.format_exc()
 
         context.set_response_content_type("application/json")
@@ -155,7 +155,7 @@ class JinjaView(BaseView):
         if config.getboolean("pygrim:i18n", False):
             extensions.update(("pygrim.components.jinja_ext.i18n",))
 
-        return map(str, extensions)
+        return [str(extension) for extension in extensions]
 
     def _initialize_assets(self, config):
         self._css = config.get("assets:css", [])
@@ -173,10 +173,10 @@ class JinjaView(BaseView):
 
     def _merge_assets(self, first, second):
         merged = []
-        seen = {}
+        seen = set()
         for item in first + second:
             if item not in seen:
-                seen[item] = True
+                seen.add(item)
                 merged.append(item)
 
         return merged
