@@ -2,13 +2,23 @@
 from datetime import datetime, timedelta
 from inspect import isgenerator, isgeneratorfunction
 from logging import getLogger
-from os import SEEK_END
 from urllib.parse import quote_plus as url_quoteplus
 
 # local
 from ..components.containers import NormalizedDict
 
 log = getLogger("pygrim.http.response")
+
+
+NO_CONTENT_STATUSES = (204, 304)
+
+
+def ensure_bytes(value):
+    return (
+        value.encode("utf-8")
+        if isinstance(value, str)
+        else bytes(value) if value else value
+    )
 
 
 class Response(object):
@@ -28,52 +38,54 @@ class Response(object):
         lambda c: "Secure" if c.get("secure") else None
     )
 
-    NO_CONTENT_STATUSES = (204, 304)
-
     def __init__(self):
-        self.body = ""
         self.cookies = {}
         self.headers = NormalizedDict((
             ("Content-Type", "text/html"),
         ))
         self.status = 200
+        self.body = b""
+
+    @property
+    def body(self):
+        return self._body
+
+    @body.setter
+    def body(self, body):
+        is_generator = False
+        if body is None:
+            body = b""
+            self.headers.pop("Content-Length", None)
+        elif isinstance(body, bytes):
+            pass
+        elif isinstance(body, str):
+            body = body.encode("utf-8")
+        elif isgeneratorfunction(body):
+            body = (ensure_bytes(part) for part in body())
+            is_generator = True
+        elif isgenerator(body):
+            body = (ensure_bytes(part) for part in body)
+            is_generator = True
+        else:
+            try:
+                body.seek(0)
+                body = ensure_bytes(body.read())
+            except AttributeError:
+                body = b""
+                log.critical("Cannot read value from given body content")
+                log.exception("Cannot read value from given body content")
+
+        if body and not is_generator:
+            self.headers["Content-Length"] = len(body)
+        else:
+            self.headers.pop("Content-Length", None)
+
+        self.is_generator = is_generator
+        self._body = body
 
     def finalize(self, is_head):
-        if self.status in self.NO_CONTENT_STATUSES:
-            del self.headers["Content-Type"]
-            self.body = ""
-        else:
-            if isinstance(self.body, bytes):
-                self.headers["Content-Length"] = len(self.body)
-                if is_head:
-                    self.body = ""
-            elif isgenerator(self.body):
-                pass
-                # do not set body to None when is_head
-                # we want to iterate over body to see if no error occur
-            else:
-                if "Content-Length" not in self.headers:
-                    if (
-                        hasattr(self.body, "seek") and
-                        hasattr(self.body, "tell")
-                    ):
-                        self.body.seek(0, SEEK_END)
-                        self.headers["Content-Length"] = self.body.tell()
-                    else:
-                        log.warning(
-                            "Unable to get Content-Length for type %r",
-                            type(self.body)
-                        )
-
-                if is_head:
-                    self.body = ""
-                else:
-                    try:
-                        self.body.seek(0)
-                        self.body = self.body.read()
-                    except AttributeError:
-                        log.critical("Can't read read response body content!")
-                        log.exception("Can't read read response body content!")
+        if self.status in NO_CONTENT_STATUSES:
+            self.body = None
 
     def serialized_headers(self):
         serialized = [
@@ -87,14 +99,6 @@ class Response(object):
             in self._serialized_cookies()
         ))
         return serialized
-
-    def set_body(self, body):
-        if isgeneratorfunction(body):
-            self.body = body()
-        elif isinstance(body, str):
-            self.body = body.encode("utf-8")
-        else:
-            self.body = body
 
     def _serialize_cookie(self, name, cookie):
         params = (

@@ -1,5 +1,4 @@
 # std
-from inspect import isgenerator
 from json import dumps as json_dumps
 from logging import getLogger
 
@@ -21,6 +20,9 @@ class Context(object):
     ):
         self.config = config
         self.current_route = None
+        self.disable_content_length = config.get(
+            "view:disable_content_length", False
+        )
         self.l10n = l10n
         self.model = model
         self.template = None
@@ -171,7 +173,7 @@ class Context(object):
             log.warning("Trying to use disabled flash messages!")
 
     def generates_response(self):
-        return isgenerator(self.get_response_body())
+        return self._response.is_generator
 
     def get_cookie(self, key):
         return self._request.cookies.get(key)
@@ -276,7 +278,7 @@ class Context(object):
             self._language = language
 
     def set_response_body(self, body):
-        self._response.set_body(body)
+        self._response.body = body
 
     def set_response_content_type(self, content_type):
         self._response.headers["Content-Type"] = content_type

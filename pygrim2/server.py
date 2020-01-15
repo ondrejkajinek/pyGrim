@@ -541,11 +541,7 @@ class Server(object):
             if context.generates_response():
                 for part in context.get_response_body():
                     if not is_head:
-                        yield(
-                            part
-                            if isinstance(part, bytes)
-                            else str(part).encode("utf8")
-                        )
+                        yield(part)
             elif not is_head:
                 yield context.get_response_body()
         except HeadersAlreadySent as exc:

@@ -80,6 +80,19 @@ class error_handler(BaseDecorator):
         super(error_handler, self).prepare_func(func)
 
 
+class force_content_length(BaseDecorator):
+    """
+    Forces method to send Content-Length response header even if server
+    is configured not to do so (this enables optimization when sending
+    view result)
+    """
+
+    def post_call(self, fun, args, kwargs, ret):
+        context = kwargs["context"]
+        context.disable_content_length = False
+        return super().post_call(fun, args, kwargs, ret)
+
+
 class json_method(BaseDecorator):
     """
     Sets view to json

@@ -3,7 +3,7 @@ import logging
 from os import getcwd, path
 
 # non-std
-from jinja2 import Environment, FileSystemLoader, select_autoescape
+import jinja2
 
 # local
 from .base_view import BaseView
@@ -33,35 +33,15 @@ class JinjaView(BaseView):
     def __init__(self, config, extra_functions, l10n, **kwargs):
         self._debug = config.getbool("jinja:debug", False)
         self._l10n = l10n
-        self._env_kwargs = {
-            "extensions": self._get_extensions(config),
-            "loader": FileSystemLoader(
-                searchpath=path.join(
-                    getcwd(),
-                    config.get("jinja:template_path", "templates")
-                )
-            ),
-            "autoescape": select_autoescape(
-                enabled_extensions=config.get(
-                    "jinja:environment:autoescape",
-                    ("jinja",)
-                )
-            ),
-            "auto_reload": config.getbool(
-                "jinja:environment:auto_reload", True
-            )
-        }
-        if config.getbool("jinja:suppress_none", True):
-            self._env_kwargs["finalize"] = _suppress_none
-
+        self._env_params = self._prepare_environment_params(config)
         self._extra_functions = extra_functions
         self._initialize_assets(config)
 
     def get_template_directory(self):
-        return tuple(self._env_kwargs["loader"].searchpath)
+        return tuple(self._env_params["loader"].searchpath)
 
     def _create_env(self, context):
-        env = Environment(**self._env_kwargs)
+        env = jinja2.Environment(**self._env_params)
         env.globals.update(self._extra_functions)
 
         if self._has_gettext():
@@ -109,7 +89,41 @@ class JinjaView(BaseView):
         return [str(ext) for ext in extensions]
 
     def _has_gettext(self):
-        return I18N_EXT_NAME in self._env_kwargs["extensions"]
+        return I18N_EXT_NAME in self._env_params["extensions"]
+
+    def _prepare_environment_params(self, config):
+        params = {
+            "extensions": self._get_extensions(config),
+            "loader": jinja2.FileSystemLoader(
+                searchpath=path.join(
+                    getcwd(),
+                    config.get("jinja:template_path", "templates")
+                )
+            ),
+            "autoescape": jinja2.select_autoescape(
+                enabled_extensions=config.get(
+                    "jinja:environment:autoescape",
+                    ("jinja",)
+                )
+            ),
+            "auto_reload": config.getbool(
+                "jinja:environment:auto_reload", True
+            )
+        }
+        if config.getbool("jinja:suppress_none", True):
+            params["finalize"] = _suppress_none
+
+        cache_size = config.get("jinja:cache_size", None)
+        if cache_size:
+            params["cache_size"] = cache_size
+
+        bcc_directory = config.get("jinja:bytecode_cache_directory", None)
+        if bcc_directory:
+            params["bytecode_cache"] = jinja2.BytecodeCache(
+                bcc_directory
+            )
+
+        return params
 
     def _render_template(self, context):
         env = self._create_env(context)
@@ -117,4 +131,11 @@ class JinjaView(BaseView):
         context.view_data.update({
             "context": context
         })
-        return template.render(**context.view_data)
+        if context.disable_content_length:
+            stream = template.stream(**context.view_data)
+            stream.enable_buffering(10)
+            result = (part for part in stream)
+        else:
+            result = template.render(**context.view_data)
+
+        return result
