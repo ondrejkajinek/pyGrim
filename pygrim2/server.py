@@ -205,7 +205,7 @@ class Server(object):
             controller._model = self._model
 
     def _default_error_handler(self, context, exc):
-        log.exception(exc.message)
+        log.exception(str(exc))
         context.set_response_body("Internal Server Error")
         context.set_response_status(500)
         self._set_fallback_view(context)
