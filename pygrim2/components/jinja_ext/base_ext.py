@@ -31,7 +31,10 @@ class BaseExtension(Extension):
         environment.globals.update(self._get_functions())
 
     def as_json(self, data):
-        log.warning("Filter `as_json` is deprecated and will be removed soon.")
+        log.warning(
+            "Filter `as_json` is deprecated and will be removed soon. "
+            "Use 'tojson' instead."
+        )
         return self.to_json(data)
 
     # TODO: remove, put to some GIT specific extension!
@@ -115,7 +118,8 @@ class BaseExtension(Extension):
 
     def _get_functions(self):
         return {
-            "counter": Counter
+            "counter": Counter,
+            "set": set,  # add set constructor to use sets in jinja2
         }
 
     def _readable_size(self, size, precision, multiple, prefixes):
