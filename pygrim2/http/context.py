@@ -292,6 +292,9 @@ class Context(object):
     def set_view(self, view):
         self._view = view
 
+    def get_available_languages(self):
+        return self.l10n.translations().keys()
+
     def _check_language(self, language):
         res = self.l10n.has(language)
         if res is False:
