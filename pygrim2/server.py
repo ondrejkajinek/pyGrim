@@ -252,7 +252,11 @@ class Server(object):
 
     def _find_config_class(self):
         for key in self.KNOWN_CONFIG_FORMATS:
+            log.debug("Checking config in format:%r", key)
             if key in uwsgi_opt:
+                log.debug(
+                    "Found config in format:%r on %r", key, uwsgi_opt[key]
+                )
                 self._config_dir = path.dirname(uwsgi_opt[key])
                 return uwsgi_opt[key], self.KNOWN_CONFIG_FORMATS[key]
         else:
@@ -295,6 +299,7 @@ class Server(object):
 
         for view_type in view_types:
             try:
+                log.debug("Found view:%r", view_type)
                 yield view_type, self.KNOWN_VIEW_CLASSES[view_type]
             except KeyError:
                 raise RuntimeError("Unknown view class: %r.", view_type)
@@ -415,6 +420,7 @@ class Server(object):
 
         try:
             view = self._views[context.get_view()]
+            log.debug("Using view:%r", view)
         except KeyError as unknown_view:
             raise UnknownView(unknown_view)
         else:
