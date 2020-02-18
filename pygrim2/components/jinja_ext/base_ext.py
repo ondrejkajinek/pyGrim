@@ -100,8 +100,8 @@ class BaseExtension(Extension):
 
         return wrap(value, length)
 
-    def to_json(self, value, indent=None):
-        return json_dumps(value)
+    def to_json(self, value, indent=None, pretty=None):
+        return json_dumps(value, nice=pretty)
 
     def _get_filters(self):
         return {
