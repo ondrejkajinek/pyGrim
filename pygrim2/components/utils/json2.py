@@ -119,7 +119,7 @@ def _dumps(obj, nice=None, depth=0):
     elif hasattr(obj, "toJson"):
         output.write(obj.toJson(func=_dumps, nice=nice, depth=depth))
     elif callable(obj):
-        return "<function %r>" % (obj.__name__,)
+        return "\"<function %r>\"" % (obj.__name__,)
     else:
         raise TypeError(type(obj), dir(obj), repr(obj))
 
