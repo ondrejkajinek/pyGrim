@@ -5,6 +5,7 @@ from decimal import Decimal
 from io import StringIO
 from types import GeneratorType
 from uuid import UUID
+import re
 
 # import everything from json to current namespace,
 # redefine functions as required
@@ -14,6 +15,8 @@ from json import *
 # JSON does not support these values, so we mark them as invalid
 InvalidJsonFloatValues = tuple(float(inv) for inv in ("inf", "-inf", "NaN"))
 
+
+ReType = type(re.compile(r'a'))
 """
 TODO: translate
 Jaký je rozdíl mezi reálným číslem a ženou?
@@ -119,7 +122,10 @@ def _dumps(obj, nice=None, depth=0):
     elif hasattr(obj, "toJson"):
         output.write(obj.toJson(func=_dumps, nice=nice, depth=depth))
     elif callable(obj):
-        return "\"<function %r>\"" % (obj.__name__,)
+        output.write("\"<function %r>\"" % (obj.__name__,))
+    elif isinstance(obj, ReType):
+        output.write(_dump_string("<re.Pattern '" + obj.pattern + "'>"))
+
     else:
         raise TypeError(type(obj), dir(obj), repr(obj))
 
