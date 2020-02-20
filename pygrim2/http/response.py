@@ -1,4 +1,7 @@
 # std
+import locale
+import threading
+from contextlib import contextmanager
 from datetime import datetime, timedelta
 from inspect import isgenerator, isgeneratorfunction
 from logging import getLogger
@@ -8,6 +11,19 @@ from urllib.parse import quote_plus as url_quoteplus
 from ..components.containers import NormalizedDict
 
 log = getLogger("pygrim.http.response")
+
+
+LOCALE_LOCK = threading.Lock()
+
+
+@contextmanager
+def setlocale(name):
+    with LOCALE_LOCK:
+        saved = locale.setlocale(locale.LC_ALL)
+        try:
+            yield locale.setlocale(locale.LC_ALL, name)
+        finally:
+            locale.setlocale(locale.LC_ALL, saved)
 
 
 NO_CONTENT_STATUSES = (204, 304)
@@ -23,16 +39,19 @@ def ensure_bytes(value):
 
 class Response(object):
 
-    COOKIE_PARTS = (
-        lambda c: "Domain=%s" % c["domain"] if c.get("domain") else None,
-        lambda c: (
-            "Expires=%s" % (
+    def expire(c):
+        if not c.get('lifetime'):
+            return None
+        with setlocale('C'):
+            exp = "Expires=%s" % (
                 (datetime.utcnow() + timedelta(seconds=c["lifetime"]))
                 .strftime("%a, %d-%b-%Y %H:%M:%S GMT")
             )
-            if c.get("lifetime")
-            else None
-        ),
+        return exp
+
+    COOKIE_PARTS = (
+        lambda c: "Domain=%s" % c["domain"] if c.get("domain") else None,
+        expire,
         lambda c: "HttpOnly" if c.get("http_only") else None,
         lambda c: "Path=%s" % c["path"] if c.get("path") else None,
         lambda c: "Secure" if c.get("secure") else None
