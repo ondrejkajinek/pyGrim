@@ -26,20 +26,20 @@ def deep_update(original, override):
     return original
 
 
-def ensure_bool(a):
-    # Václav Pokluda: is ~25% quicker than isinstance(a, bool)
-    if a is True or a is False:
-        res = a
-    elif a is None:
+def ensure_bool(val):
+    # Václav Pokluda: is ~25% quicker than isinstance(val, bool)
+    if val is True or val is False:
+        res = val
+    elif val is None:
         res = False
-    elif isinstance(a, str):
+    elif isinstance(val, str):
         res = (
-            bool(int(a))
-            if a.isdigit()
-            else a.lower().strip() == "true"
+            bool(int(val))
+            if val.isdigit()
+            else val.lower().strip() == "true"
         )
     else:
-        res = bool(a)
+        res = bool(val)
 
     return res
 
