@@ -1,10 +1,18 @@
 # std
 from collections import Mapping
-from re import compile as re_compile
+import logging
+import re
 from unicodedata import normalize as unicodedata_normalize
 
-REGEXP_TYPE = type(re_compile(r""))
-TRAILING_SLASH_REGEXP = re_compile("/\??\$?$|\$?$")
+
+log = logging.getLogger("pygrim2.components.utils.functions")
+
+
+REGEXP_TYPE = type(re.compile(r""))
+TRAILING_SLASH_REGEXP = re.compile(r"/\??\$?$|\$?$")
+
+OPTIONAL_PARAM_REGEXP = re.compile(r"\(([^)]*?)(%\(([^)]+)\)s)([^)]*?)\)\?")
+PARAM_REGEXP = re.compile(r"\(\?P<([^>]+)>[^)]+\)")
 
 
 def deep_update(original, override):
@@ -49,7 +57,7 @@ def ensure_tuple(variable):
 
 def fix_trailing_slash(pattern):
     return (
-        re_compile(TRAILING_SLASH_REGEXP.sub("/?$", pattern.pattern))
+        re.compile(TRAILING_SLASH_REGEXP.sub("/?$", pattern.pattern))
         if is_regex(pattern)
         else pattern.rstrip("/") or "/"
     )
@@ -71,9 +79,62 @@ def is_regex(pattern):
     return isinstance(pattern, REGEXP_TYPE)
 
 
+def regex_to_readable(pattern):
+    start = 0
+    pos = 0
+    end = len(pattern)
+    group_depth = 0
+    readable = ""
+    param_names = []
+    optional_names = {}
+    while pos < end:
+        if pattern[pos] == "(":
+            if group_depth == 0:
+                readable += pattern[start:pos]
+                start = pos
+
+            group_depth += 1
+        elif pattern[pos] == ")":
+            group_depth -= 1
+            if group_depth == 0:
+                param_name = PARAM_REGEXP.findall(pattern, start, pos + 1)[0]
+                param_names.append(param_name)
+                if pos + 1 < end and pattern[pos + 1] == "?":
+                    optional_readable = PARAM_REGEXP.sub(
+                        r"%(\1)s", pattern[start + 1:pos]
+                    )
+                    optional_names.update((
+                        (param_name, "%s%%s%s" % (opt[0], opt[3]))
+                        for opt
+                        in OPTIONAL_PARAM_REGEXP.findall(optional_readable)
+                    ))
+                    pos += 1
+
+                readable += "%({})s".format(param_name)
+                start = pos + 1
+
+        pos += 1
+
+    # add trailing part
+    readable += pattern[start:end]
+    required_names = [
+        name
+        for name
+        in param_names
+        if name not in optional_names
+    ]
+    if len(required_names) + len(optional_names) < len(param_names):
+        raise RuntimeError(
+            "Some keys are duplicate in route %r" % pattern
+        )
+
+    return readable, required_names, optional_names
+
+
+
 def remove_trailing_slash(pattern):
     return (
-        re_compile(TRAILING_SLASH_REGEXP.sub("", pattern.pattern))
+        re.compile(TRAILING_SLASH_REGEXP.sub("", pattern.pattern))
         if is_regex(pattern)
         else TRAILING_SLASH_REGEXP.sub("", pattern)
     )

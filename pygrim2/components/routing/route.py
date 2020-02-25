@@ -5,7 +5,8 @@ from urllib.parse import quote_plus
 
 # local
 from ..utils import (
-    fix_trailing_slash, get_method_name, is_regex, remove_trailing_slash
+    fix_trailing_slash, get_method_name, is_regex, remove_trailing_slash,
+    regex_to_readable
 )
 from ...http.methods import GET, HEAD, METHODS
 
@@ -79,8 +80,6 @@ class RouteGroup(RouteObject):
 
 class Route(RouteObject):
 
-    URL_FORMAT_REGEXP = re.compile(r"%\(([^)]+)\)s")
-    URL_OPTIONAL_REGEXP = re.compile(r"\(([^)]*?)(%\(([^)]+)\)s)([^)]*?)\)\?")
     URL_PARAM_REGEXP = re.compile(r"\(\?P<([^>]+)>[^)]+\)")
 
     def __init__(self, methods, pattern, handle, name=None):
@@ -178,22 +177,9 @@ class Route(RouteObject):
 
     def _pattern_to_readable(self):
         if self.is_regular():
-            param_names = self.URL_PARAM_REGEXP.findall(self.pattern)
-            readable = self.URL_PARAM_REGEXP.sub(r"%(\1)s", self.pattern)
-            optional_names = {
-                optional[2]: "%s%%s%s" % (optional[0], optional[3])
-                for optional
-                in self.URL_OPTIONAL_REGEXP.findall(readable)
-            }
-
-            readable = self.URL_OPTIONAL_REGEXP.sub(r"\2", readable)
-            readable = remove_trailing_slash(readable).lstrip("^")
-            readable = readable.replace(r"\.", ".")
-            required_names = set(param_names) - set(optional_names)
-            if len(required_names) + len(optional_names) < len(param_names):
-                raise RuntimeError(
-                    "Some keys are duplicate in route %r" % self.pattern
-                )
+            readable, required_names, optional_names = regex_to_readable(
+                self.pattern
+            )
         else:
             readable = self.pattern
             required_names = set()
