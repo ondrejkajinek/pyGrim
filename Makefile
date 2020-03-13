@@ -42,6 +42,11 @@ debtest: deb
 	&& scp build/${FULL_PKG_NAME} debian.ats:${PACKAGES_REMOTE_DIR} \
 	&& ssh aptly@debian.ats bash pkg-to-testing ${PACKAGES_REMOTE_DIR}${FULL_PKG_NAME} stretch
 
+debbuster: deb
+	python3 setup.py create_tag \
+	&& scp build/${FULL_PKG_NAME} debian.ats:${PACKAGES_REMOTE_DIR} \
+	&& ssh aptly@debian.ats bash pkg-to-testing ${PACKAGES_REMOTE_DIR}${FULL_PKG_NAME} buster
+
 clean:
 	rm -rf dist
 	rm -rf build
