@@ -1,3 +1,18 @@
+pygrim (0.3.5) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * fixes to work and work-around Cookie SameSite issues
+  * commented code removed
+  * compatibility package removed from setup.py deps
+  * pep8, minor optimization
+  * ability to disable content-length header, which gives space for
+    template streaming
+  * #65801: Route pattern reworked, url_for optimized -- no regular
+    expressions on server runtime, route pattern is translated into
+    format string during startup
+
+ -- Václav Pokluda <root@darky>  Mon, 30 Mar 2020 17:44:13 +0200
+
 pygrim (0.3.4) testing; urgency=medium
 
   * COMMIT MESSASGES
