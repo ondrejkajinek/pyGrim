@@ -26,7 +26,44 @@ class Request(object):
     def __init__(self, environment):
         self._parse_headers(environment)
         self._save_environment(environment)
-        self.cookies = self._parse_string(self._headers.get("cookie", ""), ";")
+        self.cookies = self._parse_cookies(self._headers.get("cookie", ""))
+
+    def _parse_cookies(self, source):
+        if not source:
+            return ImmutableDict()
+        parts = (
+            item
+            for item
+            in source.split(';')
+            if item
+        )
+
+        parsed = {}
+        for part in parts:
+            key, value = (
+                map(string_strip, map(unquote_plus, part.split("=", 1)))
+                if "=" in part
+                else (unquote_plus(part.strip()), None)
+            )
+            parsed.setdefault(key, []).append(value)
+
+        # fix legacy cookies
+        for key in parsed.keys():
+            if key.endswith("-legacy"):
+                if key[:-7] in parsed:
+                    # legacy is the second one - if nonlegacy exists ignore it
+                    parsed.pop(key)
+                else:
+                    parsed[key[:-7]] = parsed.pop(key)
+                # endif
+            # endif
+        # endfor
+
+        for key in parsed.iterkeys():
+            if len(parsed[key]) == 1:
+                parsed[key] = parsed[key][0]
+
+        return ImmutableDict(parsed)
 
     def _get_content_type(self):
         c_t = self._normalize_content_type(

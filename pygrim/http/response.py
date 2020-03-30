@@ -3,7 +3,7 @@
 from datetime import datetime, timedelta
 from inspect import isgeneratorfunction
 from logging import getLogger
-from os import SEEK_END
+# from os import SEEK_END
 from urllib import quote_plus as url_quoteplus
 from locale import getlocale, LC_ALL
 import types
@@ -41,7 +41,35 @@ class Response(object):
         ),
         lambda c: "HttpOnly" if c.get("http_only") else None,
         lambda c: "Path=%s" % c["path"] if c.get("path") else None,
-        lambda c: "Secure" if c.get("secure") else None
+        lambda c: (
+            "Secure"
+            if (
+                c.get("secure") or
+                (c.get("same_site") or "").lower() == "none"
+            )
+            else None
+        ),
+        lambda c: "SameSite=%s" % (c.get("same_site") or "Lax"),
+    )
+
+    COOKIE_PARTS_LEGACY = (
+        lambda c: (
+            "Domain=%s" % c["domain"]
+            if c.get("domain")
+            else None
+        ),
+        lambda c: "Lang=%s" % (getlocale(LC_ALL)[0] or "",),
+        lambda c: (
+            "Expires=%s" % (
+                (datetime.utcnow() + timedelta(seconds=c["lifetime"]))
+                .strftime("%a, %d-%b-%Y %H:%M:%S GMT")
+            )
+            if c.get("lifetime")
+            else None
+        ),
+        lambda c: "HttpOnly" if c.get("http_only") else None,
+        lambda c: "Path=%s" % c["path"] if c.get("path") else None,
+        lambda c: "Secure" if c.get("secure") else None,
     )
 
     def __init__(self):
@@ -105,6 +133,7 @@ class Response(object):
                 self.headers.append(("Set-Cookie", cookie))
 
     def _serialize_cookie(self, name, cookie):
+        # ensure cookie values:
         params = (
             ensure_string(part_formatter(cookie))
             for part_formatter
@@ -117,6 +146,26 @@ class Response(object):
         params_part = "; {}".format(cookie_params)
         return "{}={}{}".format(name_part, value_part, params_part)
 
+    def _serialize_cookie_legacy(self, name, cookie):
+        if cookie.get("same_site") not in (None, "None"):
+            return None
+
+        # ensure cookie values:
+        params = (
+            ensure_string(part_formatter(cookie))
+            for part_formatter
+            in self.COOKIE_PARTS_LEGACY
+        )
+        cookie_params = "; ".join(param for param in params if param)
+
+        name_part = url_quoteplus(name + "-legacy")
+        value_part = url_quoteplus(str(cookie["value"]))
+        params_part = "; {}".format(cookie_params)
+        return "{}={}{}".format(name_part, value_part, params_part)
+
     def _serialized_cookies(self):
         for name, cookie in self.cookies.iteritems():
             yield self._serialize_cookie(name, cookie)
+            leg_cookie = self._serialize_cookie_legacy(name, cookie)
+            if leg_cookie:
+                yield leg_cookie

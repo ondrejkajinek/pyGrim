@@ -21,7 +21,8 @@ class SessionStorage(object):
                 ("domain", "", ""),
                 ("path", "/", ""),
                 ("http_only", False, "bool"),
-                ("secure", False, "bool")
+                ("secure", False, "bool"),
+                ("same_site", "Lax", "")
             )
         }
         log.debug("Session cookie template:%r", self._cookie)
