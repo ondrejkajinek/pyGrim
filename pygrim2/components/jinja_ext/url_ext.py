@@ -18,6 +18,12 @@ class UrlExtension(Extension):
     def site_url(self, context, site):
         return path.join(self.base_url(context), site.lstrip("/"))
 
+    def srcset_width(self, target, path, sizes):
+        return ", ".join([
+            "/img/%s/%s/0/%s %sw" % (target, w, path, w)
+            for w in sizes
+        ])
+
     def _get_filters(self):
         return {
             "base_url": self.base_url,
@@ -27,5 +33,6 @@ class UrlExtension(Extension):
     def _get_functions(self):
         return {
             "base_url": self.base_url,
-            "site_url": self.site_url
+            "site_url": self.site_url,
+            "srcset_width": self.srcset_width
         }
