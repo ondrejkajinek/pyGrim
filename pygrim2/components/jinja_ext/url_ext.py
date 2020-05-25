@@ -20,7 +20,7 @@ class UrlExtension(Extension):
 
     def srcset_width(self, target, path, sizes):
         return ", ".join([
-            "/img/%s/%s/0/%s %sw" % (target, w, path, w)
+            "/im/%s/%s/0/%s %sw" % (target, w, path, w)
             for w in sizes
         ])
 
