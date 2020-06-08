@@ -16,21 +16,15 @@ name = "pygrim2"
 desc = "lightweight python frontend framework"
 
 
-def changelog():
-    _fill_changelog()
-    _edit_file("debian/changelog")
-
-
 def check():
     _need_push_pull()
-    _edit_file("debian/version")
-    _check_repo()
+    _edit_file("VERSION")
 
 
 def create_tag():
     tag = "%s-%s" % (name, get_version())
     _call_cmd("git reset HEAD")
-    _call_cmd("git add debian/version debian/changelog")
+    _call_cmd("git add VERSION")
     _call_cmd('git commit -m "version %s"' % tag)
     # This will put one commit message per annotation line
     annotate = """git tag "%s" --annotate -m "$( echo -e "%s" )" """ % (
@@ -54,7 +48,7 @@ def get_package_name():
 
 
 def get_version():
-    with open("debian/version") as version_in:
+    with open("VERSION") as version_in:
         version = version_in.read().strip()
 
     return version
@@ -69,32 +63,6 @@ def _check_cmd(cmd, shell=False):
         shlex_split(cmd),
         shell=shell
     ).strip().decode("utf8")
-
-
-def _check_repo():
-    version = get_version()
-    cmd = """ssh debian.ats "aptly package search '%s (%s%s)'" """
-    current = cmd % (name, "=", version)
-    is_current = _check_cmd(current)
-    if is_current:
-        _error("This version is already in repository!")
-        raise RuntimeError("This version is already in repo!")
-    else:
-        _success("This version is not in repository, proceeding.")
-
-    newer = cmd % (name, ">", version)
-    is_newer = _check_cmd(newer)
-    if is_newer:
-        r = _question(
-            """There are newer version than %s in repository (%s),
-            do you wish to proceed? [y]es, [n]o (default)""" % (
-                version, is_newer
-            )
-        )
-        if r.lower() not in ("y", "yes"):
-            raise RuntimeError("Old verion upload was canceled by user.")
-    else:
-        _success("This would be the latest version in repo, proceeding.")
 
 
 def _commit_messages():
@@ -125,26 +93,6 @@ def _edit_file(filename):
 
 def _error(msg):
     stderr.write("%s%s%s\n" % (FAIL, msg, ENDC))
-
-
-def _fill_changelog():
-    write_version_to_changelog = (
-        "%s dch -v %s --distribution testing COMMIT MESSASGES"
-    ) % (_dch_base(), get_version())
-    _call_cmd(write_version_to_changelog, shell=True, split=False)
-    last_tag = _get_last_tag()
-    _info("Last tag: %s" % last_tag)
-
-    try:
-        for message in _commit_messages():
-            _write_message(message)
-    except CalledProcessError as ex:
-        res = _question(
-            """[?]\tIt seems no commit happened since last tag.
-            Continue anyway? [y]es, [n]o (default)"""
-        )
-        if res.lower() not in ("y", "yes"):
-            raise ex
 
 
 def _get_last_tag():
@@ -181,12 +129,6 @@ def _success(msg):
     stdout.write("%s%s%s\n" % (SUCCESS, msg, ENDC))
 
 
-def _write_message(message):
-    _info("Writing commit message '%s' to changelog" % message)
-    dch = """%s dch -a "%s" """ % (_dch_base(), message)
-    _call_cmd(dch, shell=True, split=False)
-
-
 # # # start of specific part
 # # # end of specific part
 methods = {
@@ -196,7 +138,6 @@ methods = {
     "author_email": (get_author_email, (), {}),
     "name": (get_package_name, (), {}),
     "create_tag": (create_tag, (), {}),
-    "changelog": (changelog, (), {}),
 }
 if __name__ == "__main__":
     if argv[1] in methods.keys():
