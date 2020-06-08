@@ -2,8 +2,8 @@
 
 from sys import argv
 
-from .packagelib import create_tag, find_packages, setup
-from .packagelib.setup import (
+from packagelib import create_tag, find_packages, setup
+from packagelib.setup import (
     check_notes, need_push_pull, has_commits, _edit_version
 )
 
