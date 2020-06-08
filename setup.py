@@ -65,7 +65,10 @@ def _call_cmd(cmd, shell=False, split=True):
 
 
 def _check_cmd(cmd, shell=False):
-    return check_output(shlex_split(cmd), shell=shell).strip()
+    return check_output(
+        shlex_split(cmd),
+        shell=shell
+    ).strip().decode("utf8")
 
 
 def _check_repo():
@@ -158,8 +161,9 @@ def _info(msg):
 
 def _need_push_pull():
     _call_cmd("git fetch")
-    behind = _check_cmd("git rev-list HEAD..origin/%s" % _current_branch())
-    ahead = _check_cmd("git rev-list origin/%s..HEAD" % _current_branch())
+    curr = _current_branch()
+    behind = _check_cmd("git rev-list HEAD..origin/%s" % curr)
+    ahead = _check_cmd("git rev-list origin/%s..HEAD" % curr)
     if ahead:
         _error("You haven't `git push`ed!")
         raise RuntimeError("`git push` required")
