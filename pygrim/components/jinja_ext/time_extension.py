@@ -127,14 +127,17 @@ class TimeExtension(Extension):
         return self._format_datetime(obj, format_str, locale)
 
     def time_from_seconds(self, seconds, locale=None):
-        if locale:
-            return self.formater.format(
-                timedelta(seconds=seconds), locale=locale
-            )
-        else:
-            minutes, seconds = divmod(seconds, 60)
-            hours, minutes = divmod(minutes, 60)
-            return "%02d:%02d:%02d" % (hours, minutes, seconds)
+        if isinstance(seconds, int):
+            if locale:
+                return self.formater.format(
+                    timedelta(seconds=seconds), locale=locale
+                )
+            else:
+                minutes, seconds = divmod(seconds, 60)
+                hours, minutes = divmod(minutes, 60)
+                return "%02d:%02d:%02d" % (hours, minutes, seconds)
+        
+        return 0
 
     def month_name(self, case, locale, number, source_date):
         if locale not in months:
