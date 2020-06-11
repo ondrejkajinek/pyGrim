@@ -77,7 +77,7 @@ class Context(object):
 
     def add_cookie(
         self, name, value, lifetime=None, domain=None, path=None,
-        http_only=None, secure=None
+        http_only=None, secure=None, same_site=None
     ):
         """
         Sets cookie with specified name, value, domain, path, etc.,
@@ -89,7 +89,8 @@ class Context(object):
             "lifetime": lifetime,
             "path": path,
             "secure": secure,
-            "value": value
+            "value": value,
+            "same_site": same_site
         }
 
     def add_css(self, *args):
@@ -112,7 +113,8 @@ class Context(object):
         )
 
     def delete_cookie(
-        self, name, domain=None, path=None, http_only=None, secure=None
+        self, name, domain=None, path=None, http_only=None, secure=None,
+        same_site=None
     ):
         if name in self._response.cookies:
             self._response.cookies[name].update({
@@ -126,7 +128,8 @@ class Context(object):
                 "lifetime": -1,
                 "path": path,
                 "secure": secure,
-                "value": None
+                "value": None,
+                "same_site": same_site
             }
 
     def dump_request(self):
@@ -300,8 +303,10 @@ class Context(object):
             else:
                 self.formater = Formater(language)
             self._language = language
+            # language cookie is not nesessary to be secured => same_site=None
             self.add_cookie(
-                self._lang_key, self._language, 3600 * 24 * 365, path="/"
+                self._lang_key, self._language, 3600 * 24 * 365,
+                path="/", same_site="None"
             )
         else:
             log.warning("Language %r is not supported", language)

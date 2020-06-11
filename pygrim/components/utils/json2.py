@@ -8,6 +8,7 @@ from types import GeneratorType
 from unicodedata import normalize as unicodedata_normalize
 from uuid import UUID
 import time
+import re
 
 # import everything from json to current namespace
 # redefine functions as required
@@ -18,6 +19,10 @@ from json import *
 
 # JSON does not support these values, so we mark them as invalid
 InvalidJsonFloatValues = map(float, ("inf", "-inf", "NaN"))
+
+
+ReType = type(re.compile(r'a'))
+
 """
 TODO: translate
 Jaký je rozdíl mezi reálným číslem a ženou?
@@ -146,6 +151,10 @@ def _dumps(obj, nice=None, depth=0):
         output.write(_dump_dict(obj._asdict(), nice, depth))
     elif hasattr(obj, "toJson"):
         output.write(obj.toJson(func=_dumps, nice=nice, depth=depth))
+    elif callable(obj):
+        output.write("\"<function %r>\"" % (obj.__name__,))
+    elif isinstance(obj, ReType):
+        output.write(_dump_string("<re.Pattern '" + obj.pattern + "'>"))
     else:
         raise TypeError(type(obj), dir(obj), repr(obj))
 
