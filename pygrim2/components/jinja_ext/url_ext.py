@@ -19,10 +19,16 @@ class UrlExtension(Extension):
         return path.join(self.base_url(context), site.lstrip("/"))
 
     def srcset_width(self, target, path, sizes):
-        return ", ".join([
-            "/im/%s/%s/0/%s %sw" % (target, w, path, w)
-            for w in sizes
-        ])
+        arr = []
+        for w in sizes:
+            w1 = w
+            w2 = w
+            if isinstance(w, (tuple, list)):
+                w1, w2 = w
+            arr.append(
+                "/im/%s/%s/0/%s %sw" % (target, w1, path, w2)
+            )
+        return ", ".join(arr)
 
     def _get_filters(self):
         return {
