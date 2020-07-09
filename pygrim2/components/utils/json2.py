@@ -1,6 +1,6 @@
 # std
 from collections import Iterable
-from datetime import date, datetime, timedelta
+from datetime import date, datetime, timedelta, time
 from decimal import Decimal
 from io import StringIO
 from types import GeneratorType
@@ -113,7 +113,7 @@ def _dumps(obj, nice=None, depth=0):
         output.write(_dump_iterable(obj, nice, depth))
     elif isinstance(obj, UUID):
         output.write(_dump_uuid(obj))
-    elif isinstance(obj, (datetime, date)):
+    elif isinstance(obj, (datetime, date, time)):
         output.write(_dump_datetime(obj))
     elif isinstance(obj, timedelta):
         output.write(_dump_timedelta(obj))
