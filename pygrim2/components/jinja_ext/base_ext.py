@@ -79,7 +79,7 @@ class BaseExtension(Extension):
         return self.DASH_SQUEEZER.sub(
             replace_char,
             self._seo_dashize(
-                self._seo_remove(strip_accent(text).lower()),
+                self._seo_remove(strip_accent(text).lower(), replace_char),
                 replace_char
             )
         )
