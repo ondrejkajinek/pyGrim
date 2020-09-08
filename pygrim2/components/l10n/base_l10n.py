@@ -1,5 +1,5 @@
 from logging import getLogger
-from os import path
+from os import path, getcwd
 
 from .abstract_l10n import AbstractL10n
 from ..containers import ShortcutDict
@@ -73,10 +73,21 @@ class BaseL10n(AbstractL10n):
                 self._translations.add_shortcut(shortcut, locale)
 
     def _load_translations(self, config):
+
+        try:
+            import uwsgi
+        except ImportError:
+            class uwsgi:
+                @staticmethod
+                def getopt(opt):
+                    if opt == "chdir":
+                        return getcwd()
+
+
         l10n_kwargs = {
             "lang_domain": config.get("pygrim:l10n:lang_domain"),
             "locale_path": path.join(
-                config.get("uwsgi:chdir"),
+                uwsgi.getopt("chdir"),
                 config.get("pygrim:l10n:locale_path")
             )
         }
