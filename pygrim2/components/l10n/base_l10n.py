@@ -19,6 +19,7 @@ class BaseL10n(AbstractL10n):
         self._set_default_locale(config)
 
     def get(self, translation):
+        start_log.debug("Selecting %s from %s", translation, self._translations.keys())
         return self._translations.get(
             translation, self._translations[self._default_locale]
         )

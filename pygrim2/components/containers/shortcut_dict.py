@@ -20,6 +20,20 @@ class ShortcutDict(dict):
     def add_shortcut(self, shortcut, target):
         self._shortcuts[shortcut] = target
 
+    def get(self, key, *args):
+        if key in self.iterkeys():
+            return self[key]
+        if (
+            key in self._shortcuts and
+            self._shortcuts[key] in self.iterkeys()
+        ):
+            return self[self._shortcuts[key]]
+        if args:
+            return args[0]
+        # endif
+        return None
+    # enddef
+
 
 if __name__ == "__main__":
     sd = ShortcutDict()

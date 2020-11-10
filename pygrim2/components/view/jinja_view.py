@@ -2,6 +2,7 @@
 
 # std
 from os import getcwd, path
+from logging import getLogger
 
 # non-std
 from jinja2 import Environment, FileSystemLoader, select_autoescape
@@ -12,6 +13,7 @@ from ..jinja_ext import i18n
 from ..utils import get_class_name
 
 I18N_EXT_NAME = get_class_name(i18n)
+log = getLogger(__file__)
 
 
 def _suppress_none(self, variable):
@@ -61,7 +63,13 @@ class JinjaView(BaseView):
         env = Environment(**self._env_kwargs)
         env.globals.update(self._extra_functions)
 
+        log.debug("Select translations? :%s", self._has_gettext())
         if self._has_gettext():
+            log.info(
+                "Selecting translations %s from => %s",
+                context.get_language(),
+                self._l10n.get(context.get_language())
+            )
             env.install_gettext_translations(
                 self._l10n.get(context.get_language())
             )
