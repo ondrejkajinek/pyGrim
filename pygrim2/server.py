@@ -260,7 +260,10 @@ class Server(object):
                 self._config_dir = path.dirname(uwsgi_opt[key])
                 return uwsgi_opt[key], self.KNOWN_CONFIG_FORMATS[key]
         else:
-            raise RuntimeError("No known config format used to start uwsgi!")
+            raise RuntimeError(
+                "No known config format used to start uwsgi!"
+                "known: %s" % (self.KNOWN_CONFIG_FORMATS.keys(),)
+            )
 
     def _find_l10n_class(self):
         l10n_type = self.config.get("pygrim:l10n:type", "dummy")

@@ -78,16 +78,12 @@ class BaseL10n(AbstractL10n):
             import uwsgi
         except ImportError:
             class uwsgi:
-                @staticmethod
-                def getopt(opt):
-                    if opt == "chdir":
-                        return getcwd()
-
+                opt = {}
 
         l10n_kwargs = {
             "lang_domain": config.get("pygrim:l10n:lang_domain"),
             "locale_path": path.join(
-                uwsgi.getopt("chdir"),
+                uwsgi.opt.get("chdir", getcwd()).decode("utf8"),
                 config.get("pygrim:l10n:locale_path")
             )
         }

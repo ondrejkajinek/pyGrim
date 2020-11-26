@@ -196,7 +196,9 @@ class BabelExtension(TimeBase):
 
     def _formatted_currency(self, context, amount, currency):
         locale = context.get("context").get_language()
-        formatted = babel.numbers.format_currency(amount, currency, locale=locale)
+        formatted = babel.numbers.format_currency(
+            amount, currency, locale=locale
+        )
 
         currency_first = formatted[-1].isdigit()
         currency = ""
