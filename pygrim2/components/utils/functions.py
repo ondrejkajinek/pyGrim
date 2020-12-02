@@ -117,12 +117,12 @@ def regex_to_readable(pattern):
 
     # add trailing part
     readable += pattern[start:end]
-    required_names = [
+    required_names = set(
         name
         for name
         in param_names
         if name not in optional_names
-    ]
+    )
     if len(required_names) + len(optional_names) < len(param_names):
         raise RuntimeError(
             "Some keys are duplicate in route %r" % pattern
