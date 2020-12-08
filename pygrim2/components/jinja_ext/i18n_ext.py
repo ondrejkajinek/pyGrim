@@ -39,42 +39,14 @@ def lang_text_factory():
     @contextfilter
     def lang_text(context, source):
         if isinstance(source, dict) and source:
-            lang = context.get("context").get_language()
-            used = set()
-            parts = (
-                part
-                for part
-                in itertools.chain(*[
-                    # orig, lowered and uppered locale name
-                    (i, i.lower(), i.upper())
-                    for i
-                    # take every possible varint of lang
-                    # <lang>_<territory>.<encoding>@<variant>
-                    # <lang>_<territory>.<encoding>
-                    # <lang>_<territory>
-                    # <lang>
-                    in (
-                        lang,
-                        lang.split("@", 1)[0],
-                        lang.split(".", 1)[0],
-                        lang.split("_", 1)[0]
-                    )
-                ])
-                # don't add duplicate locale names
-                if part not in used and (used.add(part) or True)
-            )
-            for part in parts:
-                if part in source:
-                    text = source[part]
-                    break
-            else:
-                text = Undefined()
+            for lang in context.get("context").get_language_priority():
+                if lang in source:
+                    return source[lang]
+            return source.values()[0]
         elif isinstance(source, str):
-            text = source
+            return source
         else:
-            text = Undefined()
-
-        return text
+            return Undefined()
 
     return lang_text
 
