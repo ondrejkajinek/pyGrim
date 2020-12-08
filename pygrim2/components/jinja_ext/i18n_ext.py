@@ -1,4 +1,3 @@
-import itertools
 
 from jinja2.ext import InternationalizationExtension
 from jinja2.runtime import Undefined
@@ -42,7 +41,7 @@ def lang_text_factory():
             for lang in context.get("context").get_language_priority():
                 if lang in source:
                     return source[lang]
-            return source.values()[0]
+            return next(iter(source.values()))
         elif isinstance(source, str):
             return source
         else:
