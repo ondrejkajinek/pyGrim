@@ -217,9 +217,13 @@ class NoRoute(Route):
         self._handle = None
         self._methods = ()
         self._name = "<no route>"
+        self.pattern = None
 
     def __bool__(self):
         return False
 
     def get_handle_name(self):
         return self._name
+
+    def is_regular(self):
+        return False

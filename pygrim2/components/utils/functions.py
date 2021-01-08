@@ -58,6 +58,8 @@ def ensure_tuple(variable):
 
 
 def fix_trailing_slash(pattern):
+    if pattern is None:
+        return None
     return (
         re.compile(TRAILING_SLASH_REGEXP.sub("/?$", pattern.pattern))
         if is_regex(pattern)
@@ -74,6 +76,8 @@ def get_class_name(cls):
 
 
 def get_method_name(method):
+    if method is None:
+        return None
     return "%s.%s" % (method.__self__.__class__.__name__, method.__name__)
 
 

@@ -128,6 +128,7 @@ class Server(object):
         try:
             self._handle_request(context=context)
         except BaseException:
+            log.critical("Fatal server error", exc_info=True)
             context.set_response_body("Fatal Server Error")
             context.set_response_status(500)
             context.delete_response_headers()
@@ -430,7 +431,9 @@ class Server(object):
             try:
                 view.display(context)
             except BaseException:
-                log.exception("Error when calling View.display")
+                log.exception(
+                    "Error when calling View.display on view %s", view
+                )
                 raise
 
     def _process_error_handler(self, method):
