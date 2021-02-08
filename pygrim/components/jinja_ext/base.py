@@ -4,11 +4,16 @@ from ..formater import Formater
 from ..utils import Counter
 from ..utils.functions import strip_accent
 from ..utils.json2 import dumps as json_dumps
+from pygrim.components.config import YamlConfig
 from jinja2.ext import Extension, Markup
 from jinja2.runtime import Undefined
 from logging import getLogger
 from re import compile as re_compile
 from textwrap import wrap
+import traceback
+from requests.utils import requote_uri
+from ConfigParser import ConfigParser
+
 try:
     from seo_helper import SeoHelper
 except ImportError:
@@ -64,9 +69,43 @@ class BaseExtension(Extension):
 
     def __init__(self, environment):
         super(BaseExtension, self).__init__(environment)
+        log.critical("JKX SELF DIR: %r", dir(self))
         environment.filters.update(self._get_filters())
         environment.globals.update(self._get_functions())
         self.formater = Formater("en_US.UTF8")
+        # pro imager
+        config = getattr(environment, "config", None) or {}
+        self._debug = False
+        self.use_nginx = False
+        self.imager_domain_prefixes = {
+            "content-core.grandit.cz": "coc",
+            "content-core.test.mopa.cz": "coct",
+            "img.floowie.com": "flw",
+            "mainstorage.musicjet.cz": "mjd",
+            "storage.palmknihy.cz": "pkn",
+        }
+
+        if isinstance(config, (YamlConfig, dict)):
+            self._debug = bool(config.get("jinja:debug", self._debug))
+            self.use_nginx = bool(config.get(
+                "jinja:imager:use_nginx", self.use_nginx
+            ))
+            self.imager_domain_prefixes = config.get(
+                "jinja:imager:domain_prefixes", self.imager_domain_prefixes
+            )
+        elif isinstance(config, ConfigParser):
+            self._debug = bool(config.get("jinja", "debug", self._debug))
+            self.use_nginx = bool(config.get(
+                "jinja", "imager_use_nginx", self.use_nginx
+            ))
+            if config.has_section("jinja-imager-domain-prefixes"):
+                self.imager_domain_prefixes = config.optionsdict(
+                    "jinja-imager-domain-prefixes", self.imager_domain_prefixes
+                )
+            # endif
+        else:
+            log.critical("Unknown config class %s", type(config))
+        # endif
 
     def as_json(self, data):
         log.warning("Filter `as_json` is deprecated and will be removed soon.")
@@ -100,10 +139,49 @@ class BaseExtension(Extension):
         if not width and not height:
             width = size
 
+        if self.use_nginx:
+            image = path
+            image = requote_uri(image)
+            if path.startswith("http"):
+                domain, img = image .split("/", 2)[-1].split("/", 1)
+                prefix = self.imager_domain_prefixes.get(domain)
+                if not prefix:
+                    log.warning(
+                        "IMAGER: unsupported domain %r in image", domain
+                    )
+                    if self._debug:
+                        raise RuntimeError(
+                            "unsupported domain %r in image", domain
+                        )
+                    else:
+                        return path
+                image = img
+            else:
+                # TODO: co zobrazovat v pripade relativnich url? Vratit puvodni
+                log.warning("IMAGER: found relative url %r", image)
+                log.warning(
+                    "using relative URL:%r from %s",
+                    image, "".join(traceback.format_stack())
+                )
+                return path
+            # endif
+            use_width = width or 0
+            use_height = height or 0
+            new_path = "/im/%s/%s/%s/%s" % (
+                prefix, use_width, use_height, image
+            )
+            log.debug("PATH: %r => %r", path, new_path)
+            return new_path
+        # endif
+
         width = width or ""
         height = height or ""
         if not path.startswith("/"):
             start = "/" if proxy else "//"
+            log.debug(
+                "IMG: %r - %r - %r - %r %r",
+                start, method or "fit", width, height, path
+            )
             path = "%simg.grandit.cz/%s,img,%s,%s;%s" % (
                 start, method or "fit", width, height, path)
 

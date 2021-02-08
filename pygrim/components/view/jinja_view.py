@@ -22,13 +22,20 @@ def _suppress_none(self, variable):
 _suppress_none.contextfunction = True
 
 
+class ConfigurableEnvironment(Environment):
+    def __init__(self, **kwargs):
+        self.config = kwargs.pop("config")
+        super(ConfigurableEnvironment, self).__init__(**kwargs)
+
+
 class JinjaView(BaseView):
 
     def __init__(self, config, extra_functions, translations=None, **kwargs):
         super(JinjaView, self).__init__(config, **kwargs)
         self._debug = config.getbool("jinja:debug", False)
         self._dump_switch = config.get("jinja:dump_switch", "jkxd")
-        self._env = Environment(
+        self._env = ConfigurableEnvironment(
+            config=config,
             extensions=self._get_extensions(config),
             loader=FileSystemLoader(
                 searchpath=path.join(
