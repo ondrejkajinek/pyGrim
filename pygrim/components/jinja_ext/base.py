@@ -99,9 +99,11 @@ class BaseExtension(Extension):
                 "jinja", "imager_use_nginx", self.use_nginx
             ))
             if config.has_section("jinja-imager-domain-prefixes"):
-                self.imager_domain_prefixes = config.optionsdict(
-                    "jinja-imager-domain-prefixes", self.imager_domain_prefixes
+                pfxs = config.optionsdict(
+                    "jinja-imager-domain-prefixes", None
                 )
+                if pfxs:
+                    self.imager_domain_prefixes = pfxs
             # endif
         else:
             log.critical("Unknown config class %s", type(config))
