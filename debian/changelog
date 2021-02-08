@@ -1,3 +1,10 @@
+pygrim (0.3.7) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * Config read fix
+
+ -- Václav Pokluda <root@darky>  Mon, 08 Feb 2021 16:55:03 +0100
+
 pygrim (0.3.6) testing; urgency=medium
 
   * COMMIT MESSASGES
