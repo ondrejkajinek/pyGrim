@@ -1,3 +1,10 @@
+pygrim (0.3.8) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * FIX: encoding url
+
+ -- Václav Pokluda <root@darky>  Thu, 11 Feb 2021 10:15:22 +0100
+
 pygrim (0.3.7) testing; urgency=medium
 
   * COMMIT MESSASGES
