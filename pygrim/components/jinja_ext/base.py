@@ -143,6 +143,8 @@ class BaseExtension(Extension):
 
         if self.use_nginx:
             image = path
+            if isinstance(image, unicode):
+                image = image.encode("utf8")
             image = requote_uri(image)
             if path.startswith("http"):
                 domain, img = image .split("/", 2)[-1].split("/", 1)
