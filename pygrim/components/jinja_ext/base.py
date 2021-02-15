@@ -76,7 +76,9 @@ class BaseExtension(Extension):
         # pro imager
         config = getattr(environment, "config", None) or {}
         self._debug = False
+        self.use_imager_fallback = False
         self.use_nginx = False
+        self.imager_relative_prefix = None
         self.imager_domain_prefixes = {
             "content-core.grandit.cz": "coc",
             "content-core.test.mopa.cz": "coct",
@@ -90,6 +92,12 @@ class BaseExtension(Extension):
             self.use_nginx = bool(config.get(
                 "jinja:imager:use_nginx", self.use_nginx
             ))
+            self.use_imager_fallback = bool(config.get(
+                "jinja:imager:use_imager_fallback", self.use_imager_fallback
+            ))
+            self.imager_relative_prefix = config.get(
+                "jinja:imager:relative_prefix", self.imager_relative_prefix
+            )
             self.imager_domain_prefixes = config.get(
                 "jinja:imager:domain_prefixes", self.imager_domain_prefixes
             )
@@ -98,6 +106,12 @@ class BaseExtension(Extension):
             self.use_nginx = bool(config.get(
                 "jinja", "imager_use_nginx", self.use_nginx
             ))
+            self.use_imager_fallback = bool(config.get(
+                "jinja", "imager_use_imager_fallback", self.use_imager_fallback
+            ))
+            self.imager_relative_prefix = config.get(
+                "jinja", "imager_relative_prefix", self.imager_relative_prefix
+            )
             if config.has_section("jinja-imager-domain-prefixes"):
                 pfxs = config.optionsdict(
                     "jinja-imager-domain-prefixes", None
@@ -132,6 +146,23 @@ class BaseExtension(Extension):
     def decimal_format(self, number, precision, locale=None):
         return self.formater.format_decimal(number, precision, locale)
 
+    def _fit_image_imager(
+        self, path, size=None, proxy=False, width=None, height=None,
+        method=None
+    ):
+        width = width or ""
+        height = height or ""
+        if not path.startswith("/"):
+            start = "/" if proxy else "//"
+            log.debug(
+                "IMG: %r - %r - %r - %r %r",
+                start, method or "fit", width, height, path
+            )
+            path = "%simg.grandit.cz/%s,img,%s,%s;%s" % (
+                start, method or "fit", width, height, path)
+        return path
+    # enddef
+
     def fit_image(
         self, path, size=None, proxy=False, width=None, height=None,
         method=None
@@ -158,16 +189,37 @@ class BaseExtension(Extension):
                             "unsupported domain %r in image", domain
                         )
                     else:
-                        return path
+                        if self.use_imager_fallback:
+                            log.warning(
+                                "IMAGER: using old imager for url %r", path
+                            )
+                            return self._fit_image_imager(
+                                path, size=size, proxy=proxy, width=width,
+                                height=height, method=method
+                            )
+                        else:
+                            return path
                 image = img
             else:
-                # TODO: co zobrazovat v pripade relativnich url? Vratit puvodni
-                log.warning("IMAGER: found relative url %r", image)
-                log.warning(
-                    "using relative URL:%r from %s",
-                    image, "".join(traceback.format_stack())
-                )
-                return path
+                if self.imager_relative_prefix:
+                    # pokud mame relativni prefix, tak jej pouzijeme
+                    prefix = self.imager_relative_prefix
+                    image = path.lstrip("/")
+                elif self.use_imager_fallback:
+                    # jdeme na stary imager, ale chceme o tom vedet
+                    log.warning("IMAGER: using old imager for url %r", path)
+                    return self._fit_image_imager(
+                        path, size=size, proxy=proxy, width=width,
+                        height=height, method=method
+                    )
+                else:
+                    # relativni linky neumime, tak vratime puvodni link
+                    log.warning("IMAGER: found relative url %r", image)
+                    log.warning(
+                        "using relative URL:%r from %s",
+                        image, "".join(traceback.format_stack())
+                    )
+                    return path
             # endif
             use_width = width or 0
             use_height = height or 0
@@ -178,18 +230,10 @@ class BaseExtension(Extension):
             return new_path
         # endif
 
-        width = width or ""
-        height = height or ""
-        if not path.startswith("/"):
-            start = "/" if proxy else "//"
-            log.debug(
-                "IMG: %r - %r - %r - %r %r",
-                start, method or "fit", width, height, path
-            )
-            path = "%simg.grandit.cz/%s,img,%s,%s;%s" % (
-                start, method or "fit", width, height, path)
-
-        return path
+        return self._fit_image_imager(
+            path, size=size, proxy=proxy, width=width, height=height,
+            method=method
+        )
 
     def number_format(self, number, locale=None):
         return self.formater.format_number(number, locale)
