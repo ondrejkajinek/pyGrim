@@ -1,3 +1,10 @@
+pygrim (0.3.9) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * #81169: Vypnuti imageru - digiporty
+
+ -- Václav Pokluda <root@darky>  Tue, 16 Feb 2021 08:42:14 +0100
+
 pygrim (0.3.8) testing; urgency=medium
 
   * COMMIT MESSASGES
