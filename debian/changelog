@@ -1,3 +1,10 @@
+pygrim (0.3.10) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * Odebrani nadbytecneho logovani
+
+ -- Václav Pokluda <root@darky>  Wed, 17 Feb 2021 10:18:01 +0100
+
 pygrim (0.3.9) testing; urgency=medium
 
   * COMMIT MESSASGES
