@@ -69,7 +69,6 @@ class BaseExtension(Extension):
 
     def __init__(self, environment):
         super(BaseExtension, self).__init__(environment)
-        log.critical("JKX SELF DIR: %r", dir(self))
         environment.filters.update(self._get_filters())
         environment.globals.update(self._get_functions())
         self.formater = Formater("en_US.UTF8")
