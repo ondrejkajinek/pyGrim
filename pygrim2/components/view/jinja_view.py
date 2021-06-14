@@ -28,6 +28,12 @@ def _suppress_none(self, variable):
 _suppress_none.contextfunction = True
 
 
+class ConfigurableEnvironment(jinja2.Environment):
+    def __init__(self, **kwargs):
+        self.config = kwargs.pop("config")
+        super(ConfigurableEnvironment, self).__init__(**kwargs)
+
+
 class JinjaView(BaseView):
 
     def __init__(self, config, extra_functions, l10n, **kwargs):
@@ -41,7 +47,7 @@ class JinjaView(BaseView):
         return tuple(self._env_params["loader"].searchpath)
 
     def _create_env(self, context):
-        env = jinja2.Environment(**self._env_params)
+        env = ConfigurableEnvironment(**self._env_params)
         env.globals.update(self._extra_functions)
 
         if self._has_gettext():
@@ -108,7 +114,8 @@ class JinjaView(BaseView):
             ),
             "auto_reload": config.getbool(
                 "jinja:environment:auto_reload", True
-            )
+            ),
+            "config": config
         }
         if config.getbool("jinja:suppress_none", True):
             params["finalize"] = _suppress_none
