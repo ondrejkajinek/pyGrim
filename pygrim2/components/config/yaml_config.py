@@ -80,3 +80,9 @@ class YamlConfig(AbstractConfig):
             config = {}
 
         return config
+
+    def _asdict(self):
+        return self.config
+
+    def __getitem__(self, key):
+        return self.config[key]

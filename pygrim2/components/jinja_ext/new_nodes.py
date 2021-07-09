@@ -1,3 +1,5 @@
+# coding: utf8
+
 from jinja2.nodes import Extends, NodeType
 
 

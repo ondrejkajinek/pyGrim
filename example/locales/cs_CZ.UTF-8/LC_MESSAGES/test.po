@@ -9,6 +9,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Language: cs_CZ\n"
+<<<<<<< HEAD
 "Plural-Forms: nplurals=3; plural=n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;"
 
 msgid "hello"
@@ -22,3 +23,8 @@ msgid_plural "%(num)d apples"
 msgstr[0] "%(num)d jablko"
 msgstr[1] "%(num)d jablka"
 msgstr[2] "%(num)d jablek"
+=======
+
+msgid "hello"
+msgstr "Ahoj"
+>>>>>>> origin/master

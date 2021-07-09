@@ -96,6 +96,8 @@ def _dump_uuid(source):
 
 def _dumps(obj, nice=None, depth=0):
     output = StringIO()
+    if isinstance(obj, time.struct_time):
+        obj = datetime.fromtimestamp(time.mktime(obj))
     if obj is None:
         output.write(_dump_none())
     elif isinstance(obj, str):
