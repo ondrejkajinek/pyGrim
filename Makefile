@@ -17,6 +17,7 @@ buildPip:
 	python3 setup.py sdist
 	python3 setup.py sdist bdist_wheel
 
+
 uploadPackage:
 	twine upload --repository-url http://10.42.105.13/ dist/*
 
@@ -40,7 +41,7 @@ unlinkItems:
 
 postinstall:
 	( \
-		python3 -m pip install -U pip && \
+		python3 -m pip install -U pip &&\
 		python3 -m pip install -r `pwd`/system-requirements.txt \
 	)
 

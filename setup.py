@@ -29,8 +29,6 @@ methods = {
     "tag": (create_tag, (name,), {}),
     "test": (test, (), {})
 }
-
-
 if __name__ == "__main__":
     if argv[1] in methods.keys():
         method, args, kwargs = methods[argv[1]]
