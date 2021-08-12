@@ -1,6 +1,3 @@
-# -*- coding: utf8 -*-
-
-
 class Counter(object):
 
     def __init__(self, start=0):

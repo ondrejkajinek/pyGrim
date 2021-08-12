@@ -1,5 +1,4 @@
 class AbstractView(object):
-    """Defines interface for View classes"""
 
     def __init__(self, config, **kwargs):
         raise NotImplementedError(

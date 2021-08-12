@@ -21,8 +21,7 @@ class SessionStorage(object):
                 ("domain", "", ""),
                 ("path", "/", ""),
                 ("http_only", False, "bool"),
-                ("secure", False, "bool"),
-                ("same_site", "Lax", "")
+                ("secure", False, "bool")
             )
         }
         start_log.debug("Session cookie template:%r", self._cookie)
@@ -47,8 +46,6 @@ class SessionStorage(object):
             cookie = cookie[-1]
 
         if cookie:
-            if isinstance(cookie, (list, tuple)):
-                cookie = cookie[-1]
             session_id = cookie
             log.debug("Session to be loaded: %r", session_id)
         else:
