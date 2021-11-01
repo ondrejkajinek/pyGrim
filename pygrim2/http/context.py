@@ -96,7 +96,7 @@ class Context(object):
 
     def add_cookie(
         self, name, value, lifetime=None, domain=None, path=None,
-        http_only=None, secure=None
+        http_only=None, secure=None, same_site=None,
     ):
         """
         Sets cookie with specified name, value, domain, path, etc.,
@@ -108,7 +108,8 @@ class Context(object):
             "lifetime": lifetime,
             "path": path,
             "secure": secure,
-            "value": value
+            "value": value,
+            "same_site": same_site,
         }
 
     def add_css(self, *args):

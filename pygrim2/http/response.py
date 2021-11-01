@@ -54,7 +54,8 @@ class Response(object):
         expire,
         lambda c: "HttpOnly" if c.get("http_only") else None,
         lambda c: "Path=%s" % c["path"] if c.get("path") else None,
-        lambda c: "Secure" if c.get("secure") else None
+        lambda c: "Secure" if c.get("secure") else None,
+        lambda c: "SameSite=%s" % c.get('same_site', 'lax'),
     )
 
     def __init__(self):

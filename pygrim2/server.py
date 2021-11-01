@@ -78,10 +78,10 @@ def register_view_class(name, cls):
 
 class Server(object):
 
-    KNOWN_CONFIG_FORMATS = {
-        "json": JsonConfig,
-        "yaml": YamlConfig
-    }
+    KNOWN_CONFIG_FORMATS = OrderedDict((
+        ("yaml", YamlConfig),
+        ("json",  JsonConfig),
+    ))
 
     KNONW_L10N_CLASSES = {
         "dummy": DummyL10n,
