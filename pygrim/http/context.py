@@ -29,7 +29,8 @@ class Context(object):
         self._default_headers = config.get("context:default_headers", None)
         self._lang_switch = config.get("pygrim:i18n:locale_switch", "lang")
 
-        self.disable_content_length = config.get("view:disable_content_length", False)
+        self.disable_content_length = config.get(
+            "view:disable_content_length", False)
         self.current_route = None
         self.session = None
         self.template = None
@@ -288,7 +289,7 @@ class Context(object):
     def session_loaded(self):
         return self._session_loaded
 
-    def set_language(self, language, debug=False):
+    def set_language(self, language, debug=False, with_cookie=True):
         debug = debug or self._debug
         language = self._language_map.get(language)
         if language in self._languages:
@@ -303,11 +304,12 @@ class Context(object):
             else:
                 self.formater = Formater(language)
             self._language = language
-            # language cookie is not nesessary to be secured => same_site=None
-            self.add_cookie(
-                self._lang_key, self._language, 3600 * 24 * 365,
-                path="/", same_site="None"
-            )
+            if with_cookie:
+                # lang cookie is not nesessary to be secured => same_site=None
+                self.add_cookie(
+                    self._lang_key, self._language, 3600 * 24 * 365,
+                    path="/", same_site="None"
+                )
         else:
             log.warning("Language %r is not supported", language)
             self._language = self._default_language
@@ -341,7 +343,7 @@ class Context(object):
         self._language_map.update(
             self.config.get("pygrim:i18n:locale_map", {})
         )
-        self._language = self._select_language()
+        self._language = self._select_language(with_cookie=False)
 
     def _request_param(self, method, key=None, fallback=None):
         try:
@@ -358,7 +360,7 @@ class Context(object):
 
         return value
 
-    def _select_language(self, debug=False):
+    def _select_language(self, debug=False, with_cookie=False):
         language = self._language_map.get(self.GET(self._lang_switch))
         if language is None:
             cookieval = self._request.cookies.get(self._lang_key)
@@ -383,7 +385,7 @@ class Context(object):
                     next((lang for lang in accept_languages if lang), None) or
                     self._default_language
                 )
-        self.set_language(language, debug=debug)
+        self.set_language(language, debug=debug, with_cookie=with_cookie)
         return self._language
 
     def get_canonical_url(self, _raise_on_error=False, **args):
