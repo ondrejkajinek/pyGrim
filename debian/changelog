@@ -1,3 +1,10 @@
+pygrim (0.3.11) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * #92208 - sitelanguage is not saved to cookie in default
+
+ -- Václav Pokluda <root@darky>  Mon, 13 Dec 2021 12:17:22 +0100
+
 pygrim (0.3.10) testing; urgency=medium
 
   * COMMIT MESSASGES
