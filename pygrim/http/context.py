@@ -261,6 +261,18 @@ class Context(object):
     def is_request_post(self):
         return self._request.environment["request_method"] == "POST"
 
+    def _preference_cookies_enabled(self):
+        try:
+            if not self.session:
+                return False
+            accept = self.session.get("cookie_accept")
+            if not accept:
+                return False
+            return bool(accept.get("preference"))
+        except BaseException:
+            log.exception("err setting lang after session loading")
+            return False
+
     def load_session(self, session_handler):
         if self._session_loaded is False:
             self.session = session_handler.load(self._request)
@@ -269,6 +281,14 @@ class Context(object):
                 "Session handler: %r loaded session: %r",
                 type(session_handler), self.session
             )
+            if (
+                self._language and
+                self.GET(self._lang_switch) and
+                self._preference_cookies_enabled()
+            ):
+                self.set_language(self._language, with_cookie=True)
+            # endif
+        # endif
 
     def pop_route_params(self):
         params = self._route_params.copy()
