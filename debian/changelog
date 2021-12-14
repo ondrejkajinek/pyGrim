@@ -1,3 +1,10 @@
+pygrim (0.3.12) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * setting language on preference cookies enabled
+
+ -- Václav Pokluda <root@darky>  Tue, 14 Dec 2021 15:24:18 +0100
+
 pygrim (0.3.11) testing; urgency=medium
 
   * COMMIT MESSASGES
