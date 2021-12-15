@@ -205,7 +205,7 @@ class Context(object):
         language = self._language.split("_", 1)[0]
         if language in LANGUAGE_CASCADE:
             idx = LANGUAGE_CASCADE.index(language)
-            lp =  LANGUAGE_CASCADE[idx:] + LANGUAGE_CASCADE[:idx]
+            lp = LANGUAGE_CASCADE[idx:] + LANGUAGE_CASCADE[:idx]
         else:
             lp = [language] + LANGUAGE_CASCADE
         self.language_priority = lp
@@ -285,10 +285,12 @@ class Context(object):
         if self.session_loaded and self.session_changed:
             self._session_handler.save(self.session)
 
-    def set_language(self, language):
+    def set_language(self, language, with_cookie=False):
         if self._check_language(language):
+            self._session_load_should_save_lang_cookie = False
             self._language = language
-            self._save_language_cookie()
+            if with_cookie:
+                self._save_language_cookie()
 
     def set_temp_language(self, language):
         if self._check_language(language):
@@ -323,9 +325,24 @@ class Context(object):
         return res
 
     def _initialize_localization(self):
-        self._language, save_cookie = self.l10n.select_language(self)
-        if save_cookie:
-            self._save_language_cookie()
+        (
+            self._language,
+            self._session_load_should_save_lang_cookie
+        ) = self.l10n.select_language(self)
+        # lang cookies se odkládá až to budu dle souhlasu moct udělat
+        #   (po load session)
+
+    def _preference_cookies_enabled(self):
+        try:
+            if not self.session:
+                return False
+            accept = self.session.get("cookie_accept")
+            if not accept:
+                return False
+            return bool(accept.get("preference"))
+        except BaseException:
+            log.exception("err setting lang after session loading")
+            return False
 
     def _load_session(self):
         session = self._session_handler.load(self._request)
@@ -336,6 +353,13 @@ class Context(object):
         )
         if self._uses_flash and "_flash" not in session:
             session["_flash"] = []
+        if (
+            self._session_load_should_save_lang_cookie and
+            self._language and
+            self._preference_cookies_enabled()
+        ):
+            self._session_load_should_save_lang_cookie = False
+            self._save_language_cookie()
 
         return session
 
