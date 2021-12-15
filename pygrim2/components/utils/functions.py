@@ -11,8 +11,10 @@ log = logging.getLogger("pygrim2.components.utils.functions")
 REGEXP_TYPE = type(re.compile(r""))
 TRAILING_SLASH_REGEXP = re.compile(r"/\??\$?$|\$?$")
 
-OPTIONAL_PARAM_REGEXP = re.compile(r"\(([^)]*?)(%\(([^)]+)\)s)([^)]*?)\)\?")
-PARAM_REGEXP = re.compile(r"\(\?P<([^>]+)>[^)]+\)")
+# OPTIONAL_PARAM_REGEXP = re.compile(r"\(([^)]*?)(%\(([^)]+)\)s)([^)]*?)\)\?")
+# PARAM_REGEXP = re.compile(r"\(\?P<([^>]+)>[^)]+\)")
+URL_OPTIONAL_REGEXP = re.compile(r"\(([^)]*?)(%\(([^)]+)\)s)([^)]*?)\)\?")
+URL_PARAM_REGEXP = re.compile(r"\(\?P<([^>]+)>[^)]+\)")
 
 
 def deep_update(original, override):
@@ -56,6 +58,8 @@ def ensure_tuple(variable):
 
 
 def fix_trailing_slash(pattern):
+    if pattern is None:
+        return None
     return (
         re.compile(TRAILING_SLASH_REGEXP.sub("/?$", pattern.pattern))
         if is_regex(pattern)
@@ -72,6 +76,8 @@ def get_class_name(cls):
 
 
 def get_method_name(method):
+    if method is None:
+        return None
     return "%s.%s" % (method.__self__.__class__.__name__, method.__name__)
 
 
@@ -80,56 +86,21 @@ def is_regex(pattern):
 
 
 def regex_to_readable(pattern):
-    start = 0
-    pos = 0
-    end = len(pattern)
-    group_depth = 0
-    readable = ""
-    param_names = []
-    optional_names = {}
-    while pos < end:
-        if pattern[pos] == "(":
-            if group_depth == 0:
-                readable += pattern[start:pos]
-                start = pos
+    param_names = URL_PARAM_REGEXP.findall(pattern)
+    readable = URL_PARAM_REGEXP.sub("%(\\1)s", pattern)
+    optional_names = {
+        optional[2]: "%s%%s%s" % (optional[0], optional[3])
+        for optional
+        in URL_OPTIONAL_REGEXP.findall(readable)
+    }
 
-            group_depth += 1
-        elif pattern[pos] == ")":
-            group_depth -= 1
-            if group_depth == 0:
-                param_name = PARAM_REGEXP.findall(pattern, start, pos + 1)[0]
-                param_names.append(param_name)
-                if pos + 1 < end and pattern[pos + 1] == "?":
-                    optional_readable = PARAM_REGEXP.sub(
-                        r"%(\1)s", pattern[start + 1:pos]
-                    )
-                    optional_names.update((
-                        (param_name, "%s%%s%s" % (opt[0], opt[3]))
-                        for opt
-                        in OPTIONAL_PARAM_REGEXP.findall(optional_readable)
-                    ))
-                    pos += 1
-
-                readable += "%({})s".format(param_name)
-                start = pos + 1
-
-        pos += 1
-
-    # add trailing part
-    readable += pattern[start:end]
-    required_names = [
-        name
-        for name
-        in param_names
-        if name not in optional_names
-    ]
-    if len(required_names) + len(optional_names) < len(param_names):
-        raise RuntimeError(
-            "Some keys are duplicate in route %r" % pattern
-        )
-
-    return readable, required_names, optional_names
-
+    readable = URL_OPTIONAL_REGEXP.sub("\\2", readable)
+    readable = remove_trailing_slash(readable).lstrip("^")
+    readable = readable.replace("\\.", ".")
+    mandatory_names = set(param_names) - set(optional_names)
+    if len(mandatory_names) + len(optional_names) < len(param_names):
+        raise RuntimeError(f"Some keys are duplicate in route {pattern}")
+    return readable, mandatory_names, optional_names
 
 
 def remove_trailing_slash(pattern):

@@ -12,8 +12,12 @@ from ..components.utils.decorators import lazy_property
 
 log = getLogger("pygrim.http.context")
 
+LANGUAGE_CASCADE = ("cs", "sk", "cs", "en", "de", "ru")
+
 
 class Context(object):
+
+    language_priority = None
 
     def __init__(
         self, config, model, session_handler, l10n, request, response
@@ -194,6 +198,19 @@ class Context(object):
 
     def get_language(self):
         return self._language
+
+    def get_language_priority(self):
+        if self.language_priority:
+            return self.language_priority
+
+        language = self._language.split("_", 1)[0]
+        if language in LANGUAGE_CASCADE:
+            idx = LANGUAGE_CASCADE.index(language)
+            lp =  LANGUAGE_CASCADE[idx:] + LANGUAGE_CASCADE[:idx]
+        else:
+            lp = [language] + LANGUAGE_CASCADE
+        self.language_priority = lp
+        return lp
 
     def get_request_host(self):
         return self._request.environment["host"]

@@ -188,7 +188,7 @@ class Route(RouteObject):
         return readable, required_names, optional_names
 
     def _set_pattern(self, pattern):
-        super(Route, self)._set_pattern(fix_trailing_slash(pattern))
+        super(Route, self)._set_pattern(pattern)
         readable, req_params, optional_params = self._pattern_to_readable()
         self._readable_pattern = readable
         self._required_params = req_params
@@ -217,9 +217,13 @@ class NoRoute(Route):
         self._handle = None
         self._methods = ()
         self._name = "<no route>"
+        self.pattern = None
 
     def __bool__(self):
         return False
 
     def get_handle_name(self):
         return self._name
+
+    def is_regular(self):
+        return False
