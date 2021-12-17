@@ -334,7 +334,7 @@ class Context(object):
 
     def _preference_cookies_enabled(self):
         try:
-            if not self.session:
+            if not self._session_loaded:
                 return False
             accept = self.session.get("cookie_accept")
             if not accept:
