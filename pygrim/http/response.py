@@ -36,7 +36,7 @@ class Response(object):
                 (datetime.utcnow() + timedelta(seconds=c["lifetime"]))
                 .strftime("%a, %d-%b-%Y %H:%M:%S GMT")
             )
-            if c.get("lifetime")
+            if c.get("lifetime") is not None
             else None
         ),
         lambda c: "HttpOnly" if c.get("http_only") else None,
@@ -64,7 +64,7 @@ class Response(object):
                 (datetime.utcnow() + timedelta(seconds=c["lifetime"]))
                 .strftime("%a, %d-%b-%Y %H:%M:%S GMT")
             )
-            if c.get("lifetime")
+            if c.get("lifetime") is not None
             else None
         ),
         lambda c: "HttpOnly" if c.get("http_only") else None,

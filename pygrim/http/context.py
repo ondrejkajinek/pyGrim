@@ -313,12 +313,6 @@ class Context(object):
         debug = debug or self._debug
         language = self._language_map.get(language)
         if language in self._languages:
-            if not debug and language in self._debug_languages:
-                log.warning(
-                    "Language %r is supported only in debugmode", language
-                )
-                self._language = self._default_language
-                return
             if self.formater:
                 self.formater._set_locale(language)
             else:
