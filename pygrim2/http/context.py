@@ -332,14 +332,23 @@ class Context(object):
         # lang cookies se odkládá až to budu dle souhlasu moct udělat
         #   (po load session)
 
+    def _session_preference_cookies_enabled(self, session):
+        try:
+            if not session:
+                return False
+            accept = session.get("cookie_accept")
+            if not accept:
+                return False
+            return bool(accept.get("preference"))
+        except BaseException:
+            log.exception("err setting lang after session loading")
+            return False
+
     def _preference_cookies_enabled(self):
         try:
             if not self._session_loaded:
                 return False
-            accept = self.session.get("cookie_accept")
-            if not accept:
-                return False
-            return bool(accept.get("preference"))
+            return self._session_preference_cookies_enabled(self.session)
         except BaseException:
             log.exception("err setting lang after session loading")
             return False
@@ -353,10 +362,11 @@ class Context(object):
         )
         if self._uses_flash and "_flash" not in session:
             session["_flash"] = []
+
         if (
             self._session_load_should_save_lang_cookie and
             self._language and
-            self._preference_cookies_enabled()
+            self._session_preference_cookies_enabled(session)
         ):
             self._session_load_should_save_lang_cookie = False
             self._save_language_cookie()
