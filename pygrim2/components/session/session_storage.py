@@ -17,7 +17,7 @@ class SessionStorage(object):
             for key, default, cast
             in (
                 ("name", "SESS_ID", ""),
-                ("lifetime", 7 * 24 * 3600, "int"),
+                ("lifetime", 92 * 24 * 3600, "int"),  # 92 = 3 měsíce
                 ("domain", "", ""),
                 ("path", "/", ""),
                 ("http_only", False, "bool"),
