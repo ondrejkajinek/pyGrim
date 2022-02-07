@@ -1,6 +1,7 @@
 # std
 import datetime
 import re
+from logging import getLogger
 
 # non-std
 import babel.dates
@@ -16,6 +17,8 @@ from .time_base import TimeBase
 DDT = type(datetime.datetime.min)
 DD = type(datetime.date.min)
 DT = type(datetime.time.min)
+
+log = getLogger("pygrim.jinja_ext.time_base")
 
 
 def py_2_babel_dateformat(fmt):

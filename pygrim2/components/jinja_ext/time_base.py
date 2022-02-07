@@ -1,5 +1,6 @@
 # std
 from datetime import date, datetime, time
+from logging import getLogger
 
 # non-std
 from dateutil.parser import parse as parse_dt
@@ -10,6 +11,8 @@ DDT = type(datetime.min)
 DD = type(date.min)
 DT = type(time.min)
 DTS = (DDT, DD, DT)
+
+log = getLogger("pygrim.jinja_ext.time_base")
 
 
 class TimeBase(Extension):
