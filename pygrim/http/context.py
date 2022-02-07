@@ -37,6 +37,20 @@ class Context(object):
         self.view_data = {}
 
         self._request = request_class(environment)
+
+        self._enabled_acceptances = {"function"}
+        cookie_acceptance = self.get_cookie("cookie_accept")
+        self._acceptance_is_set = bool(cookie_acceptance)
+        if cookie_acceptance:
+            self._enabled_acceptances |= set(
+                {
+                    "P": "preference",
+                    "A": "analytics",
+                    "M": "marketing",
+                    "F": "function"
+                }.get(k, "function") for k in cookie_acceptance
+            )
+
         self._response = response_class()
         if self._default_headers:
             self.add_response_headers(self._default_headers)
@@ -261,17 +275,38 @@ class Context(object):
     def is_request_post(self):
         return self._request.environment["request_method"] == "POST"
 
-    def _preference_cookies_enabled(self):
-        try:
-            if not self.session:
-                return False
-            accept = self.session.get("cookie_accept")
-            if not accept:
-                return False
-            return bool(accept.get("preference"))
-        except BaseException:
-            log.exception("err setting lang after session loading")
-            return False
+    def is_cookie_acceptance_set(self):
+        return self._acceptance_is_set
+
+    def set_cookie_acceptance(self, enabled_preferences):
+        enabled_preferences = list(enabled_preferences)
+        if "function" not in enabled_preferences:
+            enabled_preferences.append("function")
+        enabled_preferences.sort()
+
+        value = "".join({
+            "preference": "P",
+            "analytics": "A",
+            "marketing": "M",
+            "function": "F"
+        }[k] for k in enabled_preferences)
+
+        self.add_cookie(
+            name="cookie_accept",
+            value=value,
+            # lifetime=2 * 365.25 * 24 * 60 * 60 - 2 roky dle tasku #93872
+            lifetime=63115200,
+            path="/",
+        )
+
+        if "preference" not in enabled_preferences:
+            self.unset_language_cookie()
+
+    def is_cookie_acceptance_enabled(self, acceptance):
+        return (
+            acceptance == "function" or
+            acceptance in self._enabled_acceptances
+        )
 
     def load_session(self, session_handler):
         if self._session_loaded is False:
@@ -281,13 +316,6 @@ class Context(object):
                 "Session handler: %r loaded session: %r",
                 type(session_handler), self.session
             )
-            if (
-                self._language and
-                self.GET(self._lang_switch) and
-                self._preference_cookies_enabled()
-            ):
-                self.set_language(self._language, with_cookie=True)
-            # endif
         # endif
 
     def pop_route_params(self):
@@ -328,6 +356,18 @@ class Context(object):
             log.warning("Language %r is not supported", language)
             self._language = self._default_language
 
+    def unset_language_cookie(self):
+        if self._lang_key is not None:
+            # pozor params stejné jako při vytváření
+            self.delete_cookie(
+                name=self._lang_key,
+                domain=None,
+                path="/",
+                http_only=None,
+                secure=None,
+                same_site="None"
+            )
+
     def set_response_body(self, body):
         self._response.body = body
 
@@ -357,7 +397,9 @@ class Context(object):
         self._language_map.update(
             self.config.get("pygrim:i18n:locale_map", {})
         )
-        self._language = self._select_language(with_cookie=False)
+        self._language = self._select_language(
+            with_cookie=self.is_cookie_acceptance_enabled("preference")
+        )
 
     def _request_param(self, method, key=None, fallback=None):
         try:
