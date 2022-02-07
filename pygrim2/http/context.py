@@ -35,6 +35,20 @@ class Context(object):
         self._can_create_session = True
         self._force_https = config.getbool("context:force_https", False)
         self._request = request
+
+        self._enabled_acceptances = {"function"}
+        cookie_acceptance = self.get_cookie("cookie_accept")
+        self._acceptance_is_set = bool(cookie_acceptance)
+        if cookie_acceptance:
+            self._enabled_acceptances |= set(
+                {
+                    "P": "preference",
+                    "A": "analytics",
+                    "M": "marketing",
+                    "F": "function"
+                }.get(k, "function") for k in cookie_acceptance
+            )
+
         self._response = response
         self._session_handler = session_handler
         self._save_session = False
@@ -277,6 +291,39 @@ class Context(object):
     def is_request_post(self):
         return self._request.environment["request_method"] == POST
 
+    def is_cookie_acceptance_set(self):
+        return self._acceptance_is_set
+
+    def set_cookie_acceptance(self, enabled_preferences):
+        enabled_preferences = list(enabled_preferences)
+        if "function" not in enabled_preferences:
+            enabled_preferences.append("function")
+        enabled_preferences.sort()
+
+        value = "".join({
+            "preference": "P",
+            "analytics": "A",
+            "marketing": "M",
+            "function": "F"
+        }[k] for k in enabled_preferences)
+
+        self.add_cookie(
+            name="cookie_accept",
+            value=value,
+            # lifetime=2 * 365.25 * 24 * 60 * 60 - 2 roky dle tasku #93872
+            lifetime=63115200,
+            path="/",
+        )
+
+        if "preference" not in enabled_preferences:
+            self.unset_language_cookie()
+
+    def is_cookie_acceptance_enabled(self, acceptance):
+        return (
+            acceptance == "function" or
+            acceptance in self._enabled_acceptances
+        )
+
     def redirect(self, url, status=302):
         self._response.status = status
         self._response.headers["Location"] = url
@@ -288,7 +335,6 @@ class Context(object):
 
     def set_language(self, language, with_cookie=False):
         if self._check_language(language):
-            self._session_load_should_save_lang_cookie = False
             self._language = language
             if with_cookie:
                 self._save_language_cookie()
@@ -326,33 +372,9 @@ class Context(object):
         return res
 
     def _initialize_localization(self):
-        (
-            self._language,
-            self._session_load_should_save_lang_cookie
-        ) = self.l10n.select_language(self)
-        # lang cookies se odkládá až to budu dle souhlasu moct udělat
-        #   (po load session)
-
-    def _session_preference_cookies_enabled(self, session):
-        try:
-            if not session:
-                return False
-            accept = session.get("cookie_accept")
-            if not accept:
-                return False
-            return bool(accept.get("preference"))
-        except BaseException:
-            log.exception("err setting lang after session loading")
-            return False
-
-    def _preference_cookies_enabled(self):
-        try:
-            if not self._session_loaded:
-                return False
-            return self._session_preference_cookies_enabled(self.session)
-        except BaseException:
-            log.exception("err setting lang after session loading")
-            return False
+        self._language, save_cookie = self.l10n.select_language(self)
+        if save_cookie:
+            self._save_language_cookie()
 
     def _load_session(self):
         session = self._session_handler.load(self._request)
@@ -363,14 +385,6 @@ class Context(object):
         )
         if self._uses_flash and "_flash" not in session:
             session["_flash"] = []
-
-        if (
-            self._session_load_should_save_lang_cookie and
-            self._language and
-            self._session_preference_cookies_enabled(session)
-        ):
-            self._session_load_should_save_lang_cookie = False
-            self._save_language_cookie()
 
         return session
 
@@ -392,4 +406,11 @@ class Context(object):
     def _save_language_cookie(self):
         self.add_cookie(
             self.l10n.lang_key(), self._language, 3600 * 24 * 365, path="/"
+        )
+
+    def unset_language_cookie(self):
+        # pozor params stejné jako při vytváření _save_language_cookie
+        self.delete_cookie(
+            name=self.l10n.lang_key(),
+            path="/",
         )
