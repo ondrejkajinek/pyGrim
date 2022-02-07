@@ -1,3 +1,10 @@
+pygrim (0.4.1) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * Cookie expires musí být vždy v angličtině
+
+ -- Václav Pokluda <root@darky>  Mon, 07 Feb 2022 14:40:37 +0100
+
 pygrim (0.4.0) testing; urgency=medium
 
   * COMMIT MESSASGES
