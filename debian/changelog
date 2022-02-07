@@ -1,3 +1,10 @@
+pygrim (0.4.0) testing; urgency=medium
+
+  * COMMIT MESSASGES
+  * #93872 - cookie accptances stored in cookie finally
+
+ -- Václav Pokluda <root@darky>  Mon, 07 Feb 2022 12:28:31 +0100
+
 pygrim (0.3.14) testing; urgency=medium
 
   * COMMIT MESSASGES
