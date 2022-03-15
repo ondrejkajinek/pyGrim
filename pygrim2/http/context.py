@@ -313,6 +313,8 @@ class Context(object):
             # lifetime=2 * 365.25 * 24 * 60 * 60 - 2 roky dle tasku #93872
             lifetime=63115200,
             path="/",
+            secure=True,
+            same_site="Lax"
         )
 
         if "preference" not in enabled_preferences:
