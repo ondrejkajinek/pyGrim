@@ -6,10 +6,10 @@ if sys.version_info.major == 3:
     http_responses = {
         code: code_desc[0]
         for code, code_desc
-        in http.server.BaseHTTPRequestHandler.responses.items()
+        in list(http.server.BaseHTTPRequestHandler.responses.items())
     }
 else:
-    from httplib import responses as http_responses
+    from http.client import responses as http_responses
 
 # in order of http://en.wikipedia.org/wiki/List_of_HTTP_status_codes
 http_responses.setdefault(418, "I'm a teapot")  # LOL

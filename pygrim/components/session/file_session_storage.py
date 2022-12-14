@@ -7,7 +7,7 @@ from .session_exceptions import (
 )
 from logging import getLogger
 
-import cPickle as pickle
+import pickle as pickle
 import os
 
 log = getLogger("pygrim.session.file_session_storage")
@@ -67,14 +67,14 @@ class FileSessionStorage(SessionStorage):
 
     def _create_session_dir(self):
         try:
-            os.mkdir(self._session_dir, 0755)
+            os.mkdir(self._session_dir, 0o755)
         except OSError as exc:
             # already exists
             if exc.errno != 17:
                 raise SessionInitializeError
 
     def _get_path(self, session_id):
-        if not isinstance(session_id, basestring):
+        if not isinstance(session_id, str):
             log.error("Session id is not string but %r", session_id)
             return None
         return os.path.join(self._session_dir, session_id)

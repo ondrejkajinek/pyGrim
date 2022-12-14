@@ -4,7 +4,7 @@
 import logging
 import re
 import string
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 # local
 from ..utils import (
@@ -117,9 +117,9 @@ class Route(RouteObject):
             query_params = {
                 key: params[key]
                 for key
-                in params.iterkeys()
+                in params.keys()
                 if key not in (
-                    self._required_params.union(self._optional_params.iterkeys())
+                    self._required_params.union(iter(self._optional_params.keys()))
                 )
             }
             url = self._readable_pattern % params
@@ -128,10 +128,10 @@ class Route(RouteObject):
             query_params = params
 
         if query_params:
-            url += "?" + urllib.urlencode([
+            url += "?" + urllib.parse.urlencode([
                 (ensure_string(key), ensure_string(value))
                 for key, value
-                in query_params.iteritems()
+                in query_params.items()
             ])
 
         log.debug("Route constructed url: %r for params: %r", url, params)

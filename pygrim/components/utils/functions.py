@@ -9,7 +9,7 @@ TRAILING_SLASH_REGEXP = re_compile("/\??\$?$|\$?$")
 
 
 def deep_update(original, override):
-    for key, value in override.iteritems():
+    for key, value in override.items():
         if isinstance(value, Mapping):
             new_value = deep_update(original.get(key, {}), value)
             original[key] = new_value
@@ -25,7 +25,7 @@ def ensure_bool(a):
         res = a
     elif a is None:
         res = False
-    elif isinstance(a, basestring):
+    elif isinstance(a, str):
         res = (
             int(a)
             if a.isdigit()
@@ -40,7 +40,7 @@ def ensure_bool(a):
 def ensure_string(text):
     return (
         text.encode("utf8")
-        if isinstance(text, unicode)
+        if isinstance(text, str)
         else str(text)
     )
 
@@ -48,7 +48,7 @@ def ensure_string(text):
 def ensure_tuple(variable):
     if isinstance(variable, tuple):
         res = variable
-    elif isinstance(variable, (list, set, buffer, xrange)):
+    elif isinstance(variable, (list, set, buffer, range)):
         res = tuple(variable)
     else:
         res = (variable,)
@@ -90,7 +90,7 @@ def remove_trailing_slash(pattern):
 
 def strip_accent(text):
     if isinstance(text, str):
-        text = unicode(text, "utf8")
+        text = str(text, "utf8")
 
     return "".join(
         c for c in unicodedata_normalize("NFKD", text) if ord(c) < 127

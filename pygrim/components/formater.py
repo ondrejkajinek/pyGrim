@@ -11,7 +11,7 @@ try:
     from babel import numbers as babel_numbers
     log.debug("Babel translations available")
 except ImportError:
-    print "!! Babel library not availbale"
+    print("!! Babel library not availbale")
     log.warning(
         "Babel library not availabe - "
         "locale dependent translates could be wrong"
@@ -166,7 +166,7 @@ class Formater(object):
     def _format_decimal_babel(self, number, precision=None, locale=None):
         return babel_numbers.format_decimal(
             number=number,
-            format="#.%s" % "".join("#" for _ in xrange(precision)),
+            format="#.%s" % "".join("#" for _ in range(precision)),
             locale=locale or self._locale
         )
 

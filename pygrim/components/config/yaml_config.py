@@ -1,6 +1,6 @@
 # coding: utf8
 
-from __future__ import print_function
+
 from .abstract_config import AbstractConfig
 try:
     from uwsgi import log as uwsgi_log
@@ -38,7 +38,7 @@ class PygrimYamlLoader(SafeLoader):
             key = self.construct_object(key_node, deep=deep)
             try:
                 hash(key)
-            except TypeError, exc:
+            except TypeError as exc:
                 raise ConstructorError(
                     "while constructing a mapping",
                     node.start_mark,

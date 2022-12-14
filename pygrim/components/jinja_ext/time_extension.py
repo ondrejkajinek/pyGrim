@@ -1,6 +1,6 @@
 # coding: utf8
 
-from __future__ import unicode_literals
+
 from datetime import date, datetime, timedelta, time
 from dateutil.parser import parse as parse_dt
 from jinja2.ext import Extension
@@ -48,12 +48,12 @@ class TimeExtension(Extension):
         self.formater = Formater("en_US.UTF8")
 
     def as_date(self, date_, format_str=None):
-        if isinstance(date_, basestring):
+        if isinstance(date_, str):
             date_ = parse_dt(date_)
 
         text = date_.strftime(format_str) if format_str else date_.isoformat()
         if isinstance(text, str):
-            text = unicode(text, "utf8")
+            text = str(text, "utf8")
         return text
 
     def date_format(self, source, format_str, locale=None):
@@ -74,7 +74,7 @@ class TimeExtension(Extension):
         return "%02d:%02d" % divmod(seconds, 60)
 
     def parse_date(self, source):
-        if isinstance(source, basestring):
+        if isinstance(source, str):
             obj = parse_dt(source).date()
         elif isinstance(source, DTT):
             obj = source.date()
@@ -86,13 +86,13 @@ class TimeExtension(Extension):
         return obj
 
     def parse_datetime(self, source):
-        if isinstance(source, basestring):
+        if isinstance(source, str):
             obj = (
                 datetime.fromtimestamp(float(source))
                 if source.isdigit()
                 else parse_dt(source)
             )
-        elif isinstance(source, (int, long)):
+        elif isinstance(source, int):
             obj = datetime.fromtimestamp(source)
         elif isinstance(source, (DTT, DT)):
             obj = source
@@ -102,7 +102,7 @@ class TimeExtension(Extension):
         return obj
 
     def parse_time(self, source):
-        if isinstance(source, basestring):
+        if isinstance(source, str):
             obj = parse_dt(source).time()
         elif isinstance(source, (DTT, DT)):
             obj = source.time()

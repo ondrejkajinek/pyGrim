@@ -1,8 +1,8 @@
 # coding: utf8
 
-from __future__ import print_function
+
 from functools import wraps
-from components.utils import json2 as json
+from .components.utils import json2 as json
 from copy import deepcopy
 
 try:
@@ -141,7 +141,7 @@ class not_found_method(method):
         super(not_found_method, self).__init__(**kwargs)
         self._not_found_prefixes = []
         for one in (args or (("", 0),)):
-            if isinstance(one, basestring):
+            if isinstance(one, str):
                 one = (one, 0)
             self._not_found_prefixes.append(tuple(one))
 

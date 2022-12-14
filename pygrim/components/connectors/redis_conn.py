@@ -1,7 +1,6 @@
 # coding: utf8
 
 from logging import getLogger
-from string import strip as string_strip
 
 log = getLogger("jsonrpc.connectors.redis")
 
@@ -56,7 +55,7 @@ def connect_redis_sentinel(config, section="session:args:"):
             return getattr(self.master, attr)
 
     sentinel_hosts = tuple(
-        map(string_strip, i.split(":", 1))
+        list(map(str.strip, i.split(":", 1)))
         for i
         in config.get(section + "sentinels", "").split(",")
         if i.strip()

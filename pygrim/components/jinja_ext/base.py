@@ -12,7 +12,7 @@ from re import compile as re_compile
 from textwrap import wrap
 import traceback
 from requests.utils import requote_uri
-from ConfigParser import ConfigParser
+from configparser import ConfigParser
 
 try:
     from seo_helper import SeoHelper
@@ -23,7 +23,7 @@ except ImportError:
         SEO_REMOVED = ("*", "?", "\"", "<", ">", "|", ",", "%", "!", )
 
         def safe_title(self, text):
-            if not isinstance(text, basestring):
+            if not isinstance(text, str):
                 text = str(text)
 
             res = "".join(
@@ -173,7 +173,7 @@ class BaseExtension(Extension):
 
         if self.use_nginx:
             image = path
-            if isinstance(image, unicode):
+            if isinstance(image, str):
                 image = image.encode("utf8")
             image = requote_uri(image)
             if path.startswith("http"):
@@ -248,7 +248,7 @@ class BaseExtension(Extension):
         )
 
     def safe_title(self, text):
-        if not isinstance(text, basestring):
+        if not isinstance(text, str):
             text = str(text)
         c = getattr(SeoHelper, "safe_title", SeoHelper.seo)
         return c(text)
@@ -260,9 +260,9 @@ class BaseExtension(Extension):
         if not value:
             return None
 
-        if isinstance(value, (int, long)):
+        if isinstance(value, int):
             value = str(value)
-        elif isinstance(value, basestring):
+        elif isinstance(value, str):
             pass
         else:
             raise ValueError("int or string expected not %r" % (value,))
@@ -280,7 +280,7 @@ class BaseExtension(Extension):
                 " ".join(
                     '%s="%s"' % (key, value)
                     for key, value
-                    in kwargs.iteritems()
+                    in kwargs.items()
                 ),
                 separator,
                 amount

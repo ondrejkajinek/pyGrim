@@ -124,7 +124,7 @@ class Context(object):
         self._response.headers.update(
             (str(k), str(v))
             for k, v
-            in headers.items()
+            in list(headers.items())
         )
 
     def delete_cookie(
@@ -151,7 +151,7 @@ class Context(object):
         environment = {
             key: value
             for key, value
-            in self._request.environment.iteritems()
+            in self._request.environment.items()
             if not key.startswith(("wsgi.", "uwsgi."))
         }
         environment.update((
@@ -461,7 +461,7 @@ class Context(object):
             if self.canonical_args:
                 data = {
                     k: get_in(self.view_data, keys)
-                    for k, keys in self.canonical_args.iteritems()
+                    for k, keys in self.canonical_args.items()
                 }
             data.update(args)
             return self.get_request_url() + self.current_route.url_for(data)

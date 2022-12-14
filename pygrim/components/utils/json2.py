@@ -1,7 +1,7 @@
 # coding: utf8
 
 from collections import Iterable
-from cStringIO import StringIO
+from io import StringIO
 from datetime import date, datetime, timedelta
 from decimal import Decimal
 from types import GeneratorType
@@ -18,7 +18,7 @@ from json import *
 # TODO: unify implementation of dumps2 and dumps2fs using StringIO
 
 # JSON does not support these values, so we mark them as invalid
-InvalidJsonFloatValues = map(float, ("inf", "-inf", "NaN"))
+InvalidJsonFloatValues = list(map(float, ("inf", "-inf", "NaN")))
 
 
 ReType = type(re.compile(r'a'))
@@ -61,14 +61,14 @@ def _dump_dict(source, nice, depth):
     items = (
         ind % (
             _dumps(
-                key.encode("utf8") if isinstance(key, unicode) else str(key),
+                key.encode("utf8") if isinstance(key, str) else str(key),
                 nice=nice,
                 depth=depth
             ),
             _dumps(value, nice=nice, depth=depth + 1)
         )
         for key, value
-        in source.iteritems()
+        in source.items()
     )
 
     return "%s%s%s" % (lead, separator.join(items), trail)
@@ -105,7 +105,7 @@ def _dump_unicode(source):
     norm = norm.replace('\x1F', "")  # ^_ - Unit separator
     norm = norm.replace('\x07', "")  # ^G - Bell, rings the bell...
     norm = "".join(
-        ch if ord(ch) < 128 else "\u%04x" % ord(ch)
+        ch if ord(ch) < 128 else "\\u%04x" % ord(ch)
         for ch
         in norm
     )
@@ -129,13 +129,13 @@ def _dumps(obj, nice=None, depth=0):
         output.write(_dump_none())
     elif isinstance(obj, str):
         output.write(_dump_string(obj))
-    elif isinstance(obj, unicode):
+    elif isinstance(obj, str):
         output.write(_dump_unicode(obj))
     elif isinstance(obj, bool):
         output.write(_dump_boolean(obj))
     elif isinstance(obj, (Decimal, float)):
         output.write(_dump_number(float(obj)))
-    elif isinstance(obj, (int, long)):
+    elif isinstance(obj, int):
         output.write(_dump_number(obj))
     elif isinstance(obj, dict):
         output.write(_dump_dict(obj, nice, depth))
@@ -185,8 +185,8 @@ if __name__ == "__main__":
         "FL": (2.0 / 3, 0.0),
         "Uvozovky": "'`\"",
     }
-    print test
-    print
-    print dumps2(test)
-    print dumps2(test, nice=True)
-    print loads(dumps2(test))
+    print(test)
+    print()
+    print(dumps2(test))
+    print(dumps2(test, nice=True))
+    print(loads(dumps2(test)))

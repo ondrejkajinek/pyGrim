@@ -10,7 +10,7 @@ from .session_exceptions import (
 )
 from logging import getLogger
 
-import cPickle as pickle
+import pickle as pickle
 
 log = getLogger("pygrim.session.redis_session_storage")
 

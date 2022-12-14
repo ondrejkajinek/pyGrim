@@ -19,12 +19,11 @@ from .decorators import method
 from .http import Context, Request, Response
 
 from inspect import getmembers, ismethod, getmro
-from jinja2 import escape, Markup
+from markupsafe import Markup
 from json import dumps as json_dumps
 from locale import LC_ALL, setlocale
 from logging import getLogger
 from os import path
-from string import strip as string_strip
 from sys import exc_info
 try:
     from uwsgi import opt as uwsgi_opt
@@ -216,7 +215,7 @@ class Server(object):
             (prefix, priority, self._not_found_methods[(prefix, priority)])
             for prefix, priority
             in sorted(
-                self._not_found_methods.keys(),
+                list(self._not_found_methods.keys()),
                 key=lambda x: x[0].count("/") * 10000 + x[1],
                 reverse=True
             )
@@ -439,10 +438,10 @@ class Server(object):
         else:
             if default_locale not in translations:
                 msg = "Default locale %r is not enabled. Known locales: %r"
-                log.error(msg, default_locale, translations.keys())
-                raise RuntimeError(msg % (default_locale, translations.keys()))
+                log.error(msg, default_locale, list(translations.keys()))
+                raise RuntimeError(msg % (default_locale, list(translations.keys())))
 
-        log.debug("Loaded translations: %r", translations.keys())
+        log.debug("Loaded translations: %r", list(translations.keys()))
         log.debug("Default translation: %r", default_locale)
         return translations
 
@@ -536,7 +535,7 @@ class Server(object):
             remove_trailing_slash(prefix) + "/": mapped_dir
             for prefix, mapped_dir
             in (
-                map(string_strip, mapping.split("=", 1))
+                list(map(str.strip, mapping.split("=", 1)))
                 for mapping
                 in ensure_tuple(self.config.get("uwsgi:static-map", ()))
                 if "=" in mapping
@@ -575,7 +574,7 @@ class Server(object):
 
     def _static_file_info(self, static_path):
         static_normpath = path.normpath(static_path)
-        for dir_prefix, dir_abs_path in self._static_map.iteritems():
+        for dir_prefix, dir_abs_path in self._static_map.items():
             if static_normpath.startswith(dir_prefix):
                 static_relpath = path.relpath(static_normpath, dir_prefix)
                 if path.isfile(path.join(dir_abs_path, static_relpath)):
@@ -600,7 +599,7 @@ class Server(object):
                 " ".join(
                     """%s="%s\"""" % (key, value)
                     for key, value
-                    in kwargs.iteritems()
+                    in kwargs.items()
                 )
             )
             for css
@@ -626,14 +625,14 @@ class Server(object):
             attrs += tuple(
                 """%s="%s\"""" % (key, value)
                 for key, value
-                in kwargs.iteritems()
+                in kwargs.items()
             )
             scripts.append("<script %s></script>" % (" ".join(attrs),))
 
         return Markup("\n".join(scripts))
 
     def _jinja_static_file(self, filename, prefixes):
-        if isinstance(filename, basestring):
+        if isinstance(filename, str):
             filenames = [filename]
         else:
             filenames = filename
@@ -668,7 +667,7 @@ class Server(object):
         return file_path
 
     def _jinja_static_file_exists(self, filename, prefixes=None):
-        if isinstance(filename, basestring):
+        if isinstance(filename, str):
             filenames = [filename]
         else:
             filenames = filename
@@ -720,7 +719,7 @@ class Server(object):
                     self.view.timestamp_cache[static_file] = timestamp
 
         return (
-            "%s?v=%d" % (escape(static_file), timestamp)
+            "%s?v=%d" % (Markup.escape(static_file), timestamp)
             if timestamp
-            else escape(static_file)
+            else Markup.escape(static_file)
         )

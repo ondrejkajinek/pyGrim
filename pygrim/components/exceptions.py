@@ -1,10 +1,10 @@
 # coding: utf8
 
-from config import AbstractConfig
-from routing.router import AbstractRouter
-from session.session_storage import SessionStorage
+from .config import AbstractConfig
+from .routing.router import AbstractRouter
+from .session.session_storage import SessionStorage
 from .utils import get_class_name, get_instance_name
-from view.abstract_view import AbstractView
+from .view.abstract_view import AbstractView
 
 
 class WrongComponentBase(BaseException):

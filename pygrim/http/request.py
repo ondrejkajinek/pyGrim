@@ -3,8 +3,7 @@
 from .grim_dicts import ImmutableDict, NormalizedImmutableDict
 from logging import getLogger
 from re import compile as re_compile, IGNORECASE as re_IGNORECASE
-from string import strip as string_strip
-from urllib import unquote_plus
+from urllib.parse import unquote_plus
 from ..components.utils import json2 as json
 log = getLogger("pygrim.http.request")
 
@@ -41,14 +40,14 @@ class Request(object):
         parsed = {}
         for part in parts:
             key, value = (
-                map(string_strip, map(unquote_plus, part.split("=", 1)))
+                list(map(str.strip, list(map(unquote_plus, part.split("=", 1)))))
                 if "=" in part
                 else (unquote_plus(part.strip()), None)
             )
             parsed.setdefault(key, []).append(value)
 
         # fix legacy cookies
-        for key in parsed.keys():
+        for key in list(parsed.keys()):
             if key.endswith("-legacy"):
                 if key[:-7] in parsed:
                     # legacy is the second one - if nonlegacy exists ignore it
@@ -59,7 +58,7 @@ class Request(object):
             # endif
         # endfor
 
-        for key in parsed.iterkeys():
+        for key in parsed.keys():
             if len(parsed[key]) == 1:
                 parsed[key] = parsed[key][0]
 
@@ -158,7 +157,7 @@ class Request(object):
 
     def _parse_headers(self, environment):
         headers = {}
-        for key in environment.keys():
+        for key in list(environment.keys()):
             upper_key = key.upper()
             if (
                 upper_key.startswith("X_") or
@@ -181,13 +180,13 @@ class Request(object):
         parsed = {}
         for part in parts:
             key, value = (
-                map(string_strip, map(unquote_plus, part.split("=", 1)))
+                list(map(str.strip, list(map(unquote_plus, part.split("=", 1)))))
                 if "=" in part
                 else (unquote_plus(part.strip()), None)
             )
             parsed.setdefault(key, []).append(value)
 
-        for key in parsed.iterkeys():
+        for key in parsed.keys():
             if len(parsed[key]) == 1:
                 parsed[key] = parsed[key][0]
 

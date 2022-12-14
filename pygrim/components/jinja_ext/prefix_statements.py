@@ -1,7 +1,7 @@
 # coding: utf8
 
 from jinja2 import nodes
-from jinja2.compiler import CodeGenerator, CompilerExit, dict_item_iter
+from jinja2.compiler import CodeGenerator, CompilerExit
 from jinja2.ext import Extension
 
 from .new_nodes import PrefixExtends
@@ -95,7 +95,7 @@ def visit_prefix_extends(self, node, frame):
 
     func_name = 'get_or_select_template'
     if isinstance(node.template, nodes.Const):
-        if isinstance(node.template.value, basestring):
+        if isinstance(node.template.value, str):
             func_name = 'get_template'
         elif isinstance(node.template.value, (tuple, list)):
             func_name = 'select_template'
@@ -106,7 +106,7 @@ def visit_prefix_extends(self, node, frame):
     self.visit(node.template, frame)
     self.write(', %r)' % self.name)
     self.writeline('for name, parent_block in parent_template.blocks.%s():' % (
-        dict_item_iter
+        "items"
     ))
     self.indent()
     self.writeline('context.blocks.setdefault(name, []).append(parent_block)')

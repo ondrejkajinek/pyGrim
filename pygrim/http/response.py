@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 from inspect import isgeneratorfunction
 from logging import getLogger
 # from os import SEEK_END
-from urllib import quote_plus as url_quoteplus
+from urllib.parse import quote_plus as url_quoteplus
 import types
 
 log = getLogger("pygrim.http.response")
@@ -16,7 +16,7 @@ NO_CONTENT_STATUSES = (204, 304)
 def ensure_string(value):
     return (
         value.encode("utf-8")
-        if isinstance(value, unicode)
+        if isinstance(value, str)
         else str(value) if value else value
     )
 
@@ -118,7 +118,7 @@ class Response(object):
             body = ""
         elif isinstance(body, str):
             pass
-        elif isinstance(body, unicode):
+        elif isinstance(body, str):
             body = body.encode("utf-8")
         elif isinstance(body, types.GeneratorType):
             body = (ensure_string(part) for part in body)
@@ -150,7 +150,7 @@ class Response(object):
         self.headers = [
             (key, str(value))
             for key, value
-            in self.headers.iteritems()
+            in self.headers.items()
         ]
 
         if self.cookies:
@@ -189,7 +189,7 @@ class Response(object):
         return "{}={}{}".format(name_part, value_part, params_part)
 
     def _serialized_cookies(self):
-        for name, cookie in self.cookies.iteritems():
+        for name, cookie in self.cookies.items():
             yield self._serialize_cookie(name, cookie)
             leg_cookie = self._serialize_cookie_legacy(name, cookie)
             if leg_cookie:
