@@ -57,14 +57,14 @@ def initialize_loggers(config):
     logger.propagate = False
 
     try:
-        for logger in (config.get("logging:loggers") or {}).keys():
-            l = logging.getLogger(logger)
-            l.setLevel(config.get("logging:loggers:%s" % logger))
+        for logger in list((config.get("logging:loggers") or {}).keys()):
+            l_log = logging.getLogger(logger)
+            l_log.setLevel(config.get("logging:loggers:%s" % logger))
     except KeyError:
         logging.error(
             "Missing section for detailed logger settings ([logging.loggers])"
         )
-    except:
+    except BaseException:
         logging.exception("Error loading logging levels")
 
 

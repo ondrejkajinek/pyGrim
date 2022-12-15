@@ -136,7 +136,7 @@ class TimeExtension(Extension):
                 minutes, seconds = divmod(seconds, 60)
                 hours, minutes = divmod(minutes, 60)
                 return "%02d:%02d:%02d" % (hours, minutes, seconds)
-        
+
         return 0
 
     def month_name(self, case, locale, number, source_date):
@@ -151,7 +151,7 @@ class TimeExtension(Extension):
             formatted = (
                 self.formater.format_date(obj, format_str, locale=locale)
                 if locale
-                else obj.strftime(format_str).decode('utf-8')
+                else obj.strftime(format_str)
             )
         except ValueError:
             formatted = None

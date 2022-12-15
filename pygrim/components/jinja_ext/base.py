@@ -3,7 +3,7 @@
 from ..formater import Formater
 from ..utils import Counter
 from ..utils.functions import strip_accent
-from ..utils.json2 import dumps as json_dumps
+from json2 import dumps as json_dumps
 from pygrim.components.config import YamlConfig
 from jinja2.ext import Extension, Markup
 from jinja2.runtime import Undefined
@@ -173,8 +173,6 @@ class BaseExtension(Extension):
 
         if self.use_nginx:
             image = path
-            if isinstance(image, str):
-                image = image.encode("utf8")
             image = requote_uri(image)
             if path.startswith("http"):
                 domain, img = image .split("/", 2)[-1].split("/", 1)
@@ -280,7 +278,7 @@ class BaseExtension(Extension):
                 " ".join(
                     '%s="%s"' % (key, value)
                     for key, value
-                    in kwargs.items()
+                    in list(kwargs.items())
                 ),
                 separator,
                 amount

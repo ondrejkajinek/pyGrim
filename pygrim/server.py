@@ -100,7 +100,7 @@ class Server(object):
         )
         try:
             self._handle_request(context=context)
-        except:
+        except BaseException:
             log.exception("Fatal Error")
             start_response("500: Fatal Server Error", [])
             yield "Fatal Server Error"
@@ -118,9 +118,14 @@ class Server(object):
                 parts = body() if context.is_generator_function() else body
                 for part in parts:
                     if do_yield:
-                        yield part
+                        if isinstance(part, str):
+                            yield part.encode("utf8")
+                        else:
+                            yield part
             elif context.is_request_head():
                 log.debug("HEAD - not returning body")
+            elif isinstance(body, str):
+                yield body.encode("utf8")
             else:
                 yield body
             # endif
@@ -196,7 +201,7 @@ class Server(object):
         self._finalize_not_found_handlers()
 
     def _default_error_method(self, context, exc):
-        log.exception(exc.message)
+        log.exception(str(exc))
         context.set_response_body("Internal Server Error")
         context.set_response_status(500)
 
@@ -241,7 +246,7 @@ class Server(object):
     def _find_config_class(self):
         for key in self.KNOWN_CONFIG_FORMATS:
             if key in uwsgi_opt:
-                self._config_dir = path.dirname(uwsgi_opt[key])
+                self._config_dir = path.dirname(uwsgi_opt[key].decode("utf8"))
                 if not self._config_dir:
                     self._config_dir = uwsgi_opt["chdir"] + "conf/"
                     uwsgi_opt[key] = self._config_dir + uwsgi_opt[key]
@@ -329,7 +334,7 @@ class Server(object):
         except DispatchFinished:
             self._dump_request(context)
             return
-        except:
+        except BaseException:
             exc = exc_info()[1]
 
         try:
@@ -337,7 +342,7 @@ class Server(object):
         except DispatchFinished:
             self._dump_request(context)
             return
-        except:
+        except BaseException:
             log.critical("Error in default_error_method.")
             log.exception("Error in default_error_method.")
             raise
@@ -390,7 +395,7 @@ class Server(object):
                     continue
             else:
                 self._handle_not_found(context=context)
-        except:
+        except BaseException:
             self._handle_error(context=context, exc=exc_info()[1])
 
     def _initialize_basic_components(self):
@@ -439,7 +444,9 @@ class Server(object):
             if default_locale not in translations:
                 msg = "Default locale %r is not enabled. Known locales: %r"
                 log.error(msg, default_locale, list(translations.keys()))
-                raise RuntimeError(msg % (default_locale, list(translations.keys())))
+                raise RuntimeError(
+                    msg % (default_locale, list(translations.keys()))
+                )
 
         log.debug("Loaded translations: %r", list(translations.keys()))
         log.debug("Default translation: %r", default_locale)
@@ -574,7 +581,7 @@ class Server(object):
 
     def _static_file_info(self, static_path):
         static_normpath = path.normpath(static_path)
-        for dir_prefix, dir_abs_path in self._static_map.items():
+        for dir_prefix, dir_abs_path in list(self._static_map.items()):
             if static_normpath.startswith(dir_prefix):
                 static_relpath = path.relpath(static_normpath, dir_prefix)
                 if path.isfile(path.join(dir_abs_path, static_relpath)):
@@ -599,7 +606,7 @@ class Server(object):
                 " ".join(
                     """%s="%s\"""" % (key, value)
                     for key, value
-                    in kwargs.items()
+                    in list(kwargs.items())
                 )
             )
             for css
@@ -625,7 +632,7 @@ class Server(object):
             attrs += tuple(
                 """%s="%s\"""" % (key, value)
                 for key, value
-                in kwargs.items()
+                in list(kwargs.items())
             )
             scripts.append("<script %s></script>" % (" ".join(attrs),))
 

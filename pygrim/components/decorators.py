@@ -12,7 +12,7 @@ def c_locale(func):
         setlocale(LC_ALL, "C")
         try:
             res = func(*args, **kwargs)
-        except:
+        except BaseException:
             setlocale(LC_ALL, locale)
             raise
         else:

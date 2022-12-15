@@ -28,7 +28,7 @@ class NormalizedImmutableDict(ImmutableDict):
         super(NormalizedImmutableDict, self).__init__({
             self._normalize_key(key): container[key]
             for key
-            in (container or {}).keys()
+            in list((container or {}).keys())
         })
 
     def __getitem__(self, key):

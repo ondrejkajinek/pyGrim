@@ -15,7 +15,7 @@ NO_CONTENT_STATUSES = (204, 304)
 
 def ensure_string(value):
     return (
-        value.encode("utf-8")
+        value
         if isinstance(value, str)
         else str(value) if value else value
     )
@@ -150,7 +150,7 @@ class Response(object):
         self.headers = [
             (key, str(value))
             for key, value
-            in self.headers.items()
+            in list(self.headers.items())
         ]
 
         if self.cookies:
@@ -189,7 +189,7 @@ class Response(object):
         return "{}={}{}".format(name_part, value_part, params_part)
 
     def _serialized_cookies(self):
-        for name, cookie in self.cookies.items():
+        for name, cookie in list(self.cookies.items()):
             yield self._serialize_cookie(name, cookie)
             leg_cookie = self._serialize_cookie_legacy(name, cookie)
             if leg_cookie:

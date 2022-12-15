@@ -6,12 +6,12 @@ import traceback
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 
 from .base_view import BaseView
-from ..utils.json2 import dumps as json_dumps
+from json2 import dumps as json_dumps
 
 I18N_EXT_NAME = "pygrim.components.jinja_ext.i18n.I18NExtension"
 
 
-def _suppress_none(self, variable):
+def _suppress_none(variable):
     return (
         ""
         if variable is None

@@ -2,7 +2,7 @@
 
 
 from functools import wraps
-from .components.utils import json2 as json
+import json2 as json
 from copy import deepcopy
 
 try:
@@ -63,7 +63,9 @@ class force_content_length(BaseDecorator):
     def post_call(self, fun, args, kwargs, ret):
         context = kwargs.get("context")
         context.disable_content_length = False
-        return super(force_content_length, self).post_call(fun, args, kwargs, ret)
+        return super(force_content_length, self).post_call(
+            fun, args, kwargs, ret
+        )
 
 
 class method(BaseDecorator):

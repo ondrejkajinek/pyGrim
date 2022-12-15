@@ -151,7 +151,7 @@ class Context(object):
         environment = {
             key: value
             for key, value
-            in self._request.environment.items()
+            in list(self._request.environment.items())
             if not key.startswith(("wsgi.", "uwsgi."))
         }
         environment.update((
@@ -461,11 +461,11 @@ class Context(object):
             if self.canonical_args:
                 data = {
                     k: get_in(self.view_data, keys)
-                    for k, keys in self.canonical_args.items()
+                    for k, keys in list(self.canonical_args.items())
                 }
             data.update(args)
             return self.get_request_url() + self.current_route.url_for(data)
-        except:
+        except BaseException:
             if (
                 _raise_on_error is True or
                 self._debug

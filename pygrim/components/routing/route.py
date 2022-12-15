@@ -3,8 +3,9 @@
 # std
 import logging
 import re
-import string
-import urllib.request, urllib.parse, urllib.error
+import urllib.request
+import urllib.parse
+import urllib.error
 
 # local
 from ..utils import (
@@ -69,7 +70,7 @@ class Route(RouteObject):
         self._handle = None
         self._handle_name = handle_name
         self._methods = tuple(
-            string.upper(method)
+            str.upper(method)
             for method
             in ensure_tuple(methods)
         )
@@ -117,9 +118,9 @@ class Route(RouteObject):
             query_params = {
                 key: params[key]
                 for key
-                in params.keys()
+                in list(params.keys())
                 if key not in (
-                    self._required_params.union(iter(self._optional_params.keys()))
+                    self._required_params.union(iter(list(self._optional_params.keys())))
                 )
             }
             url = self._readable_pattern % params
@@ -131,7 +132,7 @@ class Route(RouteObject):
             url += "?" + urllib.parse.urlencode([
                 (ensure_string(key), ensure_string(value))
                 for key, value
-                in query_params.items()
+                in list(query_params.items())
             ])
 
         log.debug("Route constructed url: %r for params: %r", url, params)

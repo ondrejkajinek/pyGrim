@@ -9,7 +9,7 @@ TRAILING_SLASH_REGEXP = re_compile("/\??\$?$|\$?$")
 
 
 def deep_update(original, override):
-    for key, value in override.items():
+    for key, value in list(override.items()):
         if isinstance(value, Mapping):
             new_value = deep_update(original.get(key, {}), value)
             original[key] = new_value
@@ -48,7 +48,7 @@ def ensure_string(text):
 def ensure_tuple(variable):
     if isinstance(variable, tuple):
         res = variable
-    elif isinstance(variable, (list, set, buffer, range)):
+    elif isinstance(variable, (list, set, memoryview, range)):
         res = tuple(variable)
     else:
         res = (variable,)

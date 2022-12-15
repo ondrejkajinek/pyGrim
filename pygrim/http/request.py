@@ -4,7 +4,7 @@ from .grim_dicts import ImmutableDict, NormalizedImmutableDict
 from logging import getLogger
 from re import compile as re_compile, IGNORECASE as re_IGNORECASE
 from urllib.parse import unquote_plus
-from ..components.utils import json2 as json
+import json2 as json
 log = getLogger("pygrim.http.request")
 
 
@@ -40,7 +40,9 @@ class Request(object):
         parsed = {}
         for part in parts:
             key, value = (
-                list(map(str.strip, list(map(unquote_plus, part.split("=", 1)))))
+                list(map(
+                    str.strip, list(map(unquote_plus, part.split("=", 1)))
+                ))
                 if "=" in part
                 else (unquote_plus(part.strip()), None)
             )
@@ -58,7 +60,7 @@ class Request(object):
             # endif
         # endfor
 
-        for key in parsed.keys():
+        for key in list(parsed.keys()):
             if len(parsed[key]) == 1:
                 parsed[key] = parsed[key][0]
 
@@ -85,7 +87,7 @@ class Request(object):
         ):
             try:
                 data = json.loads(self.RAW_POST)
-            except:
+            except BaseException:
                 log.exception("Error loding json data from request")
                 data = {}
                 save = False
@@ -152,7 +154,7 @@ class Request(object):
     def _get_port(self, env):
         try:
             return int(env["SERVER_PORT"])
-        except:
+        except BaseException:
             return self.DEFAULT_SCHEME_PORTS[env["wsgi.url_scheme"]]
 
     def _parse_headers(self, environment):
@@ -180,13 +182,15 @@ class Request(object):
         parsed = {}
         for part in parts:
             key, value = (
-                list(map(str.strip, list(map(unquote_plus, part.split("=", 1)))))
+                list(map(
+                    str.strip, list(map(unquote_plus, part.split("=", 1)))
+                ))
                 if "=" in part
                 else (unquote_plus(part.strip()), None)
             )
             parsed.setdefault(key, []).append(value)
 
-        for key in parsed.keys():
+        for key in list(parsed.keys()):
             if len(parsed[key]) == 1:
                 parsed[key] = parsed[key][0]
 
