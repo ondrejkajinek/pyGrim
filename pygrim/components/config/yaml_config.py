@@ -5,7 +5,8 @@ from .abstract_config import AbstractConfig
 try:
     from uwsgi import log as uwsgi_log
 except ImportError:
-    uwsgi_log = print
+    raise RuntimeError("Cannot import uwsgi.log")
+    # uwsgi_log = print
 
 from yaml import load as yaml_load, parser as yaml_parser
 from yaml import SafeLoader, MappingNode
@@ -29,7 +30,7 @@ class PygrimYamlLoader(SafeLoader):
             raise ConstructorError(
                 None,
                 None,
-                "expected a mapping node, but found %s" % (
+                "expected a mapping node, but found %s:%s" % (
                     node.id, node.start_mark
                 )
             )

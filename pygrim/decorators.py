@@ -8,7 +8,8 @@ from copy import deepcopy
 try:
     from uwsgi import log as uwsgi_log
 except ImportError:
-    uwsgi_log = print
+    raise RuntimeError("Cannot import uwsgi.log")
+    # uwsgi_log = print
 
 from logging import getLogger
 log = getLogger("pygrim.decorators")
