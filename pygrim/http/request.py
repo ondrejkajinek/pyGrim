@@ -93,7 +93,7 @@ class Request(object):
                 save = False
         elif attr == "RAW_POST":
             data = "".join(
-                part for part in self.environment["wsgi.input"]
+                part.decode("utf8") for part in self.environment["wsgi.input"]
             )
         elif attr in ("GET", "DELETE"):
             data = self._parse_string(self.environment.get("query_string"))
