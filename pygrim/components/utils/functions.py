@@ -5,7 +5,7 @@ from re import compile as re_compile
 from unicodedata import normalize as unicodedata_normalize
 
 REGEXP_TYPE = type(re_compile(r""))
-TRAILING_SLASH_REGEXP = re_compile("/\??\$?$|\$?$")
+TRAILING_SLASH_REGEXP = re_compile("/\??\$?$|\$?\$")
 
 
 def deep_update(original, override):

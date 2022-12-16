@@ -14,6 +14,15 @@ import traceback
 from requests.utils import requote_uri
 from configparser import ConfigParser
 
+cfg_parser_cls = [ConfigParser]
+try:
+    from jsonrpc.config import CfgParser
+    cfg_parser_cls.append(CfgParser)
+except ImportError:
+    pass
+cfg_parser_cls = tuple(cfg_parser_cls)
+
+
 try:
     from seo_helper import SeoHelper
 except ImportError:
@@ -100,7 +109,7 @@ class BaseExtension(Extension):
             self.imager_domain_prefixes = config.get(
                 "jinja:imager:domain_prefixes", self.imager_domain_prefixes
             )
-        elif isinstance(config, ConfigParser):
+        elif isinstance(config, cfg_parser_cls):
             self._debug = bool(config.get("jinja", "debug", self._debug))
             self.use_nginx = bool(config.get(
                 "jinja", "imager_use_nginx", self.use_nginx
@@ -119,7 +128,10 @@ class BaseExtension(Extension):
                     self.imager_domain_prefixes = pfxs
             # endif
         else:
-            log.critical("Unknown config class %s", type(config))
+            log.critical(
+                "Unknown config class %s - known %s",
+                type(config), [YamlConfig] + cfg_parser_cls
+            )
         # endif
 
     def as_json(self, data):
