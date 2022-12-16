@@ -2,7 +2,7 @@
 
 # non-std
 from jinja2 import nodes
-from jinja2.compiler import CodeGenerator, CompilerExit, dict_item_iter
+from jinja2.compiler import CodeGenerator, CompilerExit
 from jinja2.ext import Extension
 
 # local
@@ -108,7 +108,7 @@ def visit_prefix_extends(self, node, frame):
     self.visit(node.template, frame)
     self.write(", %r)" % self.name)
     self.writeline("for name, parent_block in parent_template.blocks.%s():" % (
-        dict_item_iter
+        "items",
     ))
     self.indent()
     self.writeline("context.blocks.setdefault(name, []).append(parent_block)")

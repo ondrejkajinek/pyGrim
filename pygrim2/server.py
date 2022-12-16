@@ -7,7 +7,8 @@ from os import path
 from sys import exc_info
 
 # non-std
-from jinja2 import escape, Markup
+from markupsafe import Markup
+
 try:
     from uwsgi import opt as uwsgi_opt
 except ImportError:
@@ -691,9 +692,11 @@ class Server(object):
     def _versioned_file(self, static_file):
         abs_path = self._static_file_abs_path(static_file)
         return (
-            "%s?v=%d" % (escape(static_file), int(path.getmtime(abs_path)))
+            "%s?v=%d" % (
+                Markup.escape(static_file), int(path.getmtime(abs_path))
+            )
             if abs_path and path.isfile(abs_path)
-            else escape(static_file)
+            else Markup.escape(static_file)
         )
 
     def _view_disabled(self):

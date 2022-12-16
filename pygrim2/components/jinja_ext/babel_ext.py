@@ -5,9 +5,8 @@ import re
 # non-std
 import babel.dates
 import babel.numbers
-from jinja2.filters import contextfilter
 from jinja2.runtime import Undefined
-from jinja2.utils import contextfunction
+from jinja2.utils import pass_context
 
 # local
 from .time_base import TimeBase
@@ -101,12 +100,12 @@ def py_2_babel_dateformat(fmt):
 
 class BabelExtension(TimeBase):
 
-    @contextfunction
+    @pass_context
     def currency_format(self, context, amount, currency):
         return babel.numbers.format_currency(
             amount, currency, locale=context.get("context").get_language())
 
-    @contextfunction
+    @pass_context
     def currency_int_format(self, context, amount, currency):
         locale = context.get("context").get_language()
         text = babel.numbers.format_currency(amount, currency, locale=locale)
@@ -116,7 +115,7 @@ class BabelExtension(TimeBase):
             text
         )
 
-    @contextfunction
+    @pass_context
     def currency_parts(self, context, amount, currency):
         amount, currency = self._formatted_currency(context, amount, currency)
         return {
@@ -124,7 +123,7 @@ class BabelExtension(TimeBase):
             "currency": currency
         }
 
-    @contextfunction
+    @pass_context
     def currency_int_parts(self, context, amount, currency):
         locale = context.get("context").get_language()
         amount, currency = self._formatted_currency(context, amount, currency)
@@ -138,7 +137,7 @@ class BabelExtension(TimeBase):
             "currency": currency
         }
 
-    @contextfilter
+    @pass_context
     def date_format(self, context, source, format_str=None):
         locale = context.get("context").get_language()
         obj = self._parse_date(source)
@@ -171,7 +170,7 @@ class BabelExtension(TimeBase):
 
         raise ValueError("Cannot format type %s", type(obj))
 
-    @contextfilter
+    @pass_context
     def number_format(self, context, number):
         locale = context.get("context").get_language()
         return (
@@ -180,7 +179,7 @@ class BabelExtension(TimeBase):
             else babel.numbers.format_number(number, locale)
         )
 
-    @contextfilter
+    @pass_context
     def time_format(self, context, source, format_str=None):
         obj = self._parse_time(source)
         if isinstance(obj, DT):

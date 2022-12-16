@@ -1,7 +1,7 @@
 
 from jinja2.ext import InternationalizationExtension
 from jinja2.runtime import Undefined
-from jinja2.filters import contextfilter
+from jinja2.utils import pass_context
 
 
 def gettext_factory(method):
@@ -35,7 +35,7 @@ def ngettext_factory(method):
 
 def lang_text_factory():
 
-    @contextfilter
+    @pass_context
     def lang_text(context, source):
         if isinstance(source, dict) and source:
             for lang in context.get("context").get_language_priority():
