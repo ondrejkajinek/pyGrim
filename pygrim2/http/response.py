@@ -1,7 +1,4 @@
 # std
-import locale
-import threading
-from contextlib import contextmanager
 from datetime import datetime, timedelta
 from inspect import isgenerator, isgeneratorfunction
 from logging import getLogger
@@ -11,19 +8,6 @@ from urllib.parse import quote_plus as url_quoteplus
 from ..components.containers import NormalizedDict
 
 log = getLogger("pygrim.http.response")
-
-
-LOCALE_LOCK = threading.Lock()
-
-
-@contextmanager
-def setlocale(name):
-    with LOCALE_LOCK:
-        saved = locale.setlocale(locale.LC_ALL)
-        try:
-            yield locale.setlocale(locale.LC_ALL, name)
-        finally:
-            locale.setlocale(locale.LC_ALL, saved)
 
 
 NO_CONTENT_STATUSES = (204, 304)
@@ -37,16 +21,44 @@ def ensure_bytes(value):
     )
 
 
+def format_http_date(c):
+    return (
+        c.strftime("%%s, %d-%%s-%Y %H:%M:%S GMT")
+    ) % (
+        {
+            1: "Mon",
+            2: "Tue",
+            3: "Wed",
+            4: "Thu",
+            5: "Fri",
+            6: "Sat",
+            7: "Sun"
+        }[c.isoweekday()],
+        {
+            1: "Jan",
+            2: "Feb",
+            3: "Mar",
+            4: "Apr",
+            5: "May",
+            6: "Jun",
+            7: "Jul",
+            8: "Aug",
+            9: "Sep",
+            10: "Oct",
+            11: "Nov",
+            12: "Dec"
+        }[c.month]
+    )
+
+
 class Response(object):
 
     def expire(c):
-        if not c.get('lifetime'):
+        if c.get('lifetime') is None:
             return None
-        with setlocale('C'):
-            exp = "Expires=%s" % (
-                (datetime.utcnow() + timedelta(seconds=c["lifetime"]))
-                .strftime("%a, %d-%b-%Y %H:%M:%S GMT")
-            )
+        exp = "Expires=" + format_http_date(
+            datetime.utcnow() + timedelta(seconds=c["lifetime"])
+        )
         return exp
 
     COOKIE_PARTS = (

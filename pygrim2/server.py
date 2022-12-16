@@ -262,6 +262,13 @@ class Server(object):
                 self._config_dir = path.dirname(uwsgi_opt[key])
                 return uwsgi_opt[key], self.KNOWN_CONFIG_FORMATS[key]
         else:
+            key = "emyaml"
+            if key in uwsgi_opt:
+                log.debug(
+                    "Found config in format:%r on %r", key, uwsgi_opt[key]
+                )
+                self._config_dir = path.dirname(uwsgi_opt[key])
+                return uwsgi_opt[key], self.KNOWN_CONFIG_FORMATS["yaml"]
             raise RuntimeError(
                 "No known config format used to start uwsgi!"
                 "known: %s" % (self.KNOWN_CONFIG_FORMATS.keys(),)

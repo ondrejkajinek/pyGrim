@@ -12,7 +12,7 @@ REGEXP_TYPE = type(re.compile(r""))
 TRAILING_SLASH_REGEXP = re.compile(r"/\??\$?$|\$?$")
 
 # OPTIONAL_PARAM_REGEXP = re.compile(r"\(([^)]*?)(%\(([^)]+)\)s)([^)]*?)\)\?")
-# PARAM_REGEXP = re.compile(r"\(\?P<([^>]+)>[^)]+\)")
+# PARAM_REGEXP = re.compile(r"\(\?P<([^>]+)>[^)]+\)")
 URL_OPTIONAL_REGEXP = re.compile(r"\(([^)]*?)(%\(([^)]+)\)s)([^)]*?)\)\?")
 URL_PARAM_REGEXP = re.compile(r"\(\?P<([^>]+)>[^)]+\)")
 
@@ -85,7 +85,120 @@ def is_regex(pattern):
     return isinstance(pattern, REGEXP_TYPE)
 
 
+def _handle_regex_part(pattern):
+    state = {
+        "pattern": "",
+        "mandatories": set(),
+        "optionals": {}
+    }
+    while pattern:
+        char = pattern[0]
+        pattern = pattern[1:]
+        if char == "\\":
+            char = pattern[:1]
+            pattern = pattern[1:]
+            if not char:
+                continue
+            # endif
+        elif char == ")":
+            # elif protože pokud je závorka v escape nechci
+            #   ji považovat za závorku
+            # jdu o kousek výš, protože mám konec skupiny
+            return state, pattern
+        elif char == "(":
+            # elif protože pokud je závorka v escape nechci
+            #   ji považovat za závorku
+            group_name = None
+            if pattern.startswith("?P<"):
+                pattern = pattern[3:]
+                idx = pattern.find(">")
+                if idx == -1:
+                    # not found
+                    raise ValueError(
+                        "Invalid regular group name starting %r" % (
+                            pattern[:10],
+                        )
+                    )
+                group_name = pattern[:idx]
+                pattern = pattern[idx + 1:]
+            new_state, pattern = _handle_regex_part(pattern)
+            optional = False
+            if pattern and pattern[0] == "?":
+                pattern = pattern[1:]
+                optional = True
+            # endif
+            if group_name:
+                if new_state["mandatories"] or new_state["optionals"]:
+                    raise ValueError(
+                        "Parenthised named groups is forbidden in routing"
+                    )
+                if optional:
+                    state["optionals"][group_name] = "%s"
+                else:
+                    state["mandatories"].add(group_name)
+                state["pattern"] += "%(" + group_name + ")s"
+            else:
+                if optional:
+                    sm = len(new_state["mandatories"])
+                    so = len(new_state["optionals"])
+                    if (sm + so) > 1:
+                        raise ValueError(
+                            "Combination of 2 groups in optional part is "
+                            "forbidden in routing"
+                        )
+                    elif (sm + so) == 0:
+                        # skip and do not add optional part withot variable
+                        pass
+                    elif sm:
+                        _mandatory = list(new_state["mandatories"])[0]
+                        k = "%(" + _mandatory + ")s"
+                        state["pattern"] += k
+                        state["optionals"][_mandatory] = (
+                            new_state["pattern"].replace(k, "%s"))
+                    else:
+                        ("/((?P<a>.*)b)?", ("/%(a)s", set(), {"a": "%sb"}))
+                        _optional = list(new_state["optionals"].keys())[0]
+                        k = "%(" + _optional + ")s"
+                        state["pattern"] += k
+                        state["optionals"][_optional] = (
+                            new_state["pattern"].replace(
+                                k,
+                                new_state["optionals"][_optional]
+                            )
+                        )
+                else:
+                    state["mandatories"] = new_state["mandatories"]
+                    state["optionals"] = new_state["optionals"]
+                    state["pattern"] += new_state["pattern"]
+                # endif
+            # endif - named group?
+            continue
+        elif char == "?":
+            # pokud mám ? a předtím není skupina dávám pryč předchozí
+            #   znak protože je optional
+            state["pattern"] = state["pattern"][:-1]
+            continue
+        # endif
+
+        state["pattern"] += char
+    return state, None
+
+
 def regex_to_readable(pattern):
+    # please refer tests on the page end
+    # remove start char
+    if pattern[:1] == "^":
+        pattern = pattern[1:]
+    state, pattern = _handle_regex_part(pattern)
+    if pattern is not None:
+        raise ValueError("Invalid regex pattern")
+    # remove trailing /?$ or subpart
+    state["pattern"] = remove_trailing_slash(state["pattern"])
+    return state["pattern"], state["mandatories"], state["optionals"]
+
+
+def regex_to_readable_old(pattern):
+    # removed! only for referenci of foundy any bug
     param_names = URL_PARAM_REGEXP.findall(pattern)
     readable = URL_PARAM_REGEXP.sub("%(\\1)s", pattern)
     optional_names = {
@@ -123,3 +236,49 @@ def strip_accent(text):
     return "".join(
         c for c in unicodedata_normalize("NFKD", text) if ord(c) < 127
     )
+
+
+if __name__ == "__main__":
+    import traceback
+    for a, b in (
+        # ("", ("", set(), {})),
+        ("/(?P<a>.*)", ("/%(a)s", set(("a",)), {})),
+        ("/(?P<a>.*)?", ("/%(a)s", set(), {"a": "%s"})),
+        ("/((?P<a>.*))?", ("/%(a)s", set(), {"a": "%s"})),
+        ("/((?P<a>.*)-b)?", ("/%(a)s", set(), {"a": "%s-b"})),
+        ("/((?P<a>.*)?-b)?", ("/%(a)s", set(), {"a": "%s-b"})),
+        ("/((?P<a>.*)-b)", ("/%(a)s-b", set("a",), {})),
+        ("/(b-(?P<a>.*))?", ("/%(a)s", set(), {"a": "b-%s"})),
+        ("/(b-(?P<a>.*)?)?", ("/%(a)s", set(), {"a": "b-%s"})),
+        ("/(b-(?P<a>.*))", ("/b-%(a)s", set("a",), {})),
+        ("/(?P<a>(cd|ef))", ("/%(a)s", set(("a",)), {})),
+        (
+            '/(?P<veletrh>((praha2020)|(plzen2020)))/fotogalerie-detail',
+            ("/%(veletrh)s/fotogalerie-detail", set(("veletrh",)), {}),
+        ),
+        (
+            '/(?P<veletrh>(praha|plzen)2[0-9]{3})/fotogalerie-detail',
+            ("/%(veletrh)s/fotogalerie-detail", set(("veletrh",)), {}),
+        ),
+    ):
+        print(f"\nCheck {a}")
+        try:
+            v = regex_to_readable(a)
+            assert v[0] == b[0], (
+                f"unexpected result {v[0]} for {a} - expected {b[0]}"
+            )
+            assert v[1] == b[1], (
+                f"unexpected mandatory params {v[1]} for {a} - expected {b[1]}"
+            )
+            assert v[2] == b[2], (
+                f"unexpected optional params {v[2]} for {a} - expected {b[2]}"
+            )
+        except BaseException:
+            raise
+            print(f"ERROR on {a}")
+            traceback.print_exc()
+            print(regex_to_readable_old(a))
+        else:
+            print(f"Succes {a}\n\t{v}")
+
+# eof

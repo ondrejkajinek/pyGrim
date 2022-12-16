@@ -35,6 +35,20 @@ class Context(object):
         self._can_create_session = True
         self._force_https = config.getbool("context:force_https", False)
         self._request = request
+
+        self._enabled_acceptances = {"function"}
+        cookie_acceptance = self.get_cookie("cookie_accept")
+        self._acceptance_is_set = bool(cookie_acceptance)
+        if cookie_acceptance:
+            self._enabled_acceptances |= set(
+                {
+                    "P": "preference",
+                    "A": "analytics",
+                    "M": "marketing",
+                    "F": "function"
+                }.get(k, "function") for k in cookie_acceptance
+            )
+
         self._response = response
         self._session_handler = session_handler
         self._save_session = False
@@ -205,7 +219,7 @@ class Context(object):
         language = self._language.split("_", 1)[0]
         if language in LANGUAGE_CASCADE:
             idx = LANGUAGE_CASCADE.index(language)
-            lp =  LANGUAGE_CASCADE[idx:] + LANGUAGE_CASCADE[:idx]
+            lp = LANGUAGE_CASCADE[idx:] + LANGUAGE_CASCADE[:idx]
         else:
             lp = [language] + LANGUAGE_CASCADE
         self.language_priority = lp
@@ -276,6 +290,39 @@ class Context(object):
     def is_request_post(self):
         return self._request.environment["request_method"] == POST
 
+    def is_cookie_acceptance_set(self):
+        return self._acceptance_is_set
+
+    def set_cookie_acceptance(self, enabled_preferences):
+        enabled_preferences = list(enabled_preferences)
+        if "function" not in enabled_preferences:
+            enabled_preferences.append("function")
+        enabled_preferences.sort()
+
+        value = "".join({
+            "preference": "P",
+            "analytics": "A",
+            "marketing": "M",
+            "function": "F"
+        }[k] for k in enabled_preferences)
+
+        self.add_cookie(
+            name="cookie_accept",
+            value=value,
+            # lifetime=2 * 365.25 * 24 * 60 * 60 - 2 roky dle tasku #93872
+            lifetime=63115200,
+            path="/",
+        )
+
+        if "preference" not in enabled_preferences:
+            self.unset_language_cookie()
+
+    def is_cookie_acceptance_enabled(self, acceptance):
+        return (
+            acceptance == "function" or
+            acceptance in self._enabled_acceptances
+        )
+
     def redirect(self, url, status=302):
         self._response.status = status
         self._response.headers["Location"] = url
@@ -285,10 +332,11 @@ class Context(object):
         if self.session_loaded and self.session_changed:
             self._session_handler.save(self.session)
 
-    def set_language(self, language):
+    def set_language(self, language, with_cookie=False):
         if self._check_language(language):
             self._language = language
-            self._save_language_cookie()
+            if with_cookie:
+                self._save_language_cookie()
 
     def set_temp_language(self, language):
         if self._check_language(language):
@@ -357,4 +405,11 @@ class Context(object):
     def _save_language_cookie(self):
         self.add_cookie(
             self.l10n.lang_key(), self._language, 3600 * 24 * 365, path="/"
+        )
+
+    def unset_language_cookie(self):
+        # pozor params stejné jako při vytváření _save_language_cookie
+        self.delete_cookie(
+            name=self.l10n.lang_key(),
+            path="/",
         )
